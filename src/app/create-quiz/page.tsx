@@ -1,6 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useFieldArray, useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 import {
   PlusCircle,
   Trash2,
@@ -22,65 +24,99 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 
-interface Question {
-  id: number;
-  text: string;
-  choices: string[];
-  correctAnswer: number;
-}
+const questionSchema = z.object({
+  text: z.string().min(1, "Question text is required"),
+  choices: z
+    .array(z.string().min(1, "Option text is required"))
+    .min(2, "At least two options are required"),
+  correctAnswer: z.number().min(0, "A correct answer must be selected"),
+});
+
+const formSchema = z.object({
+  title: z.string().min(1, "Title is required"),
+  description: z.string().min(1, "Description is required"),
+  isTimeLimited: z.boolean(),
+  timeLimit: z
+    .number()
+    .min(1, "Time limit must be at least 1 minute")
+    .max(180, "Time limit cannot exceed 180 minutes")
+    .optional(),
+  questions: z
+    .array(questionSchema)
+    .min(1, "At least one question is required"),
+});
+
+type QuizFormValues = z.infer<typeof formSchema>;
 
 export default function CreateQuizPage() {
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [timeLimit, setTimeLimit] = useState(60);
-  const [isTimeLimited, setIsTimeLimited] = useState(false);
-  const [questions, setQuestions] = useState<Question[]>([]);
+  const form = useForm<QuizFormValues>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      title: "",
+      description: "",
+      isTimeLimited: false,
+      timeLimit: 30,
+      questions: [],
+    },
+  });
+
+  const { fields, append, remove, update } = useFieldArray({
+    control: form.control,
+    name: "questions",
+  });
+
+  console.log(form.formState.errors);
 
   const addQuestion = () => {
-    setQuestions([
-      ...questions,
-      {
-        id: Math.random(),
-        text: "",
-        choices: ["", "", ""],
-        correctAnswer: -1,
-      },
-    ]);
-  };
-
-  const updateQuestion = (index: number, field: keyof Question, value: any) => {
-    const updatedQuestions = [...questions];
-    updatedQuestions[index] = { ...updatedQuestions[index], [field]: value };
-    setQuestions(updatedQuestions);
+    append({
+      text: "",
+      choices: ["", ""],
+      correctAnswer: -1,
+    });
   };
 
   const addChoice = (questionIndex: number) => {
-    const updatedQuestions = [...questions];
-    updatedQuestions[questionIndex].choices.push("");
-    setQuestions(updatedQuestions);
+    const question = fields[questionIndex];
+    update(questionIndex, {
+      ...question,
+      choices: [...question.choices, ""],
+    });
   };
 
   const removeChoice = (questionIndex: number, choiceIndex: number) => {
-    const updatedQuestions = [...questions];
-    updatedQuestions[questionIndex].choices.splice(choiceIndex, 1);
-    setQuestions(updatedQuestions);
+    const question = fields[questionIndex];
+    const newChoices = question.choices.filter(
+      (_, index) => index !== choiceIndex
+    );
+    update(questionIndex, {
+      ...question,
+      choices: newChoices,
+      correctAnswer:
+        question.correctAnswer === choiceIndex ? -1 : question.correctAnswer,
+    });
   };
 
   const setCorrectAnswer = (questionIndex: number, choiceIndex: number) => {
-    updateQuestion(questionIndex, "correctAnswer", choiceIndex);
+    const question = fields[questionIndex];
+    update(questionIndex, {
+      ...question,
+      correctAnswer: choiceIndex,
+    });
   };
 
-  const removeQuestion = (index: number) => {
-    const updatedQuestions = questions.filter((_, i) => i !== index);
-    setQuestions(updatedQuestions);
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log({ title, description, timeLimit, isTimeLimited, questions });
+  function onSubmit(data: QuizFormValues) {
+    console.log(data);
     alert("Quiz created successfully!");
-  };
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-background/95">
@@ -99,203 +135,256 @@ export default function CreateQuizPage() {
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-8">
-          <Card className="border-0 shadow-lg bg-white/50 backdrop-blur-xl">
-            <CardHeader>
-              <div className="flex items-center gap-3">
-                <Settings2 className="w-6 h-6 text-primary" />
-                <CardTitle>Quiz Details</CardTitle>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="space-y-4">
-                <div>
-                  <Label className="text-base font-medium mb-2 block">
-                    Quiz Title
-                  </Label>
-                  <Input
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    placeholder="Enter an engaging title for your quiz"
-                    className="h-12 text-lg border-primary/20 focus:border-primary/40"
-                  />
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+            <Card className="border-0 shadow-lg bg-white/50 backdrop-blur-xl">
+              <CardHeader>
+                <div className="flex items-center gap-3">
+                  <Settings2 className="w-6 h-6 text-primary" />
+                  <CardTitle>Quiz Details</CardTitle>
                 </div>
-                <div>
-                  <Label className="text-base font-medium mb-2 block">
-                    Description
-                  </Label>
-                  <Textarea
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    placeholder="Provide a brief description of your quiz"
-                    className="min-h-[100px] text-base border-primary/20 focus:border-primary/40"
-                  />
-                </div>
-              </div>
-
-              <div className="border-t border-border/30 pt-6">
-                <Label className="text-base font-medium mb-4 flex items-center gap-2">
-                  <Clock className="w-5 h-5" />
-                  Time Settings
-                </Label>
-                <div className="flex items-center gap-6">
-                  <div className="flex items-center gap-3">
-                    <Switch
-                      id="timed-quiz"
-                      checked={isTimeLimited}
-                      onCheckedChange={setIsTimeLimited}
-                    />
-                    <Label htmlFor="timed-quiz" className="text-sm">
-                      Enable Time Limit
-                    </Label>
-                  </div>
-                  {isTimeLimited && (
-                    <div className="flex items-center gap-2">
-                      <Input
-                        type="number"
-                        value={timeLimit}
-                        onChange={(e) => setTimeLimit(Number(e.target.value))}
-                        className="w-24 h-10"
-                      />
-                      <span className="text-sm text-muted-foreground">
-                        minutes
-                      </span>
-                    </div>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <FormField
+                  control={form.control}
+                  name="title"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-base font-medium">
+                        Quiz Title
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          placeholder="Enter an engaging title for your quiz"
+                          className="h-12 text-lg border-primary/20 focus:border-primary/40"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
                   )}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+                />
+                <FormField
+                  control={form.control}
+                  name="description"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-base font-medium">
+                        Description
+                      </FormLabel>
+                      <FormControl>
+                        <Textarea
+                          {...field}
+                          placeholder="Provide a brief description of your quiz"
+                          className="min-h-[100px] text-base border-primary/20 focus:border-primary/40"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-          <div className="space-y-4">
-            <Accordion type="multiple" className="space-y-4">
-              {questions.map((question, qIndex) => (
-                <AccordionItem
-                  key={question.id}
-                  value={`question-${qIndex}`}
-                  className="border bg-white/50 backdrop-blur-xl rounded-xl shadow-sm overflow-hidden group">
-                  <AccordionTrigger className="px-6 hover:no-underline">
-                    <div className="flex items-center gap-4">
-                      <GripVertical className="w-5 h-5 text-muted-foreground/40 group-hover:text-muted-foreground/60" />
-                      <div className="w-8 h-8 bg-primary/10 text-primary rounded-lg flex items-center justify-center text-sm font-medium">
-                        {qIndex + 1}
-                      </div>
-                      <span className="text-lg font-medium">
-                        {question.text || `Question ${qIndex + 1}`}
-                      </span>
-                    </div>
-                  </AccordionTrigger>
-                  <AccordionContent className="border-t">
-                    <div className="p-6 space-y-6">
-                      <div className="flex justify-end">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => removeQuestion(qIndex)}
-                          className="text-destructive hover:text-destructive/90">
-                          <Trash2 className="w-4 h-4 mr-2" />
-                          Remove Question
-                        </Button>
-                      </div>
-
-                      <Textarea
-                        value={question.text}
-                        onChange={(e) =>
-                          updateQuestion(qIndex, "text", e.target.value)
-                        }
-                        placeholder="Type your question here..."
-                        className="min-h-[100px] text-lg border-primary/20 focus:border-primary/40"
-                      />
-
-                      <div className="space-y-3">
-                        <Label className="text-base font-medium">Options</Label>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          {question.choices.map((choice, cIndex) => (
-                            <div
-                              key={cIndex}
-                              className={`relative p-4 rounded-xl border transition-all ${
-                                question.correctAnswer === cIndex
-                                  ? "border-primary bg-primary/5 shadow-sm"
-                                  : "border-border/40 hover:border-primary/30"
-                              }`}>
-                              <Input
-                                value={choice}
-                                onChange={(e) => {
-                                  const newChoices = [...question.choices];
-                                  newChoices[cIndex] = e.target.value;
-                                  updateQuestion(qIndex, "choices", newChoices);
-                                }}
-                                placeholder={`Option ${cIndex + 1}`}
-                                className="border-0 p-0 h-9 text-base shadow-none focus-visible:ring-0 bg-transparent"
-                              />
-                              <div className="absolute top-3 right-3 flex items-center gap-2">
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  onClick={() => removeChoice(qIndex, cIndex)}
-                                  className="h-7 w-7 text-muted-foreground hover:text-destructive">
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  onClick={() =>
-                                    setCorrectAnswer(qIndex, cIndex)
+                <div className="border-t border-border/30 pt-6">
+                  <Label className="text-base font-medium mb-4 flex items-center gap-2">
+                    <Clock className="w-5 h-5" />
+                    Time Settings
+                  </Label>
+                  <div className="flex items-center gap-6">
+                    <FormField
+                      control={form.control}
+                      name="isTimeLimited"
+                      render={({ field }) => (
+                        <FormItem className="flex items-center gap-3">
+                          <FormControl>
+                            <Switch
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                          <FormLabel>Timed Quiz</FormLabel>
+                        </FormItem>
+                      )}
+                    />
+                    {form.watch("isTimeLimited") && (
+                      <FormField
+                        control={form.control}
+                        name="timeLimit"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormControl>
+                              <div className="flex items-center gap-2">
+                                <Input
+                                  type="number"
+                                  {...field}
+                                  className="w-24 h-10"
+                                  onChange={(e) =>
+                                    field.onChange(Number(e.target.value))
                                   }
-                                  className={`h-7 w-7 ${
-                                    question.correctAnswer === cIndex
-                                      ? "text-primary"
-                                      : "text-muted-foreground"
-                                  }`}>
-                                  <CheckCircle className="h-4 w-4" />
-                                </Button>
+                                  value={field.value || ""}
+                                />
+                                <span className="text-sm text-muted-foreground">
+                                  minutes
+                                </span>
                               </div>
-                            </div>
-                          ))}
-                        </div>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          onClick={() => addChoice(qIndex)}
-                          className="w-full mt-2">
-                          <PlusCircle className="mr-2 h-4 w-4" />
-                          Add Option
-                        </Button>
-                      </div>
-                    </div>
-                  </AccordionContent>
-                </AccordionItem>
-              ))}
-            </Accordion>
-          </div>
-
-          <div className="sticky bottom-6 pt-6">
-            <Card className="border-0 shadow-xl bg-white/80 backdrop-blur-xl">
-              <CardContent className="p-4">
-                <div className="flex justify-between items-center">
-                  <div className="text-sm text-muted-foreground">
-                    {questions.length} questions created
-                  </div>
-                  <div className="flex gap-3">
-                    <Button
-                      type="button"
-                      onClick={addQuestion}
-                      variant="outline"
-                      className="h-11">
-                      <PlusCircle className="mr-2 h-4 w-4" />
-                      Add Question
-                    </Button>
-                    <Button
-                      type="submit"
-                      className="h-11 px-6 bg-primary hover:bg-primary/90">
-                      Publish Quiz
-                    </Button>
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    )}
                   </div>
                 </div>
               </CardContent>
             </Card>
-          </div>
-        </form>
+
+            <div className="space-y-4">
+              <Accordion type="multiple" className="space-y-4">
+                {fields.map((question, qIndex) => (
+                  <AccordionItem
+                    key={question.id}
+                    value={`question-${qIndex}`}
+                    className="border bg-white/50 backdrop-blur-xl rounded-xl shadow-sm overflow-hidden group">
+                    <AccordionTrigger className="px-6 hover:no-underline">
+                      <div className="flex items-center gap-4">
+                        <GripVertical className="w-5 h-5 text-muted-foreground/40 group-hover:text-muted-foreground/60" />
+                        <div className="w-8 h-8 bg-primary/10 text-primary rounded-lg flex items-center justify-center text-sm font-medium">
+                          {qIndex + 1}
+                        </div>
+                        <span className="text-lg font-medium">
+                          {question.text || `Question ${qIndex + 1}`}
+                        </span>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent className="border-t">
+                      <div className="p-6 space-y-6">
+                        <div className="flex justify-end">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => remove(qIndex)}
+                            className="text-destructive hover:text-destructive/90">
+                            <Trash2 className="w-4 h-4 mr-2" />
+                            Remove Question
+                          </Button>
+                        </div>
+
+                        <FormField
+                          control={form.control}
+                          name={`questions.${qIndex}.text`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormControl>
+                                <Textarea
+                                  {...field}
+                                  placeholder="Type your question here..."
+                                  className="min-h-[100px] text-lg border-primary/20 focus:border-primary/40"
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <div className="space-y-3">
+                          <Label className="text-base font-medium">
+                            Options
+                          </Label>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {question.choices.map((choice, cIndex) => (
+                              <div
+                                key={cIndex}
+                                className={`relative p-4 rounded-xl border transition-all ${
+                                  question.correctAnswer === cIndex
+                                    ? "border-primary bg-primary/5 shadow-sm"
+                                    : "border-border/40 hover:border-primary/30"
+                                }`}>
+                                <FormField
+                                  control={form.control}
+                                  name={`questions.${qIndex}.choices.${cIndex}`}
+                                  render={({ field }) => (
+                                    <FormItem>
+                                      <FormControl>
+                                        <Input
+                                          {...field}
+                                          placeholder={`Option ${cIndex + 1}`}
+                                          className="border-0 p-0 h-9 text-base shadow-none focus-visible:ring-0 bg-transparent"
+                                        />
+                                      </FormControl>
+                                      <FormMessage />
+                                    </FormItem>
+                                  )}
+                                />
+                                <div className="absolute top-3 right-3 flex items-center gap-2">
+                                  <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() => removeChoice(qIndex, cIndex)}
+                                    className="h-7 w-7 text-muted-foreground hover:text-destructive">
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                  <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() =>
+                                      setCorrectAnswer(qIndex, cIndex)
+                                    }
+                                    className={`h-7 w-7 ${
+                                      question.correctAnswer === cIndex
+                                        ? "text-primary"
+                                        : "text-muted-foreground"
+                                    }`}>
+                                    <CheckCircle className="h-4 w-4" />
+                                  </Button>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => addChoice(qIndex)}
+                            className="w-full mt-2">
+                            <PlusCircle className="mr-2 h-4 w-4" />
+                            Add Option
+                          </Button>
+                        </div>
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+                ))}
+              </Accordion>
+            </div>
+
+            <div className="sticky bottom-6 pt-6">
+              <Card className="border-0 shadow-xl bg-white/80 backdrop-blur-xl">
+                <CardContent className="p-4">
+                  <div className="flex justify-between items-center">
+                    <div className="text-sm text-muted-foreground">
+                      {fields.length} questions created
+                    </div>
+                    <div className="flex gap-3">
+                      <Button
+                        type="button"
+                        onClick={addQuestion}
+                        variant="outline"
+                        className="h-11">
+                        <PlusCircle className="mr-2 h-4 w-4" />
+                        Add Question
+                      </Button>
+                      <Button
+                        type="submit"
+                        className="h-11 px-6 bg-primary hover:bg-primary/90">
+                        Publish Quiz
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </form>
+        </Form>
       </div>
     </div>
   );
