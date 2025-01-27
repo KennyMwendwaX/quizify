@@ -153,10 +153,5 @@ export function SideNav({ links, ...props }: SidebarNavProps) {
 }
 
 export function SmSidebar() {
-  return (
-    <>
-      {/* Arrow Home */}
-      <SideNav links={links} />
-    </>
-  );
+  return <SideNav links={links} />;
 }
