@@ -2,7 +2,6 @@
 
 import { useFieldArray, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
 import {
   PlusCircle,
   Trash2,
@@ -32,34 +31,11 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-
-const questionSchema = z.object({
-  text: z.string().min(1, "Question text is required"),
-  choices: z
-    .array(z.string().min(1, "Option text is required"))
-    .min(2, "At least two options are required"),
-  correctAnswer: z.number().min(0, "A correct answer must be selected"),
-});
-
-const formSchema = z.object({
-  title: z.string().min(1, "Title is required"),
-  description: z.string().min(1, "Description is required"),
-  isTimeLimited: z.boolean(),
-  timeLimit: z
-    .number()
-    .min(1, "Time limit must be at least 1 minute")
-    .max(180, "Time limit cannot exceed 180 minutes")
-    .optional(),
-  questions: z
-    .array(questionSchema)
-    .min(1, "At least one question is required"),
-});
-
-type QuizFormValues = z.infer<typeof formSchema>;
+import { quizFormSchema, QuizFormValues } from "@/lib/quiz-form-schema";
 
 export default function CreateQuizPage() {
   const form = useForm<QuizFormValues>({
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(quizFormSchema),
     defaultValues: {
       title: "",
       description: "",
@@ -137,7 +113,7 @@ export default function CreateQuizPage() {
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-            <Card className="border-0 shadow-lg bg-white/50 backdrop-blur-xl">
+            <Card className="shadow-lg bg-white/50 backdrop-blur-xl">
               <CardHeader>
                 <div className="flex items-center gap-3">
                   <Settings2 className="w-6 h-6 text-primary" />
@@ -358,7 +334,7 @@ export default function CreateQuizPage() {
             </div>
 
             <div className="sticky bottom-6 pt-6">
-              <Card className="border-0 shadow-xl bg-white/80 backdrop-blur-xl">
+              <Card className="shadow-xl bg-white/80 backdrop-blur-xl">
                 <CardContent className="p-4">
                   <div className="flex justify-between items-center">
                     <div className="text-sm text-muted-foreground">
