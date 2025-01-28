@@ -107,7 +107,7 @@ export default function TakeQuizPage() {
 
     return (
       <div className="container mx-auto py-10 px-4 max-w-2xl">
-        <Card className="border-0 shadow-xl bg-gradient-to-b from-background to-background/95">
+        <Card className="shadow-xl bg-gradient-to-b from-background to-background/95">
           <CardHeader className="text-center space-y-6">
             <div className="relative w-24 h-24 mx-auto">
               <div className="absolute inset-0 rounded-full bg-primary/10 animate-ping" />
@@ -184,11 +184,11 @@ export default function TakeQuizPage() {
           </Alert>
         )}
 
-        <Card className="border-0 shadow-xl bg-white/50 backdrop-blur-xl">
+        <Card className="shadow-xl bg-white/50 backdrop-blur-xl">
           <CardHeader>
             <div className="flex items-center justify-between mb-6">
               <div>
-                <CardTitle className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/70">
+                <CardTitle className="text-2xl font-bold bg-clip-text">
                   {mockQuiz.title}
                 </CardTitle>
                 <p className="text-sm text-muted-foreground mt-2">
