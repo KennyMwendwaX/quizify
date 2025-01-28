@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { GeistSans } from "geist/font/sans";
 import "./globals.css";
-import Navbar from "@/components/navbar";
 
 export const metadata: Metadata = {
   title: "Quizify",
@@ -16,10 +15,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${GeistSans.className} antialiased`}>
-        <Navbar />
-        {children}
-      </body>
+      <body className={`${GeistSans.className} antialiased`}>{children}</body>
     </html>
   );
 }

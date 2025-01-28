@@ -52,7 +52,7 @@ export default function Navbar() {
               <Image src="/logo.svg" width={20} height={20} alt="" />
             </div>
             <div className="flex-1 text-left text-base leading-tight">
-              <span className="truncate font-semibold">TaskTrace</span>
+              <span className="truncate font-semibold">Quizify</span>
             </div>
           </Link>
           <SmSidebar />
