@@ -16,7 +16,6 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { PersonIcon } from "@radix-ui/react-icons";
 import { MdLogout } from "react-icons/md";
 import { LuMenu } from "react-icons/lu";
-import Logo from "@/app/logo.png";
 import { IoSettingsOutline } from "react-icons/io5";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -48,9 +47,9 @@ export default function Navbar() {
           </Button>
         </SheetTrigger>
         <SheetContent side="left">
-          <Link className="flex items-center gap-1" href="/dashboard">
+          <Link className="flex items-center gap-1" href="/">
             <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-              <Image src={Logo} width={32} height={28} alt="" />
+              <Image src="/logo.svg" width={20} height={20} alt="" />
             </div>
             <div className="flex-1 text-left text-base leading-tight">
               <span className="truncate font-semibold">TaskTrace</span>
@@ -59,9 +58,9 @@ export default function Navbar() {
           <SmSidebar />
         </SheetContent>
       </Sheet>
-      <Link className="flex items-center gap-1" href="/dashboard">
+      <Link className="flex items-center gap-1" href="/">
         <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-          <Image src={Logo} width={32} height={28} alt="" />
+          <Image src="/logo.svg" width={20} height={20} alt="" />
         </div>
         <div className="flex-1 text-left text-base leading-tight">
           <span className="truncate font-semibold">Quizify</span>
