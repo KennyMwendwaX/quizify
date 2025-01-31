@@ -178,7 +178,7 @@ export default function LeaderboardPage() {
           {topPerformers.map((performer, index) => (
             <Card
               key={performer.rank}
-              className="relative overflow-hidden border-0 shadow-lg bg-white/50 backdrop-blur-sm">
+              className="relative overflow-hidden shadow-lg bg-white/50 backdrop-blur-sm">
               <div className="absolute top-2 right-2">
                 <Medal
                   className={`w-6 h-6 ${
@@ -227,7 +227,7 @@ export default function LeaderboardPage() {
           ))}
         </div>
 
-        <Card className="border-0 shadow-lg bg-white/50 backdrop-blur-sm">
+        <Card className="shadow-lg bg-white/50 backdrop-blur-sm">
           <CardHeader>
             <div className="flex flex-col sm:flex-row justify-between gap-4">
               <CardTitle>All Participants</CardTitle>
