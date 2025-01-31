@@ -123,7 +123,8 @@ export default function QuizzesPage() {
   });
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-slate-100 to-slate-200 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-background/90 py-12">
+      {" "}
       <div className="container mx-auto px-4 py-16">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -186,7 +187,7 @@ export default function QuizzesPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: index * 0.1 }}>
-              <Card className="group h-full flex flex-col bg-white/50 dark:bg-gray-800/50 backdrop-blur-xl border-0 shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl overflow-hidden">
+              <Card className="group h-full flex flex-col bg-white/50 dark:bg-gray-800/50 shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl overflow-hidden">
                 <CardHeader className="relative pb-4">
                   <div className="flex justify-between items-start mb-2">
                     <Badge className={`${getDifficultyColor(quiz.difficulty)}`}>
