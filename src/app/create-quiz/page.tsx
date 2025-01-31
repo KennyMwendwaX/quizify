@@ -50,8 +50,6 @@ export default function CreateQuizPage() {
     name: "questions",
   });
 
-  console.log(form.formState.errors);
-
   const addQuestion = () => {
     append({
       text: "",
@@ -61,33 +59,35 @@ export default function CreateQuizPage() {
   };
 
   const addChoice = (questionIndex: number) => {
-    const question = fields[questionIndex];
+    const currentValues = form.getValues(`questions.${questionIndex}`);
     update(questionIndex, {
-      ...question,
-      choices: [...question.choices, ""],
+      ...currentValues,
+      choices: [...currentValues.choices, ""],
     });
   };
 
   const removeChoice = (questionIndex: number, choiceIndex: number) => {
-    const question = fields[questionIndex];
-    const newChoices = question.choices.filter(
+    const currentValues = form.getValues(`questions.${questionIndex}`);
+    const newChoices = currentValues.choices.filter(
       (_, index) => index !== choiceIndex
     );
     update(questionIndex, {
-      ...question,
+      ...currentValues,
       choices: newChoices,
       correctAnswer:
-        question.correctAnswer === choiceIndex ? -1 : question.correctAnswer,
+        currentValues.correctAnswer === choiceIndex ? -1 : currentValues.correctAnswer,
     });
   };
+  
 
   const setCorrectAnswer = (questionIndex: number, choiceIndex: number) => {
-    const question = fields[questionIndex];
+    const currentValues = form.getValues(`questions.${questionIndex}`);
     update(questionIndex, {
-      ...question,
+      ...currentValues,
       correctAnswer: choiceIndex,
     });
   };
+  
 
   function onSubmit(data: QuizFormValues) {
     console.log(data);
