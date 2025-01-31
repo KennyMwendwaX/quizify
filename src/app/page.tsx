@@ -93,6 +93,10 @@ const links = [
     title: "Take Quiz",
   },
   {
+    href: "/quizzes",
+    title: "Quizzes",
+  },
+  {
     href: "/leaderboard",
     title: "Leaderboard",
   },
