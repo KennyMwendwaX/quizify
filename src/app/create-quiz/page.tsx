@@ -221,29 +221,29 @@ export default function CreateQuizPage() {
                     value={`question-${qIndex}`}
                     className="border bg-white/50 backdrop-blur-xl rounded-xl shadow-sm overflow-hidden group">
                     <AccordionTrigger className="px-6 hover:no-underline">
-                      <div className="flex items-center gap-4">
-                        <GripVertical className="w-5 h-5 text-muted-foreground/40 group-hover:text-muted-foreground/60" />
-                        <div className="w-8 h-8 bg-primary/10 text-primary rounded-lg flex items-center justify-center text-sm font-medium">
-                          {qIndex + 1}
+                      <div className="w-full flex justify-between items-center">
+                        <div className="flex items-center gap-4">
+                          <GripVertical className="w-5 h-5 text-muted-foreground/40 group-hover:text-muted-foreground/60" />
+                          <div className="w-8 h-8 bg-primary/10 text-primary rounded-lg flex items-center justify-center text-sm font-medium">
+                            {qIndex + 1}
+                          </div>
+                          <span className="text-lg font-medium">
+                            {question.text || `Question ${qIndex + 1}`}
+                          </span>
                         </div>
-                        <span className="text-lg font-medium">
-                          {question.text || `Question ${qIndex + 1}`}
-                        </span>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => remove(qIndex)}
+                          className="text-destructive hover:text-destructive/90">
+                          <Trash2 className="w-4 h-4 mr-2" />
+                          Remove Question
+                        </Button>
                       </div>
                     </AccordionTrigger>
+
                     <AccordionContent className="border-t">
                       <div className="p-6 space-y-6">
-                        <div className="flex justify-end">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => remove(qIndex)}
-                            className="text-destructive hover:text-destructive/90">
-                            <Trash2 className="w-4 h-4 mr-2" />
-                            Remove Question
-                          </Button>
-                        </div>
-
                         <FormField
                           control={form.control}
                           name={`questions.${qIndex}.text`}
@@ -337,9 +337,15 @@ export default function CreateQuizPage() {
               <Card className="shadow-xl bg-white/80 backdrop-blur-xl">
                 <CardContent className="p-4">
                   <div className="flex justify-between items-center">
-                    <div className="text-sm text-muted-foreground">
-                      {fields.length} questions created
-                    </div>
+                    {form.formState.isSubmitted && fields.length === 0 ? (
+                      <div className="text-sm font-medium text-destructive">
+                        At least one question is required
+                      </div>
+                    ) : (
+                      <div className="text-sm text-muted-foreground">
+                        {fields.length} questions created
+                      </div>
+                    )}
                     <div className="flex gap-3">
                       <Button
                         type="button"

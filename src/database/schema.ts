@@ -1,7 +1,7 @@
 import { relations } from "drizzle-orm";
 import { boolean, integer, pgTable, serial, text } from "drizzle-orm/pg-core";
 
-export const quizzes = pgTable("quizz", {
+export const quizzes = pgTable("quizzes", {
   id: serial("id").primaryKey(),
   title: text("title").notNull(),
   description: text("description").notNull(),
@@ -14,7 +14,7 @@ export const quizzesRelations = relations(quizzes, ({ many }) => ({
   quizResponses: many(quizResponses),
 }));
 
-export const questions = pgTable("question", {
+export const questions = pgTable("questions", {
   id: serial("id").primaryKey(),
   quizId: integer("quiz_id")
     .notNull()
@@ -28,7 +28,7 @@ export const questionsRelations = relations(questions, ({ one }) => ({
   quiz: one(quizzes),
 }));
 
-export const quizResponses = pgTable("quiz_response", {
+export const quizResponses = pgTable("quiz_responses", {
   id: serial("id").primaryKey(),
   quizId: integer("quiz_id")
     .notNull()
