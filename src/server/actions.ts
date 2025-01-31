@@ -28,7 +28,7 @@ export const createQuiz = async (quiz: QuizFormValues) => {
   }
 };
 
-export const getQuizzes = async () => {
+export const getQuizzesWithQuestions = async () => {
   try {
     const quizResults = await db.query.quizzes.findMany({
       with: {
@@ -36,12 +36,6 @@ export const getQuizzes = async () => {
       },
       orderBy: [desc(quizzes.createdAt)],
     });
-
-    if (quizResults.length === 0) {
-      return {
-        error: "Failed to retrieve quizzes",
-      };
-    }
 
     return {
       quizzes: quizResults,

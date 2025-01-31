@@ -1,7 +1,7 @@
 CREATE TABLE "questions" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"quiz_id" integer NOT NULL,
-	"text" text NOT NULL,
+	"title" text NOT NULL,
 	"choices[]" text[] NOT NULL,
 	"correct_answer" integer NOT NULL,
 	"created_at" timestamp (3) DEFAULT now() NOT NULL,

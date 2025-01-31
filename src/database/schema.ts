@@ -1,4 +1,3 @@
-import { Difficulty } from "@/lib/quiz-form-schema";
 import { relations } from "drizzle-orm";
 import {
   boolean,
@@ -8,7 +7,7 @@ import {
   text,
   timestamp,
 } from "drizzle-orm/pg-core";
-import * as z from "zod";
+import { Difficulty } from "@/lib/quiz-form-schema";
 
 export const quizzes = pgTable("quizzes", {
   id: serial("id").primaryKey(),
@@ -21,24 +20,17 @@ export const quizzes = pgTable("quizzes", {
   createdAt: timestamp("created_at", { mode: "date", precision: 3 })
     .defaultNow()
     .notNull(),
-  updatedAt: timestamp("updated_at", { mode: "date", precision: 3 }).$onUpdate(
-    () => new Date()
-  ),
+  updatedAt: timestamp("updated_at", { mode: "date", precision: 3 })
+    .$onUpdate(() => new Date())
+    .notNull(),
 });
-
-export const quizzesRelations = relations(quizzes, ({ many }) => ({
-  questions: many(questions),
-  quizResponses: many(quizResponses),
-}));
-
-export type Quiz = typeof quizzes.$inferSelect;
 
 export const questions = pgTable("questions", {
   id: serial("id").primaryKey(),
   quizId: integer("quiz_id")
     .notNull()
     .references(() => quizzes.id, { onDelete: "cascade", onUpdate: "cascade" }),
-  text: text("text").notNull(),
+  title: text("title").notNull(),
   choices: text("choices[]").array().notNull(),
   correctAnswer: integer("correct_answer").notNull(),
   createdAt: timestamp("created_at", { mode: "date", precision: 3 })
@@ -49,27 +41,43 @@ export const questions = pgTable("questions", {
   ),
 });
 
-export const questionsRelations = relations(questions, ({ one }) => ({
-  quiz: one(quizzes),
-}));
-
 export const quizResponses = pgTable("quiz_responses", {
   id: serial("id").primaryKey(),
   quizId: integer("quiz_id")
     .notNull()
     .references(() => quizzes.id, { onDelete: "cascade", onUpdate: "cascade" }),
   userId: integer("user_id").notNull(),
-  answers: integer("answers[]").array().notNull(),
+  answers: integer("answers").array().notNull(),
   score: integer("score").notNull(),
   timeTaken: integer("time_taken").notNull(),
   createdAt: timestamp("created_at", { mode: "date", precision: 3 })
     .defaultNow()
     .notNull(),
-  updatedAt: timestamp("updated_at", { mode: "date", precision: 3 }).$onUpdate(
-    () => new Date()
-  ),
+  updatedAt: timestamp("updated_at", { mode: "date", precision: 3 })
+    .$onUpdate(() => new Date())
+    .notNull(),
 });
 
-export const quizResponsesRelations = relations(quizResponses, ({ one }) => ({
-  quiz: one(quizzes),
+// Relations definitions
+export const quizzesRelations = relations(quizzes, ({ many }) => ({
+  questions: many(questions),
+  quizResponses: many(quizResponses),
 }));
+
+export const questionsRelations = relations(questions, ({ one }) => ({
+  quiz: one(quizzes, {
+    fields: [questions.quizId],
+    references: [quizzes.id],
+  }),
+}));
+
+export const quizResponsesRelations = relations(quizResponses, ({ one }) => ({
+  quiz: one(quizzes, {
+    fields: [quizResponses.quizId],
+    references: [quizzes.id],
+  }),
+}));
+
+export type Quiz = typeof quizzes.$inferSelect;
+export type Question = typeof questions.$inferSelect;
+export type QuizWithQuestions = Quiz & { questions: Question[] };

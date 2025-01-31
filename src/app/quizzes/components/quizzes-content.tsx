@@ -24,7 +24,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Quiz } from "@/database/schema";
+import { QuizWithQuestions } from "@/database/schema";
 
 const categories = [
   { id: "all", name: "All Quizzes", icon: Hash },
@@ -48,10 +48,10 @@ const getDifficultyColor = (difficulty: string) => {
 };
 
 type Props = {
-  quizzes: Quiz[];
+  quizzes: QuizWithQuestions[];
 };
 
-export default function QuizzesPage({ quizzes }: Props) {
+export default function QuizzesContentPage({ quizzes }: Props) {
   const [searchTerm, setSearchTerm] = useState("");
   const [activeCategory, setActiveCategory] = useState("all");
 
@@ -63,6 +63,8 @@ export default function QuizzesPage({ quizzes }: Props) {
       activeCategory === "all" || quiz.category === activeCategory;
     return matchesSearch && matchesCategory;
   });
+
+  console.log(quizzes);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-background/90 py-12">
@@ -135,7 +137,7 @@ export default function QuizzesPage({ quizzes }: Props) {
                       {quiz.difficulty}
                     </Badge>
                     <Badge variant="secondary" className="text-xs">
-                      {quiz.questionCount} questions
+                      {quiz.questions.length} questions
                     </Badge>
                   </div>
                   <CardTitle className="text-2xl font-bold group-hover:text-primary transition-colors">
@@ -153,7 +155,7 @@ export default function QuizzesPage({ quizzes }: Props) {
                     </div>
                     <div className="flex items-center gap-2 bg-primary/5 px-3 py-1.5 rounded-lg">
                       <Users className="w-4 h-4" />
-                      {quiz.participants.toLocaleString()}
+                      {/* {quiz.participants.toLocaleString()} */} 150
                     </div>
                   </div>
                 </CardContent>
