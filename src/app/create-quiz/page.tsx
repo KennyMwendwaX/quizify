@@ -32,8 +32,15 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { quizFormSchema, QuizFormValues } from "@/lib/quiz-form-schema";
+import { useTransition } from "react";
+import { toast } from "sonner";
+import { createQuiz } from "@/server/actions";
+import { useRouter } from "next/navigation";
+import { AiOutlineLoading3Quarters } from "react-icons/ai";
 
 export default function CreateQuizPage() {
+  const [isPending, startTransition] = useTransition();
+  const router = useRouter();
   const form = useForm<QuizFormValues>({
     resolver: zodResolver(quizFormSchema),
     defaultValues: {
@@ -75,10 +82,11 @@ export default function CreateQuizPage() {
       ...currentValues,
       choices: newChoices,
       correctAnswer:
-        currentValues.correctAnswer === choiceIndex ? -1 : currentValues.correctAnswer,
+        currentValues.correctAnswer === choiceIndex
+          ? -1
+          : currentValues.correctAnswer,
     });
   };
-  
 
   const setCorrectAnswer = (questionIndex: number, choiceIndex: number) => {
     const currentValues = form.getValues(`questions.${questionIndex}`);
@@ -87,11 +95,22 @@ export default function CreateQuizPage() {
       correctAnswer: choiceIndex,
     });
   };
-  
 
   function onSubmit(data: QuizFormValues) {
-    console.log(data);
-    alert("Quiz created successfully!");
+    startTransition(async () => {
+      const result = await createQuiz(data);
+
+      if (result.error) {
+        toast.error(result.error);
+        return;
+      }
+
+      if (result.quizId) {
+        form.reset();
+        toast.success("Quiz created successfully!");
+        router.push(`/quiz/${result.quizId}`);
+      }
+    });
   }
 
   return (
@@ -357,8 +376,16 @@ export default function CreateQuizPage() {
                       </Button>
                       <Button
                         type="submit"
-                        className="h-11 px-6 bg-primary hover:bg-primary/90">
-                        Publish Quiz
+                        className="h-11 px-6 bg-primary hover:bg-primary/90"
+                        disabled={isPending}>
+                        {isPending ? (
+                          <>
+                            <AiOutlineLoading3Quarters className="mr-2 h-4 w-4 animate-spin" />
+                            Publishing...
+                          </>
+                        ) : (
+                          "Publish Quiz"
+                        )}
                       </Button>
                     </div>
                   </div>
