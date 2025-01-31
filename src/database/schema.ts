@@ -4,13 +4,14 @@ import {
   boolean,
   integer,
   pgTable,
-  bigserial,
+  serial,
   text,
   timestamp,
 } from "drizzle-orm/pg-core";
+import * as z from "zod";
 
 export const quizzes = pgTable("quizzes", {
-  id: bigserial("id", { mode: "number" }).primaryKey(),
+  id: serial("id").primaryKey(),
   title: text("title").notNull(),
   description: text("description").notNull(),
   category: text("category").notNull(),
@@ -30,8 +31,10 @@ export const quizzesRelations = relations(quizzes, ({ many }) => ({
   quizResponses: many(quizResponses),
 }));
 
+export type Quiz = typeof quizzes.$inferSelect;
+
 export const questions = pgTable("questions", {
-  id: bigserial("id", { mode: "number" }).primaryKey(),
+  id: serial("id").primaryKey(),
   quizId: integer("quiz_id")
     .notNull()
     .references(() => quizzes.id, { onDelete: "cascade", onUpdate: "cascade" }),
@@ -51,7 +54,7 @@ export const questionsRelations = relations(questions, ({ one }) => ({
 }));
 
 export const quizResponses = pgTable("quiz_responses", {
-  id: bigserial("id", { mode: "number" }).primaryKey(),
+  id: serial("id").primaryKey(),
   quizId: integer("quiz_id")
     .notNull()
     .references(() => quizzes.id, { onDelete: "cascade", onUpdate: "cascade" }),

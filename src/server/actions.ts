@@ -3,7 +3,7 @@
 import db from "@/database/db";
 import { quizzes } from "@/database/schema";
 import { QuizFormValues } from "@/lib/quiz-form-schema";
-import { eq } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 
 export const createQuiz = async (quiz: QuizFormValues) => {
   try {
@@ -30,7 +30,12 @@ export const createQuiz = async (quiz: QuizFormValues) => {
 
 export const getQuizzes = async () => {
   try {
-    const quizResults = await db.query.quizzes.findMany();
+    const quizResults = await db.query.quizzes.findMany({
+      with: {
+        questions: true,
+      },
+      orderBy: [desc(quizzes.createdAt)],
+    });
 
     if (quizResults.length === 0) {
       return {
@@ -52,6 +57,9 @@ export const getQuiz = async (quizId: number) => {
   try {
     const quiz = await db.query.quizzes.findFirst({
       where: eq(quizzes.id, quizId),
+      with: {
+        questions: true,
+      },
     });
 
     if (!quiz) {

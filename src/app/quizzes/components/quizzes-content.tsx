@@ -24,6 +24,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Quiz } from "@/database/schema";
 
 const categories = [
   { id: "all", name: "All Quizzes", icon: Hash },
@@ -31,69 +32,6 @@ const categories = [
   { id: "geography", name: "Geography", icon: Globe2 },
   { id: "general", name: "General Knowledge", icon: Lightbulb },
   { id: "science", name: "Science", icon: Atom },
-];
-
-const quizzes = [
-  {
-    id: 1,
-    title: "World History Masterclass",
-    description: "Journey through pivotal moments that shaped our world",
-    questionCount: 20,
-    timeLimit: 30,
-    participants: 1500,
-    difficulty: "Medium",
-    category: "history",
-  },
-  {
-    id: 2,
-    title: "Earth's Geography",
-    description: "Explore continents, oceans, and natural wonders",
-    questionCount: 15,
-    timeLimit: 25,
-    participants: 1200,
-    difficulty: "Hard",
-    category: "geography",
-  },
-  {
-    id: 3,
-    title: "Ancient Civilizations",
-    description: "Discover the mysteries of ancient cultures",
-    questionCount: 18,
-    timeLimit: 28,
-    participants: 980,
-    difficulty: "Easy",
-    category: "history",
-  },
-  {
-    id: 4,
-    title: "General Knowledge Challenge",
-    description: "Test your knowledge across various topics",
-    questionCount: 25,
-    timeLimit: 35,
-    participants: 2200,
-    difficulty: "Medium",
-    category: "general",
-  },
-  {
-    id: 5,
-    title: "Physics & Universe",
-    description: "Unravel the mysteries of the cosmos",
-    questionCount: 22,
-    timeLimit: 32,
-    participants: 1800,
-    difficulty: "Hard",
-    category: "science",
-  },
-  {
-    id: 6,
-    title: "World Capitals",
-    description: "Test your knowledge of global capitals",
-    questionCount: 20,
-    timeLimit: 30,
-    participants: 1650,
-    difficulty: "Easy",
-    category: "geography",
-  },
 ];
 
 const getDifficultyColor = (difficulty: string) => {
@@ -109,7 +47,11 @@ const getDifficultyColor = (difficulty: string) => {
   }
 };
 
-export default function QuizzesPage() {
+type Props = {
+  quizzes: Quiz[];
+};
+
+export default function QuizzesPage({ quizzes }: Props) {
   const [searchTerm, setSearchTerm] = useState("");
   const [activeCategory, setActiveCategory] = useState("all");
 

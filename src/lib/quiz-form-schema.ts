@@ -1,7 +1,7 @@
 import * as z from "zod";
 
 const questionSchema = z.object({
-  text: z.string().min(1, "Question text is required"),
+  prompt: z.string().min(1, "Question prompt is required"),
   choices: z
     .array(z.string().min(1, "Option text is required"))
     .min(2, "At least two options are required"),

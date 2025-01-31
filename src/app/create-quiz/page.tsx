@@ -64,7 +64,7 @@ export default function CreateQuizPage() {
 
   const addQuestion = () => {
     append({
-      text: "",
+      prompt: "",
       choices: ["", ""],
       correctAnswer: -1,
     });
@@ -185,7 +185,7 @@ export default function CreateQuizPage() {
                           <SelectContent>
                             <SelectItem value="science">Science</SelectItem>
                             <SelectItem value="geography">Geography</SelectItem>
-                            <SelectItem value="geography">History</SelectItem>
+                            <SelectItem value="history">History</SelectItem>
                             <SelectItem value="mathematics">
                               Mathematics
                             </SelectItem>
@@ -315,7 +315,7 @@ export default function CreateQuizPage() {
                             {qIndex + 1}
                           </div>
                           <span className="text-lg font-medium">
-                            {question.text || `Question ${qIndex + 1}`}
+                            {question.prompt || `Question ${qIndex + 1}`}
                           </span>
                         </div>
                         <Button
@@ -333,9 +333,12 @@ export default function CreateQuizPage() {
                       <div className="p-6 space-y-6">
                         <FormField
                           control={form.control}
-                          name={`questions.${qIndex}.text`}
+                          name={`questions.${qIndex}.prompt`}
                           render={({ field }) => (
                             <FormItem>
+                              <FormLabel className="text-base font-medium">
+                                Question
+                              </FormLabel>
                               <FormControl>
                                 <Textarea
                                   {...field}
