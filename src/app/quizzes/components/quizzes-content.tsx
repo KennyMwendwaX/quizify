@@ -140,9 +140,11 @@ export default function QuizzesContentPage({ quizzes }: Props) {
                       {quiz.questions.length} questions
                     </Badge>
                   </div>
-                  <CardTitle className="text-2xl font-bold group-hover:text-primary transition-colors">
-                    {quiz.title}
-                  </CardTitle>
+                  <Link href={`/quizzes/${quiz.id}`}>
+                    <CardTitle className="text-2xl font-bold group-hover:text-primary hover:underline transition-colors">
+                      {quiz.title}
+                    </CardTitle>
+                  </Link>
                 </CardHeader>
                 <CardContent className="flex-grow pb-4">
                   <p className="text-muted-foreground mb-6">

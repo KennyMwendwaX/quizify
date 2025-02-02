@@ -113,7 +113,7 @@ export default function CreateQuizPage() {
       if (result.quizId) {
         form.reset();
         toast.success("Quiz created successfully!");
-        router.push(`/quiz/${result.quizId}`);
+        router.push(`/quizzes/${result.quizId}`);
       }
     });
   }
@@ -156,7 +156,7 @@ export default function CreateQuizPage() {
                       <FormControl>
                         <Input
                           {...field}
-                          placeholder="Enter an engaging title for your quiz"
+                          placeholder="Enter a title for your quiz"
                           className="h-12 text-lg border-primary/20 focus:border-primary/40"
                         />
                       </FormControl>
