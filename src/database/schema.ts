@@ -80,4 +80,10 @@ export const quizResponsesRelations = relations(quizResponses, ({ one }) => ({
 
 export type Quiz = typeof quizzes.$inferSelect;
 export type Question = typeof questions.$inferSelect;
-export type QuizWithQuestions = Quiz & { questions: Question[] };
+export type PublicQuestion = Pick<Question, "id" | "title" | "choices">;
+export type AdminQuestion = Pick<
+  Question,
+  "id" | "title" | "choices" | "correctAnswer"
+>;
+export type PublicQuiz = Quiz & { questions: PublicQuestion[] };
+export type AdminQuiz = Quiz & { questions: AdminQuestion[] };

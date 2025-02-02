@@ -1,11 +1,23 @@
 import * as z from "zod";
 
 const questionSchema = z.object({
-  title: z.string().min(1, "Question title is required"),
+  title: z
+    .string({
+      required_error: "Question title is required",
+    })
+    .min(1, "Question title cannot be empty"),
   choices: z
-    .array(z.string().min(1, "Option text is required"))
-    .min(2, "At least two options are required"),
-  correctAnswer: z.number().min(0, "A correct answer must be selected"),
+    .array(z.string())
+    .min(2, "Each question must have at least 2 choices")
+    .max(6, "Each question can have at most 6 choices")
+    .refine(
+      (choices) => choices.every((choice) => choice.trim().length > 0),
+      "Choices cannot be empty"
+    ),
+  correctAnswer: z
+    .number()
+    .int("Correct answer must be an integer")
+    .min(0, "Correct answer index must be non-negative"),
 });
 
 export const quizFormSchema = z.object({
@@ -19,12 +31,16 @@ export const quizFormSchema = z.object({
   isTimeLimited: z.boolean(),
   timeLimit: z
     .number()
-    .min(1, "Time limit must be at least 1 minute")
-    .max(180, "Time limit cannot exceed 180 minutes")
-    .optional(),
+    .nullable()
+    .optional()
+    .refine(
+      (val) => !val || (val >= 1 && val <= 180),
+      "Time limit must be between 1 and 180 minutes"
+    ),
   questions: z
     .array(questionSchema)
-    .min(1, "At least one question is required"),
+    .min(1, "At least one question is required")
+    .max(50, "Maximum of 50 questions allowed"),
 });
 
 export type QuizFormValues = z.infer<typeof quizFormSchema>;

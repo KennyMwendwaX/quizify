@@ -24,7 +24,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { QuizWithQuestions } from "@/database/schema";
+import { PublicQuiz } from "@/database/schema";
 
 const categories = [
   { id: "all", name: "All Quizzes", icon: Hash },
@@ -48,7 +48,7 @@ const getDifficultyColor = (difficulty: string) => {
 };
 
 type Props = {
-  quizzes: QuizWithQuestions[];
+  quizzes: PublicQuiz[];
 };
 
 export default function QuizzesContentPage({ quizzes }: Props) {

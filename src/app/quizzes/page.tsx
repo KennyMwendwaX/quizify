@@ -1,5 +1,5 @@
 import QuizzesContentPage from "./components/quizzes-content";
-import { getQuizzesWithQuestions } from "@/server/actions";
+import { getPublicQuizzes } from "@/server/actions";
 
 // const quizzes = [
 //   {
@@ -65,7 +65,7 @@ import { getQuizzesWithQuestions } from "@/server/actions";
 // ];
 
 export default async function QuizzesPage() {
-  const result = await getQuizzesWithQuestions();
+  const result = await getPublicQuizzes();
   if (result.error) {
     throw new Error(result.error);
   }
