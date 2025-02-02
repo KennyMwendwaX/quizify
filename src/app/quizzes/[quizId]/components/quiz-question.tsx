@@ -14,59 +14,121 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Clock, ChevronLeft, ChevronRight, Flag } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useEffect, useState } from "react";
+import { useEffect, useReducer } from "react";
 
 type Props = {
   quiz: PublicQuiz;
 };
 
+interface QuizState {
+  currentQuestion: number;
+  answers: (number | null)[];
+  timeLeft: number;
+  isCompleted: boolean;
+  showTimeWarning: boolean;
+}
+
+type QuizAction =
+  | { type: "SELECT_ANSWER"; questionIndex: number; answer: number }
+  | { type: "NEXT_QUESTION" }
+  | { type: "PREVIOUS_QUESTION" }
+  | { type: "TICK_TIMER" }
+  | { type: "COMPLETE_QUIZ" }
+  | { type: "SET_TIME_WARNING" };
+
+function quizReducer(state: QuizState, action: QuizAction): QuizState {
+  switch (action.type) {
+    case "SELECT_ANSWER":
+      const newAnswers = [...state.answers];
+      newAnswers[action.questionIndex] = action.answer;
+      return {
+        ...state,
+        answers: newAnswers,
+      };
+    case "NEXT_QUESTION":
+      return {
+        ...state,
+        currentQuestion: Math.min(
+          state.currentQuestion + 1,
+          state.answers.length - 1
+        ),
+      };
+    case "PREVIOUS_QUESTION":
+      return {
+        ...state,
+        currentQuestion: Math.max(state.currentQuestion - 1, 0),
+      };
+    case "TICK_TIMER":
+      return {
+        ...state,
+        timeLeft: Math.max(0, state.timeLeft - 1),
+      };
+    case "COMPLETE_QUIZ":
+      return {
+        ...state,
+        isCompleted: true,
+      };
+    case "SET_TIME_WARNING":
+      return {
+        ...state,
+        showTimeWarning: true,
+      };
+    default:
+      return state;
+  }
+}
+
 export default function QuizQuestion({ quiz }: Props) {
-  const [currentQuestion, setCurrentQuestion] = useState(0);
-  const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
-  const [timeLeft, setTimeLeft] = useState<number>((quiz.timeLimit ?? 0) * 60);
-  const [quizCompleted, setQuizCompleted] = useState(false);
-  const [showTimeWarning, setShowTimeWarning] = useState(false);
-  const [answers, setAnswers] = useState<(number | null)[]>(
-    new Array(quiz.questions.length).fill(null)
-  );
+  const initialState: QuizState = {
+    currentQuestion: 0,
+    answers: new Array(quiz.questions.length).fill(null),
+    timeLeft: (quiz.timeLimit ?? 0) * 60,
+    isCompleted: false,
+    showTimeWarning: false,
+  };
+
+  const [state, dispatch] = useReducer(quizReducer, initialState);
+  const { currentQuestion, answers, timeLeft, isCompleted, showTimeWarning } =
+    state;
 
   useEffect(() => {
-    if (timeLeft > 0 && !quizCompleted) {
-      const timer = setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
+    if (timeLeft > 0 && !isCompleted) {
+      const timer = setTimeout(() => dispatch({ type: "TICK_TIMER" }), 1000);
       if (timeLeft <= 30 && !showTimeWarning) {
-        setShowTimeWarning(true);
+        dispatch({ type: "SET_TIME_WARNING" });
       }
       return () => clearTimeout(timer);
     } else if (timeLeft === 0) {
-      finishQuiz();
+      handleFinish();
     }
-  }, [timeLeft, quizCompleted, showTimeWarning]);
+  }, [timeLeft, isCompleted, showTimeWarning]);
 
   const handleAnswerSelect = (answerIndex: number) => {
-    setSelectedAnswer(answerIndex);
-    const newAnswers = [...answers];
-    newAnswers[currentQuestion] = answerIndex;
-    setAnswers(newAnswers);
+    dispatch({
+      type: "SELECT_ANSWER",
+      questionIndex: currentQuestion,
+      answer: answerIndex,
+    });
   };
 
-  const goToNextQuestion = () => {
+  const handleNext = () => {
     if (currentQuestion < quiz.questions.length - 1) {
-      setCurrentQuestion(currentQuestion + 1);
-      setSelectedAnswer(answers[currentQuestion + 1]);
+      dispatch({ type: "NEXT_QUESTION" });
     } else {
-      finishQuiz();
+      handleFinish();
     }
   };
 
-  const goToPreviousQuestion = () => {
-    if (currentQuestion > 0) {
-      setCurrentQuestion(currentQuestion - 1);
-      setSelectedAnswer(answers[currentQuestion - 1]);
-    }
+  const handlePrevious = () => {
+    dispatch({ type: "PREVIOUS_QUESTION" });
   };
 
-  const finishQuiz = () => {
-    setQuizCompleted(true);
+  const handleFinish = () => {
+    dispatch({ type: "COMPLETE_QUIZ" });
+    const validAnswers = answers.filter(
+      (answer): answer is number => answer !== null
+    );
+    console.log(validAnswers);
   };
 
   const formatTime = (seconds: number) => {
@@ -122,7 +184,7 @@ export default function QuizQuestion({ quiz }: Props) {
             <div className="space-y-4">
               <h2 className="text-lg font-medium">{question.title}</h2>
               <RadioGroup
-                value={selectedAnswer?.toString()}
+                value={answers[currentQuestion]?.toString()}
                 onValueChange={(value) => handleAnswerSelect(Number(value))}
                 className="space-y-3">
                 {question.choices.map((choice, index) => (
@@ -130,7 +192,7 @@ export default function QuizQuestion({ quiz }: Props) {
                     key={index}
                     className={cn(
                       "flex items-center space-x-3 rounded-lg border p-3 transition-colors",
-                      selectedAnswer === index
+                      answers[currentQuestion] === index
                         ? "border-primary bg-primary/5"
                         : "hover:border-primary/50"
                     )}>
@@ -146,7 +208,7 @@ export default function QuizQuestion({ quiz }: Props) {
                         <div
                           className={cn(
                             "flex h-7 w-7 items-center justify-center rounded-full border text-sm font-medium",
-                            selectedAnswer === index
+                            answers[currentQuestion] === index
                               ? "border-primary text-primary"
                               : "border-muted"
                           )}>
@@ -163,7 +225,7 @@ export default function QuizQuestion({ quiz }: Props) {
 
           <CardFooter className="flex gap-3 border-t pt-6">
             <Button
-              onClick={goToPreviousQuestion}
+              onClick={handlePrevious}
               disabled={currentQuestion === 0}
               variant="outline"
               className="flex-1">
@@ -171,8 +233,8 @@ export default function QuizQuestion({ quiz }: Props) {
               Previous
             </Button>
             <Button
-              onClick={goToNextQuestion}
-              disabled={selectedAnswer === null}
+              onClick={handleNext}
+              disabled={answers[currentQuestion] === null}
               className="flex-1">
               {currentQuestion < quiz.questions.length - 1 ? (
                 <>

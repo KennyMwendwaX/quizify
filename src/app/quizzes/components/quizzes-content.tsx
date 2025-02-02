@@ -140,11 +140,9 @@ export default function QuizzesContentPage({ quizzes }: Props) {
                       {quiz.questions.length} questions
                     </Badge>
                   </div>
-                  <Link href={`/quizzes/${quiz.id}`}>
-                    <CardTitle className="text-2xl font-bold group-hover:text-primary hover:underline transition-colors">
-                      {quiz.title}
-                    </CardTitle>
-                  </Link>
+                  <CardTitle className="text-2xl font-bold group-hover:text-primary hover:underline transition-colors">
+                    {quiz.title}
+                  </CardTitle>
                 </CardHeader>
                 <CardContent className="flex-grow pb-4">
                   <p className="text-muted-foreground mb-6">
@@ -166,7 +164,7 @@ export default function QuizzesContentPage({ quizzes }: Props) {
                     asChild
                     className="w-full h-12 rounded-xl shadow-lg hover:shadow-xl">
                     <Link
-                      href={`/take-quiz/${quiz.id}`}
+                      href={`/quizzes/${quiz.id}`}
                       className="flex items-center justify-center gap-2">
                       Start Quiz
                       <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
