@@ -31,7 +31,7 @@ export const questions = pgTable("questions", {
     .notNull()
     .references(() => quizzes.id, { onDelete: "cascade", onUpdate: "cascade" }),
   title: text("title").notNull(),
-  choices: text("choices[]").array().notNull(),
+  choices: text("choices").array().notNull(),
   correctAnswer: integer("correct_answer").notNull(),
   createdAt: timestamp("created_at", { mode: "date", precision: 3 })
     .defaultNow()
@@ -41,7 +41,7 @@ export const questions = pgTable("questions", {
   ),
 });
 
-export const quizResponses = pgTable("quiz_responses", {
+export const quizAttempts = pgTable("quiz_attempts", {
   id: serial("id").primaryKey(),
   quizId: integer("quiz_id")
     .notNull()
@@ -49,6 +49,7 @@ export const quizResponses = pgTable("quiz_responses", {
   userId: integer("user_id").notNull(),
   answers: integer("answers").array().notNull(),
   score: integer("score").notNull(),
+  isCompleted: boolean("is_completed").notNull(),
   timeTaken: integer("time_taken").notNull(),
   createdAt: timestamp("created_at", { mode: "date", precision: 3 })
     .defaultNow()
@@ -58,10 +59,9 @@ export const quizResponses = pgTable("quiz_responses", {
     .notNull(),
 });
 
-// Relations definitions
 export const quizzesRelations = relations(quizzes, ({ many }) => ({
   questions: many(questions),
-  quizResponses: many(quizResponses),
+  quizAttempts: many(quizAttempts),
 }));
 
 export const questionsRelations = relations(questions, ({ one }) => ({
@@ -71,9 +71,9 @@ export const questionsRelations = relations(questions, ({ one }) => ({
   }),
 }));
 
-export const quizResponsesRelations = relations(quizResponses, ({ one }) => ({
+export const quizResponsesRelations = relations(quizAttempts, ({ one }) => ({
   quiz: one(quizzes, {
-    fields: [quizResponses.quizId],
+    fields: [quizAttempts.quizId],
     references: [quizzes.id],
   }),
 }));

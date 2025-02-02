@@ -1,5 +1,5 @@
 {
-  "id": "5fc46e0c-9ce5-4691-b709-185924623d04",
+  "id": "0a2c29cb-f3fb-4fba-837c-ad0c89ace5e7",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -26,8 +26,8 @@
           "primaryKey": false,
           "notNull": true
         },
-        "choices[]": {
-          "name": "choices[]",
+        "choices": {
+          "name": "choices",
           "type": "text[]",
           "primaryKey": false,
           "notNull": true
@@ -74,8 +74,8 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.quiz_responses": {
-      "name": "quiz_responses",
+    "public.quiz_attempts": {
+      "name": "quiz_attempts",
       "schema": "",
       "columns": {
         "id": {
@@ -96,8 +96,8 @@
           "primaryKey": false,
           "notNull": true
         },
-        "answers[]": {
-          "name": "answers[]",
+        "answers": {
+          "name": "answers",
           "type": "integer[]",
           "primaryKey": false,
           "notNull": true
@@ -105,6 +105,12 @@
         "score": {
           "name": "score",
           "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "is_completed": {
+          "name": "is_completed",
+          "type": "boolean",
           "primaryKey": false,
           "notNull": true
         },
@@ -125,14 +131,14 @@
           "name": "updated_at",
           "type": "timestamp (3)",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         }
       },
       "indexes": {},
       "foreignKeys": {
-        "quiz_responses_quiz_id_quizzes_id_fk": {
-          "name": "quiz_responses_quiz_id_quizzes_id_fk",
-          "tableFrom": "quiz_responses",
+        "quiz_attempts_quiz_id_quizzes_id_fk": {
+          "name": "quiz_attempts_quiz_id_quizzes_id_fk",
+          "tableFrom": "quiz_attempts",
           "tableTo": "quizzes",
           "columnsFrom": [
             "quiz_id"
@@ -207,7 +213,7 @@
           "name": "updated_at",
           "type": "timestamp (3)",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         }
       },
       "indexes": {},

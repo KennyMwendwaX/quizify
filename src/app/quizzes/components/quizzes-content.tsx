@@ -140,7 +140,7 @@ export default function QuizzesContentPage({ quizzes }: Props) {
                       {quiz.questions.length} questions
                     </Badge>
                   </div>
-                  <CardTitle className="text-2xl font-bold group-hover:text-primary hover:underline transition-colors">
+                  <CardTitle className="text-2xl font-bold group-hover:text-primary transition-colors">
                     {quiz.title}
                   </CardTitle>
                 </CardHeader>
