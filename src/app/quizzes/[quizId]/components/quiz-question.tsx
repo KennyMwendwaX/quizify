@@ -285,7 +285,7 @@ export default function QuizQuestion({ quiz }: QuizQuestionProps) {
     state.timeTaken !== undefined
   ) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background/95 to-background/90">
+      <div className="min-h-[calc(100vh-150px)] flex items-center justify-center bg-gradient-to-br from-background via-background/95 to-background/90">
         <div className="w-full max-w-3xl mx-auto p-4">
           <QuizResults
             score={state.score}

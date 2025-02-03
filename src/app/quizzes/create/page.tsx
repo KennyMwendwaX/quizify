@@ -417,6 +417,21 @@ export default function CreateQuizPage() {
                             <PlusCircle className="mr-2 h-4 w-4" />
                             Add Option
                           </Button>
+                          {form.formState.isSubmitted &&
+                            form.formState.errors.questions &&
+                            Array.isArray(form.formState.errors.questions) &&
+                            form.formState.errors.questions.map(
+                              (questionError, index) =>
+                                questionError?.correctAnswer &&
+                                fields[index].correctAnswer === -1 && (
+                                  <div
+                                    key={index}
+                                    className="text-sm font-medium text-destructive">
+                                    Please select a correct answer for Question{" "}
+                                    {index + 1}
+                                  </div>
+                                )
+                            )}
                         </div>
                       </div>
                     </AccordionContent>

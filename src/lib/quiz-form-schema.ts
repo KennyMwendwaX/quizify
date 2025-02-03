@@ -16,8 +16,14 @@ const questionSchema = z.object({
     ),
   correctAnswer: z
     .number()
-    .int("Correct answer must be an integer")
-    .min(0, "Correct answer index must be non-negative"),
+    .int()
+    .refine(
+      (val: number) => {
+        if (val === -1) return false;
+        return true;
+      },
+      { message: "Please select a correct answer for this question" }
+    ),
 });
 
 export const quizFormSchema = z.object({
