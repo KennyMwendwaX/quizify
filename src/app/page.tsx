@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { motion } from "motion/react";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -33,16 +33,13 @@ import { PersonIcon } from "@radix-ui/react-icons";
 import { MdLogout } from "react-icons/md";
 import { IoSettingsOutline } from "react-icons/io5";
 import { cn } from "@/lib/utils";
-import { usePathname } from "next/navigation";
-import { Sheet, SheetTrigger, SheetContent } from "@/components/ui/sheet";
-import { LuMenu } from "react-icons/lu";
 
 const features = [
   {
     icon: <BookOpen className="h-8 w-8 mb-3" />,
     title: "Take a Quiz",
     description: "Challenge yourself with our diverse range of quizzes.",
-    link: "/take-quiz",
+    link: "/quizzes",
     color: "from-blue-500 to-cyan-400",
   },
   {
@@ -56,7 +53,7 @@ const features = [
     icon: <Trophy className="h-8 w-8 mb-3" />,
     title: "Leaderboard",
     description: "See how you rank against other quiz takers.",
-    link: "/leaderboard",
+    link: "/Dahboard",
     color: "from-amber-500 to-orange-400",
   },
   {
@@ -83,29 +80,9 @@ const itemVariants = {
   visible: { opacity: 1, y: 0 },
 };
 
-const links = [
-  {
-    href: "/create-quiz",
-    title: "Create Quiz",
-  },
-  {
-    href: "/take-quiz",
-    title: "Take Quiz",
-  },
-  {
-    href: "/quizzes",
-    title: "Quizzes",
-  },
-  {
-    href: "/leaderboard",
-    title: "Leaderboard",
-  },
-];
-
 export default function Home() {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [top, setTop] = useState<boolean>(true);
-  const pathname = usePathname();
 
   // detect whether user has scrolled the page down by 10px
   const scrollHandler = () => {
@@ -125,28 +102,6 @@ export default function Home() {
           "sticky top-0 flex h-16 items-center gap-4 px-4 md:px-6 z-50 transition-all duration-200",
           !top && "border-b shadow-sm bg-white"
         )}>
-        <Sheet>
-          <SheetTrigger asChild>
-            <Button
-              variant="outline"
-              size="icon"
-              className="shrink-0 md:hidden">
-              <LuMenu className="h-5 w-5" />
-              <span className="sr-only">Toggle navigation menu</span>
-            </Button>
-          </SheetTrigger>
-          <SheetContent side="left">
-            <Link className="flex items-center gap-1" href="/">
-              <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-                <Image src="/logo.svg" width={20} height={20} alt="" />
-              </div>
-              <div className="flex-1 text-left text-base leading-tight">
-                <span className="truncate font-semibold">Quizify</span>
-              </div>
-            </Link>
-            <SmSidebar />
-          </SheetContent>
-        </Sheet>
         <Link className="flex items-center gap-1" href="/">
           <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
             <Image src="/logo.svg" width={20} height={20} alt="" />
@@ -155,22 +110,7 @@ export default function Home() {
             <span className="truncate font-semibold">Quizify</span>
           </div>
         </Link>
-        <nav className="hidden flex-1 justify-center flex-col gap-6 text-base font-medium lg:flex lg:flex-row lg:items-center lg:gap-6">
-          {links.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className={cn(
-                buttonVariants({ variant: "ghost" }),
-                pathname === link.href
-                  ? "text-foreground"
-                  : "text-muted-foreground",
-                "transition-colors hover:text-foreground"
-              )}>
-              {link.title}
-            </Link>
-          ))}
-        </nav>
+
         <div className="items-center ml-auto">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -289,7 +229,7 @@ export default function Home() {
               asChild
               size="lg"
               className="text-lg px-8 py-6 rounded-full bg-primary hover:bg-primary/90 transition-colors duration-300">
-              <Link href="/take-quiz" className="flex items-center">
+              <Link href="/quizzes" className="flex items-center">
                 <Brain className="mr-2 h-6 w-6" />
                 Start Quizzing Now
               </Link>
@@ -299,38 +239,4 @@ export default function Home() {
       </div>
     </>
   );
-}
-
-interface SidebarNavProps extends React.HTMLAttributes<HTMLElement> {
-  links: {
-    href: string;
-    title: string;
-  }[];
-}
-
-export function SideNav({ links, ...props }: SidebarNavProps) {
-  const pathname = usePathname();
-
-  return (
-    <nav className={cn("grid gap-2 text-xl font-medium mt-2")} {...props}>
-      {links.map((link) => (
-        <Link
-          key={link.href}
-          href={link.href}
-          className={cn(
-            buttonVariants({ variant: "ghost" }),
-            pathname === link.href
-              ? "bg-muted hover:bg-muted text-primary"
-              : "hover:bg-muted hover:text-primary text-muted-foreground",
-            "flex items-center justify-start gap-3 rounded-lg px-4 py-2.5 transition-all"
-          )}>
-          {link.title}
-        </Link>
-      ))}
-    </nav>
-  );
-}
-
-export function SmSidebar() {
-  return <SideNav links={links} />;
 }

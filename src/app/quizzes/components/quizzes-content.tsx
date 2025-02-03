@@ -67,51 +67,50 @@ export default function QuizzesContentPage({ quizzes }: Props) {
   console.log(quizzes);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-background/90 py-12">
-      <div className="container mx-auto px-4 py-16">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="text-center mb-16">
-          <h1 className="text-5xl font-bold mb-6 bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
-            Discover Quizzes
-          </h1>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Challenge yourself with our curated collection of engaging quizzes
-          </p>
-        </motion.div>
+    <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-background/90 py-6">
+      <div className="container mx-auto px-4 py-4">
+        <div className="max-w-4xl mx-auto mb-4 space-y-4">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="text-center">
+            <h1 className="text-3xl font-semibold text-foreground mb-2">
+              Explore Quizzes
+            </h1>
+            <p className="text-sm text-muted-foreground max-w-md mx-auto">
+              Find your next challenge from our curated quiz collection
+            </p>
+          </motion.div>
 
-        <div className="mb-12 space-y-8">
-          <div className="max-w-md mx-auto">
-            <div className="relative group">
-              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5 transition-colors group-focus-within:text-primary" />
-              <Input
-                type="text"
-                placeholder="Search quizzes..."
-                className="pl-12 pr-4 h-14 text-lg rounded-2xl border-primary/20 focus:border-primary/40 transition-all shadow-lg focus:shadow-xl"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground h-4 w-4" />
+            <Input
+              type="text"
+              placeholder="Search quizzes..."
+              className="pl-10 pr-4 h-10 text-sm rounded-xl border-border/50 focus:border-primary/40 transition-all"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
           </div>
 
-          <div className="flex flex-wrap justify-center gap-4">
+          <div className="flex items-center justify-center gap-2">
             {categories.map((category) => {
               const Icon = category.icon;
               return (
                 <Button
                   key={category.id}
-                  onClick={() => setActiveCategory(category.id)}
+                  size="sm"
                   variant={
-                    activeCategory === category.id ? "default" : "outline"
+                    activeCategory === category.id ? "secondary" : "ghost"
                   }
-                  className={`h-11 px-6 rounded-xl transition-all ${
-                    activeCategory === category.id
-                      ? "shadow-lg"
-                      : "hover:shadow-md"
-                  }`}>
-                  <Icon className="w-4 h-4 mr-2" />
+                  onClick={() =>
+                    setActiveCategory(
+                      activeCategory === category.id ? "all" : category.id
+                    )
+                  }
+                  className="h-8 px-3">
+                  <Icon className="w-3.5 h-3.5 mr-1.5" />
                   {category.name}
                 </Button>
               );
@@ -119,6 +118,7 @@ export default function QuizzesContentPage({ quizzes }: Props) {
           </div>
         </div>
 
+        {/* Quiz Grid */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -133,7 +133,7 @@ export default function QuizzesContentPage({ quizzes }: Props) {
               <Card className="group h-full flex flex-col bg-white/50 dark:bg-gray-800/50 shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl overflow-hidden">
                 <CardHeader className="relative pb-4">
                   <div className="flex justify-between items-start mb-2">
-                    <Badge className={`${getDifficultyColor(quiz.difficulty)}`}>
+                    <Badge className={getDifficultyColor(quiz.difficulty)}>
                       {quiz.difficulty}
                     </Badge>
                     <Badge variant="secondary" className="text-xs">
@@ -155,7 +155,7 @@ export default function QuizzesContentPage({ quizzes }: Props) {
                     </div>
                     <div className="flex items-center gap-2 bg-primary/5 px-3 py-1.5 rounded-lg">
                       <Users className="w-4 h-4" />
-                      {/* {quiz.participants.toLocaleString()} */} 150
+                      150
                     </div>
                   </div>
                 </CardContent>
@@ -176,6 +176,7 @@ export default function QuizzesContentPage({ quizzes }: Props) {
           ))}
         </motion.div>
 
+        {/* No Results State */}
         {filteredQuizzes.length === 0 && (
           <motion.div
             initial={{ opacity: 0 }}

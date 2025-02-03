@@ -120,18 +120,20 @@ export default function CreateQuizPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-background/95">
-      <div className="container mx-auto py-10 px-4 max-w-4xl">
-        <div className="text-center mb-12">
-          <div className="inline-flex items-center gap-3 mb-6">
-            <div className="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center">
-              <PencilLine className="w-7 h-7 text-primary" />
+      <div className="container mx-auto py-6 px-4 max-w-4xl">
+        <div className="text-center max-w-xl mx-auto py-4">
+          <div className="relative inline-flex items-center justify-center mb-5">
+            <div className="absolute -inset-1 bg-primary/10 rounded-2xl blur-sm"></div>
+            <div className="relative w-12 h-12 bg-white/80 rounded-xl flex items-center justify-center">
+              <PencilLine className="w-6 h-6 text-primary" />
             </div>
           </div>
-          <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/70 mb-3">
+          <h1 className="text-2xl font-semibold text-foreground mb-3">
             Create New Quiz
           </h1>
-          <p className="text-muted-foreground text-lg">
-            Design an engaging quiz experience for your audience
+          <p className="text-muted-foreground text-lg max-w-md mx-auto">
+            Design an engaging quiz experience that captivates and challenges
+            your audience
           </p>
         </div>
 

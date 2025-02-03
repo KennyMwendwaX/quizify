@@ -22,16 +22,16 @@ import { cn } from "@/lib/utils";
 
 const links = [
   {
-    href: "/create-quiz",
-    title: "Create Quiz",
+    href: "/dashboard",
+    title: "Dashboard",
   },
   {
-    href: "/take-quiz",
-    title: "Take Quiz",
+    href: "/my-quizzes",
+    title: "My Quizzes",
   },
   {
-    href: "/leaderboard",
-    title: "Leaderboard",
+    href: "/quizzes",
+    title: "Explore",
   },
 ];
 

@@ -302,7 +302,7 @@ export default function QuizQuestion({ quiz }: QuizQuestionProps) {
   const isTimeRunningLow = state.timeLeft <= 30;
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background/95 to-background/90">
+    <div className="min-h-[calc(100vh-150px)] flex items-center justify-center bg-gradient-to-br from-background via-background/95 to-background/90">
       <div className="w-full max-w-3xl mx-auto p-4">
         <Card className="shadow-lg">
           <CardHeader className="space-y-4">
