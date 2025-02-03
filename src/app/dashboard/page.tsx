@@ -13,7 +13,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 
 // Mock data - replace with actual data fetching
 const userStats = {
@@ -116,7 +116,7 @@ export default function DashboardPage() {
                   {userStats.topCategory}
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Your strongest quiz category
+                  Your most played category
                 </p>
               </CardContent>
             </Card>
