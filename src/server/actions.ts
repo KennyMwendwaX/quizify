@@ -271,7 +271,7 @@ export async function getPublicQuiz(
   }
 }
 
-export const validateQuizSubmission = async (
+export const submitQuizAttempt = async (
   quizId: number,
   answers: number[],
   timeLeft: number

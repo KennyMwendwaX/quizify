@@ -24,7 +24,7 @@ import {
   Target,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { validateQuizSubmission } from "@/server/actions";
+import { submitQuizAttempt } from "@/server/actions";
 import { toast } from "sonner";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
 
@@ -218,7 +218,7 @@ export default function QuizQuestion({ quiz }: QuizQuestionProps) {
     );
 
     startTransition(async () => {
-      const result = await validateQuizSubmission(
+      const result = await submitQuizAttempt(
         quiz.id,
         validAnswers,
         state.timeLeft
