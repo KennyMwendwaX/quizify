@@ -19,9 +19,9 @@ import {
   ChevronRight,
   Flag,
   Trophy,
-  CheckCircle2,
-  AlertCircle,
   Rocket,
+  TrendingUp,
+  Target,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { validateQuizSubmission } from "@/server/actions";
@@ -55,56 +55,60 @@ type QuizAction =
     }
   | { type: "SET_TIME_WARNING" };
 
-function quizReducer(state: QuizState, action: QuizAction): QuizState {
-  switch (action.type) {
-    case "SELECT_ANSWER":
-      const newAnswers = [...state.answers];
-      newAnswers[action.questionIndex] = action.answer;
-      return { ...state, answers: newAnswers };
-    case "NEXT_QUESTION":
-      return {
-        ...state,
-        currentQuestion: Math.min(
-          state.currentQuestion + 1,
-          state.answers.length - 1
-        ),
-      };
-    case "PREVIOUS_QUESTION":
-      return {
-        ...state,
-        currentQuestion: Math.max(state.currentQuestion - 1, 0),
-      };
-    case "TICK_TIMER":
-      return {
-        ...state,
-        timeLeft: Math.max(0, state.timeLeft - 1),
-      };
-    case "COMPLETE_QUIZ":
-      return {
-        ...state,
-        isCompleted: true,
-        score: action.payload.score,
-        totalQuestions: action.payload.totalQuestions,
-        questionsAnswered: action.payload.questionsAnswered,
-        timeTaken: state.timeLeft,
-      };
-    case "SET_TIME_WARNING":
-      return {
-        ...state,
-        showTimeWarning: true,
-      };
-    default:
-      return state;
-  }
-}
+const createQuizReducer =
+  (quiz: PublicQuiz) =>
+  (state: QuizState, action: QuizAction): QuizState => {
+    switch (action.type) {
+      case "SELECT_ANSWER":
+        const newAnswers = [...state.answers];
+        newAnswers[action.questionIndex] = action.answer;
+        return { ...state, answers: newAnswers };
+      case "NEXT_QUESTION":
+        return {
+          ...state,
+          currentQuestion: Math.min(
+            state.currentQuestion + 1,
+            state.answers.length - 1
+          ),
+        };
+      case "PREVIOUS_QUESTION":
+        return {
+          ...state,
+          currentQuestion: Math.max(state.currentQuestion - 1, 0),
+        };
+      case "TICK_TIMER":
+        return {
+          ...state,
+          timeLeft: Math.max(0, state.timeLeft - 1),
+        };
+      case "COMPLETE_QUIZ":
+        return {
+          ...state,
+          isCompleted: true,
+          score: action.payload.score,
+          totalQuestions: action.payload.totalQuestions,
+          questionsAnswered: action.payload.questionsAnswered,
+          timeTaken: (quiz.timeLimit ?? 0) * 60 - state.timeLeft,
+        };
+      case "SET_TIME_WARNING":
+        return {
+          ...state,
+          showTimeWarning: true,
+        };
+      default:
+        return state;
+    }
+  };
 
-interface QuizResultsProps {
+function QuizResults({
+  score,
+  totalQuestions,
+  timeTaken,
+}: {
   score: number;
   totalQuestions: number;
   timeTaken: number;
-}
-
-function QuizResults({ score, totalQuestions, timeTaken }: QuizResultsProps) {
+}) {
   const percentage = Math.round((score / totalQuestions) * 100);
 
   const formatTime = (seconds: number) => {
@@ -113,52 +117,78 @@ function QuizResults({ score, totalQuestions, timeTaken }: QuizResultsProps) {
     return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
   };
 
+  const getPerformanceMessage = () => {
+    if (percentage >= 90) return "Excellent Performance!";
+    if (percentage >= 75) return "Great Job!";
+    if (percentage >= 60) return "Good Effort!";
+    return "Keep Practicing!";
+  };
+
   return (
-    <Card className="text-card-foreground">
-      <CardHeader className="text-center space-y-4">
-        <div className="flex justify-center">
-          <div className="relative p-6 bg-primary/10 rounded-full">
-            <Trophy className="w-16 h-16 text-primary" />
+    <Card className="max-w-xl mx-auto bg-gradient-to-br from-background via-background to-primary/5">
+      <CardHeader className="relative overflow-hidden">
+        <div className="absolute inset-0 bg-primary/5 -z-10 transform rotate-6 scale-150 origin-top-right"></div>
+        <div className="flex flex-col items-center text-center space-y-4">
+          <div className="relative">
+            <div className="absolute -inset-2 bg-primary/10 rounded-full animate-pulse"></div>
+            <div className="relative p-5 bg-primary/10 rounded-full">
+              <Trophy className="w-16 h-16 text-primary" />
+            </div>
           </div>
-        </div>
-        <div>
-          <CardTitle className="text-3xl font-bold">Quiz Completed!</CardTitle>
-          <p className="text-muted-foreground mt-2">
-            Here&apos;s how you performed
-          </p>
+
+          <div>
+            <CardTitle className="text-3xl font-bold text-primary">
+              {getPerformanceMessage()}
+            </CardTitle>
+            <p className="text-muted-foreground mt-2">
+              Quiz Completed Successfully
+            </p>
+          </div>
         </div>
       </CardHeader>
+
       <CardContent className="space-y-6">
-        <div className="grid grid-cols-2 gap-4">
-          <div className="p-4 bg-muted rounded-lg text-center">
-            <div className="text-3xl font-bold text-primary">{percentage}%</div>
-            <div className="text-sm text-muted-foreground mt-1">Score</div>
-          </div>
-          <div className="p-4 bg-muted rounded-lg text-center">
-            <div className="text-3xl font-bold text-primary">
-              {formatTime(timeTaken)}
+        <div className="grid grid-cols-3 gap-4">
+          <div className="bg-primary/5 rounded-lg p-4 text-center">
+            <div className="flex items-center justify-center mb-2">
+              <Target className="w-6 h-6 text-primary mr-2" />
+              <span className="text-2xl font-bold text-primary">
+                {percentage}%
+              </span>
             </div>
-            <div className="text-sm text-muted-foreground mt-1">Time</div>
+            <div className="text-sm text-muted-foreground">Accuracy</div>
           </div>
-        </div>
-        <div className="space-y-3">
-          <div className="flex items-center gap-2 p-3 rounded-lg bg-green-500/10">
-            <CheckCircle2 className="w-5 h-5 text-green-500" />
-            <span>Correct Answers: {score}</span>
+
+          <div className="bg-primary/5 rounded-lg p-4 text-center">
+            <div className="flex items-center justify-center mb-2">
+              <Clock className="w-6 h-6 text-emerald-500 mr-2" />
+              <span className="text-2xl font-bold text-emerald-600">
+                {formatTime(timeTaken)}
+              </span>
+            </div>
+            <div className="text-sm text-muted-foreground">Time Taken</div>
           </div>
-          <div className="flex items-center gap-2 p-3 rounded-lg bg-red-500/10">
-            <AlertCircle className="w-5 h-5 text-red-500" />
-            <span>Incorrect Answers: {totalQuestions - score}</span>
+
+          <div className="bg-primary/5 rounded-lg p-4 text-center">
+            <div className="flex items-center justify-center mb-2">
+              <TrendingUp className="w-6 h-6 text-indigo-500 mr-2" />
+              <span className="text-2xl font-bold text-indigo-600">
+                {score}/{totalQuestions}
+              </span>
+            </div>
+            <div className="text-sm text-muted-foreground">Score</div>
           </div>
         </div>
       </CardContent>
+
       <CardFooter>
         <Button
           onClick={() => window.location.reload()}
           className="w-full"
-          size="lg">
+          size="lg"
+          variant="outline">
           <Rocket className="mr-2 h-5 w-5" />
-          Try Again
+          Retry Quiz
         </Button>
       </CardFooter>
     </Card>
@@ -180,7 +210,7 @@ export default function QuizQuestion({ quiz }: QuizQuestionProps) {
     showTimeWarning: false,
   };
 
-  const [state, dispatch] = useReducer(quizReducer, initialState);
+  const [state, dispatch] = useReducer(createQuizReducer(quiz), initialState);
 
   const handleFinish = () => {
     const validAnswers = state.answers.filter(
