@@ -113,7 +113,7 @@ export default function CreateQuizPage() {
       if (result.quizId) {
         form.reset();
         toast.success("Quiz created successfully!");
-        router.push(`/quizzes/${result.quizId}`);
+        router.replace(`/quizzes/${result.quizId}`);
       }
     });
   }

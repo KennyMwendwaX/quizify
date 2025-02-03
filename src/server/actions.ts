@@ -2,7 +2,13 @@
 
 import { revalidatePath } from "next/cache";
 import db from "@/database/db";
-import { AdminQuiz, PublicQuiz, questions, quizzes } from "@/database/schema";
+import {
+  AdminQuiz,
+  PublicQuiz,
+  questions,
+  quizAttempts,
+  quizzes,
+} from "@/database/schema";
 import { quizFormSchema, QuizFormValues } from "@/lib/quiz-form-schema";
 import { desc, eq } from "drizzle-orm";
 
@@ -267,7 +273,8 @@ export async function getPublicQuiz(
 
 export const validateQuizSubmission = async (
   quizId: number,
-  answers: number[]
+  answers: number[],
+  timeLeft: number
 ): Promise<QuizSubmissionResponse> => {
   try {
     const { quiz } = await getAdminQuiz(quizId);
@@ -280,18 +287,25 @@ export const validateQuizSubmission = async (
       );
     }
 
-    // For time-limited quizzes, partial submissions are allowed
     const score = quiz.questions.reduce((total, question, index) => {
-      // If answer exists and is correct, add point
       if (
         answers[index] !== undefined &&
         answers[index] === question.correctAnswer
       ) {
         return total + 1;
       }
-      // Otherwise (no answer or incorrect), add 0
       return total;
     }, 0);
+
+    // Create quiz attempt record
+    await db.insert(quizAttempts).values({
+      quizId,
+      userId: 1, // Replace with actual user ID when auth is implemented
+      answers,
+      score,
+      isCompleted: answers.length === quiz.questions.length,
+      timeTaken: quiz.timeLimit ? quiz.timeLimit * 60 - timeLeft : 0,
+    });
 
     return {
       score,

@@ -32,7 +32,6 @@ export const quizFormSchema = z.object({
   timeLimit: z
     .number()
     .nullable()
-    .optional()
     .refine(
       (val) => !val || (val >= 1 && val <= 180),
       "Time limit must be between 1 and 180 minutes"
@@ -44,4 +43,3 @@ export const quizFormSchema = z.object({
 });
 
 export type QuizFormValues = z.infer<typeof quizFormSchema>;
-export type Difficulty = z.infer<typeof quizFormSchema>["difficulty"];

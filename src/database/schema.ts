@@ -7,14 +7,15 @@ import {
   text,
   timestamp,
 } from "drizzle-orm/pg-core";
-import { Difficulty } from "@/lib/quiz-form-schema";
 
 export const quizzes = pgTable("quizzes", {
   id: serial("id").primaryKey(),
   title: text("title").notNull(),
   description: text("description").notNull(),
   category: text("category").notNull(),
-  difficulty: text("difficulty").$type<Difficulty>().notNull(),
+  difficulty: text("difficulty", {
+    enum: ["EASY", "MEDIUM", "HARD"],
+  }).notNull(),
   isTimeLimited: boolean("is_time_limited").notNull(),
   timeLimit: integer("time_limit"),
   createdAt: timestamp("created_at", { mode: "date", precision: 3 })
