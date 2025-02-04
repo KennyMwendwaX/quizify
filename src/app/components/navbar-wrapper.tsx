@@ -12,7 +12,7 @@ export default function NavbarWrapper({
 
   return (
     <>
-      {pathname !== "/" && <Navbar />}
+      {pathname !== "/" && pathname !== "/sign-in" && <Navbar />}
       {children}
     </>
   );
