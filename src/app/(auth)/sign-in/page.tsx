@@ -1,6 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Card,
@@ -10,22 +13,100 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { FcGoogle } from "react-icons/fc";
 import { FaGithub } from "react-icons/fa";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
+import { signIn, signUp } from "@/lib/auth-client";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
+
+const signInSchema = z.object({
+  email: z.string().email({ message: "Invalid email address" }),
+  password: z
+    .string()
+    .min(8, { message: "Password must be at least 8 characters" }),
+});
+
+const signUpSchema = z
+  .object({
+    name: z.string().min(2, { message: "Name must be at least 3 characters" }),
+    email: z.string().email({ message: "Invalid email address" }),
+    password: z
+      .string()
+      .min(8, { message: "Password must be at least 8 characters" }),
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ["confirmPassword"],
+  });
+
+type SignInFormValues = z.infer<typeof signInSchema>;
+type SignUpFormValues = z.infer<typeof signUpSchema>;
 
 export default function SignInPage() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const router = useRouter();
 
-  async function onSubmit(event: React.SyntheticEvent) {
-    event.preventDefault();
-    setIsLoading(true);
+  const signInForm = useForm<SignInFormValues>({
+    resolver: zodResolver(signInSchema),
+  });
 
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 3000);
+  const signUpForm = useForm<SignUpFormValues>({
+    resolver: zodResolver(signUpSchema),
+  });
+
+  async function onSignInSubmit(data: SignInFormValues) {
+    await signIn.email(
+      {
+        email: data.email,
+        password: data.password,
+        callbackURL: "/dashboard",
+      },
+      {
+        onRequest: () => {
+          setIsLoading(true);
+        },
+        onResponse: () => {
+          setIsLoading(false);
+        },
+        onError: (ctx) => {
+          toast.error(ctx.error.message);
+        },
+      }
+    );
+  }
+
+  async function onSignUpSubmit(data: SignUpFormValues) {
+    await signUp.email({
+      name: data.name,
+      email: data.email,
+      password: data.password,
+      callbackURL: "/dashboard",
+      fetchOptions: {
+        onResponse: () => {
+          setIsLoading(false);
+        },
+        onRequest: () => {
+          setIsLoading(true);
+        },
+        onError: (ctx) => {
+          toast.error(ctx.error.message);
+        },
+        onSuccess: async () => {
+          router.push("/dashboard");
+        },
+      },
+    });
   }
 
   return (
@@ -46,29 +127,46 @@ export default function SignInPage() {
               <TabsTrigger value="signup">Sign Up</TabsTrigger>
             </TabsList>
             <TabsContent value="signin" className="space-y-4">
-              <form onSubmit={onSubmit}>
-                <div className="grid gap-4">
-                  <div className="grid gap-2">
-                    <Label htmlFor="email">Email</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      placeholder="m@example.com"
-                      required
-                    />
-                  </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor="password">Password</Label>
-                    <Input id="password" type="password" required />
-                  </div>
-                  <Button disabled={isLoading}>
+              <Form {...signInForm}>
+                <form
+                  onSubmit={signInForm.handleSubmit(onSignInSubmit)}
+                  className="space-y-4">
+                  <FormField
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Email</FormLabel>
+                        <FormControl>
+                          <Input placeholder="m@example.com" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    name="password"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Password</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="password"
+                            placeholder="••••••••"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <Button type="submit" className="w-full" disabled={isLoading}>
                     {isLoading && (
                       <AiOutlineLoading3Quarters className="mr-2 h-4 w-4 animate-spin" />
                     )}
                     Sign In
                   </Button>
-                </div>
-              </form>
+                </form>
+              </Form>
               <div className="flex flex-col space-y-4">
                 <div className="relative">
                   <div className="absolute inset-0 flex items-center">
@@ -107,42 +205,74 @@ export default function SignInPage() {
               </div>
             </TabsContent>
             <TabsContent value="signup">
-              <form onSubmit={onSubmit}>
-                <div className="grid gap-4">
-                  <div className="grid gap-2">
-                    <Label htmlFor="name">Name</Label>
-                    <Input
-                      id="name"
-                      type="text"
-                      placeholder="John Doe"
-                      required
-                    />
-                  </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor="email">Email</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      placeholder="m@example.com"
-                      required
-                    />
-                  </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor="password">Password</Label>
-                    <Input id="password" type="password" required />
-                  </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor="confirm-password">Confirm Password</Label>
-                    <Input id="confirm-password" type="password" required />
-                  </div>
-                  <Button disabled={isLoading}>
+              <Form {...signUpForm}>
+                <form
+                  onSubmit={signUpForm.handleSubmit(onSignUpSubmit)}
+                  className="space-y-4">
+                  <FormField
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Name</FormLabel>
+                        <FormControl>
+                          <Input placeholder="John Doe" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Email</FormLabel>
+                        <FormControl>
+                          <Input placeholder="m@example.com" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    name="password"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Password</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="password"
+                            placeholder="••••••••"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    name="confirmPassword"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Confirm Password</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="password"
+                            placeholder="••••••••"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <Button type="submit" className="w-full" disabled={isLoading}>
                     {isLoading && (
                       <AiOutlineLoading3Quarters className="mr-2 h-4 w-4 animate-spin" />
                     )}
                     Sign Up
                   </Button>
-                </div>
-              </form>
+                </form>
+              </Form>
             </TabsContent>
           </Tabs>
         </CardContent>
