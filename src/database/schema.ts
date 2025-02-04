@@ -8,7 +8,7 @@ import {
   timestamp,
 } from "drizzle-orm/pg-core";
 
-export const user = pgTable("user", {
+export const users = pgTable("user", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
   email: text("email").notNull().unique(),
@@ -26,18 +26,18 @@ export const session = pgTable("session", {
   updatedAt: timestamp("updated_at").notNull(),
   ipAddress: text("ip_address"),
   userAgent: text("user_agent"),
-  userId: text("user_id")
+  userId: integer("user_id")
     .notNull()
-    .references(() => user.id),
+    .references(() => users.id),
 });
 
 export const account = pgTable("account", {
   id: serial("id").primaryKey(),
   accountId: text("account_id").notNull(),
   providerId: text("provider_id").notNull(),
-  userId: text("user_id")
+  userId: integer("user_id")
     .notNull()
-    .references(() => user.id),
+    .references(() => users.id),
   accessToken: text("access_token"),
   refreshToken: text("refresh_token"),
   idToken: text("id_token"),
@@ -58,7 +58,7 @@ export const verification = pgTable("verification", {
   updatedAt: timestamp("updated_at"),
 });
 
-export const quizzes = pgTable("quizzes", {
+export const quizzes = pgTable("quiz", {
   id: serial("id").primaryKey(),
   title: text("title").notNull(),
   description: text("description").notNull(),
@@ -76,7 +76,7 @@ export const quizzes = pgTable("quizzes", {
     .notNull(),
 });
 
-export const questions = pgTable("questions", {
+export const questions = pgTable("question", {
   id: serial("id").primaryKey(),
   quizId: integer("quiz_id")
     .notNull()
@@ -92,7 +92,7 @@ export const questions = pgTable("questions", {
   ),
 });
 
-export const quizAttempts = pgTable("quiz_attempts", {
+export const quizAttempts = pgTable("quiz_attempt", {
   id: serial("id").primaryKey(),
   quizId: integer("quiz_id")
     .notNull()
@@ -110,20 +110,33 @@ export const quizAttempts = pgTable("quiz_attempts", {
     .notNull(),
 });
 
-export const quizzesRelations = relations(quizzes, ({ many }) => ({
+export const usersRelations = relations(users, ({ many }) => ({
+  quizzes: many(quizzes),
+  quizAttempts: many(quizAttempts),
+}));
+
+export const quizzesRelations = relations(quizzes, ({ one, many }) => ({
+  users: one(users, {
+    fields: [quizzes.id],
+    references: [users.id],
+  }),
   questions: many(questions),
   quizAttempts: many(quizAttempts),
 }));
 
 export const questionsRelations = relations(questions, ({ one }) => ({
-  quiz: one(quizzes, {
+  quizzes: one(quizzes, {
     fields: [questions.quizId],
     references: [quizzes.id],
   }),
 }));
 
-export const quizResponsesRelations = relations(quizAttempts, ({ one }) => ({
-  quiz: one(quizzes, {
+export const quizAttemptsRelations = relations(quizAttempts, ({ one }) => ({
+  users: one(users, {
+    fields: [quizAttempts.userId],
+    references: [users.id],
+  }),
+  quizzes: one(quizzes, {
     fields: [quizAttempts.quizId],
     references: [quizzes.id],
   }),
