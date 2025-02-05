@@ -33,6 +33,8 @@ import { PersonIcon } from "@radix-ui/react-icons";
 import { MdLogout } from "react-icons/md";
 import { IoSettingsOutline } from "react-icons/io5";
 import { cn } from "@/lib/utils";
+import { signOut, useSession } from "@/lib/auth-client";
+import { useRouter } from "next/navigation";
 
 const features = [
   {
@@ -81,6 +83,8 @@ const itemVariants = {
 };
 
 export default function Home() {
+  const session = useSession();
+  const router = useRouter();
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [top, setTop] = useState<boolean>(true);
 
@@ -112,38 +116,55 @@ export default function Home() {
         </Link>
 
         <div className="items-center ml-auto">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Avatar className="h-8 w-8 border border-gray-600 cursor-pointer">
-                <AvatarImage src={""} alt="profile-image" />
-                <AvatarFallback className="bg-white">
-                  <PersonIcon className="h-5 w-5 text-gray-600" />
-                </AvatarFallback>
-              </Avatar>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-56" align="end">
-              <DropdownMenuLabel>
-                <div className="flex flex-col space-y-1">
-                  <p className="text-base font-medium leading-none">
-                    Helmeted Chief
-                  </p>
-                  <p className="text-xs leading-none text-gray-500">
-                    helmet3d@gmail.com
-                  </p>
-                </div>
-              </DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem className="flex items-center">
-                <IoSettingsOutline className="mr-2 w-5 h-5" /> Settings
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => {}}
-                className="flex items-center hover:bg-red-100">
-                <MdLogout className="mr-2 w-5 h-5" />
-                Logout
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          {session.data ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Avatar className="h-8 w-8 border border-gray-600 cursor-pointer">
+                  <AvatarImage src={""} alt="profile-image" />
+                  <AvatarFallback className="bg-white">
+                    <PersonIcon className="h-5 w-5 text-gray-600" />
+                  </AvatarFallback>
+                </Avatar>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56" align="end">
+                <DropdownMenuLabel>
+                  <div className="flex flex-col space-y-1">
+                    <p className="text-base font-medium leading-none">
+                      {session.data.user.name}{" "}
+                    </p>
+                    <p className="text-xs leading-none text-gray-500">
+                      {session.data.user.email}
+                    </p>
+                  </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem className="flex items-center">
+                  <IoSettingsOutline className="mr-2 w-5 h-5" /> Settings
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => {
+                    signOut({
+                      fetchOptions: {
+                        onSuccess: () => {
+                          router.push("/sign-in");
+                        },
+                      },
+                    });
+                  }}
+                  className="flex items-center hover:bg-red-100">
+                  <MdLogout className="mr-2 w-5 h-5" />
+                  Logout
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <Button
+              onClick={() => router.push("/sign-in")}
+              className="flex items-center gap-2">
+              <PersonIcon className="h-4 w-4" />
+              Sign In
+            </Button>
+          )}
         </div>
       </header>
       <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-background/90">
