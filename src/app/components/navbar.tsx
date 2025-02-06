@@ -116,7 +116,7 @@ export default function Navbar() {
                 signOut({
                   fetchOptions: {
                     onSuccess: () => {
-                      router.push("/sign-in");
+                      router.replace("/sign-in");
                     },
                   },
                 });
