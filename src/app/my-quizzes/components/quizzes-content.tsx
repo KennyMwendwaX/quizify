@@ -54,7 +54,7 @@ type Props = {
   quizzes: PublicQuiz[];
 };
 
-export default function QuizzesContentPage({ quizzes }: Props) {
+export default function MyQuizzesContent({ quizzes }: Props) {
   const [searchTerm, setSearchTerm] = useState("");
   const [activeCategory, setActiveCategory] = useState("all");
 

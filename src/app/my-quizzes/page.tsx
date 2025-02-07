@@ -1,5 +1,5 @@
 import { auth } from "@/lib/auth";
-import QuizzesContentPage from "./components/quizzes-content";
+import MyQuizzesContent from "./components/quizzes-content";
 import { getAdminQuizzes } from "@/server/actions";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
@@ -20,5 +20,5 @@ export default async function QuizzesPage() {
 
   const quizzes = result.quizzes ?? [];
 
-  return <QuizzesContentPage quizzes={quizzes} />;
+  return <MyQuizzesContent quizzes={quizzes} />;
 }
