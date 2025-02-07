@@ -11,6 +11,8 @@ import {
 } from "@/database/schema";
 import { quizFormSchema, QuizFormValues } from "@/lib/quiz-form-schema";
 import { desc, eq } from "drizzle-orm";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
 
 class QuizActionError extends Error {
   constructor(
@@ -62,9 +64,26 @@ type QuizSubmissionResponse = {
 };
 
 export const createQuiz = async (
-  quiz: QuizFormValues
+  quiz: QuizFormValues,
+  userId?: string
 ): Promise<CreateQuizResponse> => {
   try {
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    if (!session?.user) {
+      throw new QuizActionError("No active session found", 401, "createQuiz");
+    }
+
+    if (!userId || userId !== session.user.id) {
+      throw new QuizActionError(
+        "User ID mismatch or missing",
+        401,
+        "createQuiz"
+      );
+    }
+
     const validatedData = quizFormSchema.parse(quiz);
 
     const { questions: quizQuestions, ...quizData } = validatedData;
@@ -125,8 +144,30 @@ export const createQuiz = async (
   }
 };
 
-export const getAdminQuizzes = async (): Promise<GetAdminQuizzesResponse> => {
+export const getAdminQuizzes = async (
+  userId?: string
+): Promise<GetAdminQuizzesResponse> => {
   try {
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    if (!session?.user) {
+      throw new QuizActionError(
+        "No active session found",
+        401,
+        "getAdminQuizzes"
+      );
+    }
+
+    if (!userId || userId !== session.user.id) {
+      throw new QuizActionError(
+        "User ID mismatch or missing",
+        401,
+        "getAdminQuizzes"
+      );
+    }
+
     const quizResults = await db.query.quizzes.findMany({
       with: {
         questions: {
@@ -153,8 +194,30 @@ export const getAdminQuizzes = async (): Promise<GetAdminQuizzesResponse> => {
   }
 };
 
-export const getPublicQuizzes = async (): Promise<GetPublicQuizzesResponse> => {
+export const getPublicQuizzes = async (
+  userId?: string
+): Promise<GetPublicQuizzesResponse> => {
   try {
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    if (!session?.user) {
+      throw new QuizActionError(
+        "No active session found",
+        401,
+        "getPublicQuizzes"
+      );
+    }
+
+    if (!userId || userId !== session.user.id) {
+      throw new QuizActionError(
+        "User ID mismatch or missing",
+        401,
+        "getPublicQuizzes"
+      );
+    }
+
     const quizResults = await db.query.quizzes.findMany({
       with: {
         questions: {
@@ -181,9 +244,26 @@ export const getPublicQuizzes = async (): Promise<GetPublicQuizzesResponse> => {
 };
 
 export const getAdminQuiz = async (
-  quizId: number
+  quizId: number,
+  userId?: string
 ): Promise<GetAdminQuizResponse> => {
   try {
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    if (!session?.user) {
+      throw new QuizActionError("No active session found", 401, "getAdminQuiz");
+    }
+
+    if (!userId || userId !== session.user.id) {
+      throw new QuizActionError(
+        "User ID mismatch or missing",
+        401,
+        "getAdminQuiz"
+      );
+    }
+
     if (!quizId || isNaN(quizId)) {
       throw new QuizActionError("Invalid quiz ID", 400, "getAdminQuiz");
     }
@@ -227,9 +307,30 @@ export const getAdminQuiz = async (
 };
 
 export async function getPublicQuiz(
-  quizId: number
+  quizId: number,
+  userId?: string
 ): Promise<GetPublicQuizResponse> {
   try {
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    if (!session?.user) {
+      throw new QuizActionError(
+        "No active session found",
+        401,
+        "getPublicQuiz"
+      );
+    }
+
+    if (!userId || userId !== session.user.id) {
+      throw new QuizActionError(
+        "User ID mismatch or missing",
+        401,
+        "getPublicQuiz"
+      );
+    }
+
     if (!quizId || isNaN(quizId)) {
       throw new QuizActionError("Invalid quiz ID", 400, "getPublicQuiz");
     }
@@ -274,17 +375,34 @@ export async function getPublicQuiz(
 export const submitQuizAttempt = async (
   quizId: number,
   answers: number[],
-  timeLeft: number
+  timeLeft: number,
+  userId?: string
 ): Promise<QuizSubmissionResponse> => {
   try {
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    if (!session?.user) {
+      throw new QuizActionError(
+        "No active session found",
+        401,
+        "submitQuizAttempt"
+      );
+    }
+
+    if (!userId || userId !== session.user.id) {
+      throw new QuizActionError(
+        "User ID mismatch or missing",
+        401,
+        "submitQuizAttempt"
+      );
+    }
+
     const { quiz } = await getAdminQuiz(quizId);
 
     if (!quiz) {
-      throw new QuizActionError(
-        "Quiz not found",
-        404,
-        "validateQuizSubmission"
-      );
+      throw new QuizActionError("Quiz not found", 404, "submitQuizAttempt");
     }
 
     const score = quiz.questions.reduce((total, question, index) => {
@@ -314,7 +432,7 @@ export const submitQuizAttempt = async (
       isComplete: answers.length === quiz.questions.length,
     };
   } catch (error) {
-    console.error("Error in validateQuizSubmission:", error);
+    console.error("Error in submitQuizAttempt:", error);
 
     if (error instanceof QuizActionError) {
       return {
@@ -324,7 +442,8 @@ export const submitQuizAttempt = async (
     }
 
     return {
-      error: "Failed to validate quiz submission. Please try again later.",
+      error:
+        "Failed to validate quiz submission attempt. Please try again later.",
       statusCode: 500,
     };
   }
