@@ -118,7 +118,7 @@ export default function QuizForm({ session }: Props) {
       if (result.quizId) {
         form.reset();
         toast.success("Quiz created successfully!");
-        router.replace(`/quizzes/${result.quizId}`);
+        router.replace("/my-quizzes");
       }
     });
   }
