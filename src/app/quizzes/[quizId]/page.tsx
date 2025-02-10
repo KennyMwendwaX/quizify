@@ -26,5 +26,5 @@ export default async function QuizQuestionPage({ params }: Props) {
     throw new Error(result.error || "Quiz not found");
   }
 
-  return <QuizQuestion quiz={result.quiz} />;
+  return <QuizQuestion quiz={result.quiz} session={session} />;
 }

@@ -400,7 +400,19 @@ export const submitQuizAttempt = async (
       );
     }
 
-    const { quiz } = await getAdminQuiz(quizId);
+    const quiz = await db.query.quizzes.findFirst({
+      where: eq(quizzes.id, quizId),
+      with: {
+        questions: {
+          columns: {
+            id: true,
+            title: true,
+            choices: true,
+            correctAnswer: true,
+          },
+        },
+      },
+    });
 
     if (!quiz) {
       throw new QuizActionError("Quiz not found", 404, "submitQuizAttempt");

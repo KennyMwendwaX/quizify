@@ -27,6 +27,7 @@ import { cn } from "@/lib/utils";
 import { submitQuizAttempt } from "@/server/actions";
 import { toast } from "sonner";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
+import { Session } from "@/lib/auth";
 
 interface QuizState {
   currentQuestion: number;
@@ -197,9 +198,10 @@ function QuizResults({
 
 interface QuizQuestionProps {
   quiz: PublicQuiz;
+  session: Session;
 }
 
-export default function QuizQuestion({ quiz }: QuizQuestionProps) {
+export default function QuizQuestion({ quiz, session }: QuizQuestionProps) {
   const [isPending, startTransition] = useTransition();
 
   const initialState: QuizState = {
@@ -221,7 +223,8 @@ export default function QuizQuestion({ quiz }: QuizQuestionProps) {
       const result = await submitQuizAttempt(
         quiz.id,
         validAnswers,
-        state.timeLeft
+        state.timeLeft,
+        session.user.id
       );
 
       if (result.error) {
