@@ -60,6 +60,9 @@ export const verification = pgTable("verification", {
 
 export const quizzes = pgTable("quiz", {
   id: serial("id").primaryKey(),
+  userId: integer("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "restrict", onUpdate: "cascade" }),
   title: text("title").notNull(),
   description: text("description").notNull(),
   category: text("category").notNull(),
@@ -97,7 +100,9 @@ export const quizAttempts = pgTable("quiz_attempt", {
   quizId: integer("quiz_id")
     .notNull()
     .references(() => quizzes.id, { onDelete: "cascade", onUpdate: "cascade" }),
-  userId: integer("user_id").notNull(),
+  userId: integer("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade", onUpdate: "cascade" }),
   answers: integer("answers").array().notNull(),
   score: integer("score").notNull(),
   isCompleted: boolean("is_completed").notNull(),

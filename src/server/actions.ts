@@ -92,6 +92,7 @@ export const createQuiz = async (
       const [createdQuiz] = await tx
         .insert(quizzes)
         .values({
+          userId: parseInt(userId),
           title: quizData.title,
           description: quizData.description,
           category: quizData.category,
@@ -418,7 +419,7 @@ export const submitQuizAttempt = async (
     // Create quiz attempt record
     await db.insert(quizAttempts).values({
       quizId,
-      userId: 1, // Replace with actual user ID when auth is implemented
+      userId: parseInt(userId),
       answers,
       score,
       isCompleted: answers.length === quiz.questions.length,
