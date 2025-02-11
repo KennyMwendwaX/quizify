@@ -24,10 +24,19 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { PublicQuiz } from "@/database/schema";
+import { useRouter } from "next/navigation";
 
 const categories = [
   { id: "all", name: "All Quizzes", icon: Hash },
@@ -55,6 +64,7 @@ type Props = {
 };
 
 export default function MyQuizzesContent({ quizzes }: Props) {
+  const router = useRouter();
   const [searchTerm, setSearchTerm] = useState("");
   const [activeCategory, setActiveCategory] = useState("all");
 
@@ -160,9 +170,24 @@ export default function MyQuizzesContent({ quizzes }: Props) {
                         {quiz.questions.length} questions
                       </Badge>
                     </div>
-                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                      <MoreVertical className="h-4 w-4" />
-                    </Button>
+
+                    <DropdownMenu>
+                      <DropdownMenuTrigger>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 w-8 p-0">
+                          <MoreVertical className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent>
+                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem>Preview</DropdownMenuItem>
+                        <DropdownMenuItem>Edit</DropdownMenuItem>
+                        <DropdownMenuItem>Delete</DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </div>
                   <CardTitle className="text-2xl font-bold group-hover:text-primary transition-colors">
                     {quiz.title}
@@ -189,7 +214,7 @@ export default function MyQuizzesContent({ quizzes }: Props) {
                       variant="outline"
                       className="flex-1 h-12 rounded-xl"
                       onClick={() =>
-                        (window.location.href = `/quizzes/${quiz.id}/edit`)
+                        router.push(`/my-quizzes/${quiz.id}/edit`)
                       }>
                       <Settings className="w-4 h-4 mr-2" />
                       Edit
