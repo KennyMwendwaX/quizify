@@ -26,5 +26,5 @@ export default async function EditQuizPage({ params }: Props) {
     throw new Error(result.error || "Quiz not found");
   }
 
-  return <EditQuizForm quiz={result.quiz} session={session} />;
+  return <EditQuizForm quizId={quizId} quiz={result.quiz} session={session} />;
 }

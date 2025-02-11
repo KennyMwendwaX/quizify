@@ -34,7 +34,7 @@ import {
 import { quizFormSchema, QuizFormValues } from "@/lib/quiz-form-schema";
 import { useTransition } from "react";
 import { toast } from "sonner";
-import { createQuiz } from "@/server/actions";
+import { updateQuiz } from "@/server/actions";
 import { useRouter } from "next/navigation";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
 import {
@@ -48,11 +48,12 @@ import { Session } from "@/lib/auth";
 import { AdminQuiz } from "@/database/schema";
 
 type Props = {
+  quizId: string;
   quiz: AdminQuiz;
   session: Session;
 };
 
-export default function EditQuizForm({ quiz, session }: Props) {
+export default function EditQuizForm({ quizId, quiz, session }: Props) {
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
   const form = useForm<QuizFormValues>({
@@ -114,7 +115,7 @@ export default function EditQuizForm({ quiz, session }: Props) {
 
   function onSubmit(data: QuizFormValues) {
     startTransition(async () => {
-      const result = await createQuiz(data, session.user.id);
+      const result = await updateQuiz(data, parseInt(quizId), session.user.id);
 
       if (result.error) {
         toast.error(result.error);
@@ -123,7 +124,7 @@ export default function EditQuizForm({ quiz, session }: Props) {
 
       if (result.quizId) {
         form.reset();
-        toast.success("Quiz created successfully!");
+        toast.success("Quiz updated successfully!");
         router.replace("/my-quizzes");
       }
     });
