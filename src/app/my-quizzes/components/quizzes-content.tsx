@@ -36,7 +36,6 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { PublicQuiz } from "@/database/schema";
-import { useRouter } from "next/navigation";
 
 const categories = [
   { id: "all", name: "All Quizzes", icon: Hash },
@@ -64,7 +63,6 @@ type Props = {
 };
 
 export default function MyQuizzesContent({ quizzes }: Props) {
-  const router = useRouter();
   const [searchTerm, setSearchTerm] = useState("");
   const [activeCategory, setActiveCategory] = useState("all");
 
@@ -213,15 +211,17 @@ export default function MyQuizzesContent({ quizzes }: Props) {
                     <Button
                       variant="outline"
                       className="flex-1 h-12 rounded-xl"
-                      onClick={() =>
-                        router.push(`/my-quizzes/${quiz.id}/edit`)
-                      }>
-                      <Settings className="w-4 h-4 mr-2" />
-                      Edit
+                      asChild>
+                      <Link
+                        href={`/my-quizzes/${quiz.id}/edit`}
+                        className="flex items-center justify-center gap-2">
+                        <Settings className="w-4 h-4 mr-2" />
+                        Edit
+                      </Link>
                     </Button>
                     <Button className="flex-1 h-12 rounded-xl" asChild>
                       <Link
-                        href={`/quizzes/${quiz.id}`}
+                        href={`/my-quizzes/${quiz.id}`}
                         className="flex items-center justify-center gap-2">
                         Preview
                         <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
