@@ -7,7 +7,7 @@ import { quizFormSchema, QuizFormValues } from "@/lib/quiz-form-schema";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { CreateQuizResponse, QuizActionError } from "./types";
-import { updateUserStreak } from "../user-streak";
+import { updateUserStreak } from "../user/streak";
 
 export const createQuiz = async (
   quiz: QuizFormValues,

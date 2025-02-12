@@ -8,7 +8,7 @@ import { eq, and } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { CreateQuizResponse, QuizActionError } from "./types";
-import { updateUserStreak } from "../user-streak";
+import { updateUserStreak } from "../user/streak";
 
 export const updateQuiz = async (
   quiz: QuizFormValues,

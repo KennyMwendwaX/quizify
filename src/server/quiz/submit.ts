@@ -6,8 +6,9 @@ import { eq } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { QuizActionError, QuizSubmissionResponse } from "./types";
-import { calculateXP, updateUserXP } from "../user-xp";
-import { updateUserStreak } from "../user-streak";
+import { calculateXP } from "@/lib/xp-utils";
+import { updateUserXP } from "../user/xp";
+import { updateUserStreak } from "../user/streak";
 
 export const submitQuizAttempt = async (
   quizId: number,
@@ -90,7 +91,6 @@ export const submitQuizAttempt = async (
       questionCount: quiz.questions.length,
     });
 
-    // Create quiz attempt record
     await db.insert(quizAttempts).values({
       quizId,
       userId: parseInt(userId),
@@ -102,10 +102,8 @@ export const submitQuizAttempt = async (
       xpEarned: xpEarnedPoints,
     });
 
-    // Update user's XP
     await updateUserXP(parseInt(userId), xpEarnedPoints);
 
-    // Update user streak
     await updateUserStreak(parseInt(userId));
 
     // Check and update achievements
