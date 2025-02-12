@@ -66,9 +66,9 @@ export default function QuizPreviewContent({ quiz }: Props) {
           {/* Header */}
           <div className="flex justify-between items-start mb-8">
             <Button variant="ghost" asChild className="h-10 gap-2">
-              <Link href={`/my-quizzes/${quiz.id}/edit`}>
+              <Link href={`/my-quizzes`}>
                 <ArrowLeft className="w-4 h-4" />
-                Back to Edit
+                Back to My Quizzes
               </Link>
             </Button>
             <div className="flex items-center gap-3">

@@ -14,6 +14,16 @@ CREATE TABLE "account" (
 	"updated_at" timestamp NOT NULL
 );
 --> statement-breakpoint
+CREATE TABLE "achievement" (
+	"id" serial PRIMARY KEY NOT NULL,
+	"title" text NOT NULL,
+	"description" text NOT NULL,
+	"requirement" text NOT NULL,
+	"xp_reward" integer NOT NULL,
+	"created_at" timestamp (3) DEFAULT now() NOT NULL,
+	"updated_at" timestamp (3) NOT NULL
+);
+--> statement-breakpoint
 CREATE TABLE "question" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"quiz_id" integer NOT NULL,
@@ -30,8 +40,10 @@ CREATE TABLE "quiz_attempt" (
 	"user_id" integer NOT NULL,
 	"answers" integer[] NOT NULL,
 	"score" integer NOT NULL,
+	"percentage" integer NOT NULL,
 	"is_completed" boolean NOT NULL,
 	"time_taken" integer NOT NULL,
+	"xp_earned" integer NOT NULL,
 	"created_at" timestamp (3) DEFAULT now() NOT NULL,
 	"updated_at" timestamp (3) NOT NULL
 );
@@ -61,14 +73,29 @@ CREATE TABLE "session" (
 	CONSTRAINT "session_token_unique" UNIQUE("token")
 );
 --> statement-breakpoint
+CREATE TABLE "user_achievement" (
+	"user_id" integer NOT NULL,
+	"achievement_id" integer NOT NULL,
+	"progress" integer DEFAULT 0 NOT NULL,
+	"is_completed" boolean DEFAULT false NOT NULL,
+	"completed_at" timestamp,
+	"created_at" timestamp (3) DEFAULT now() NOT NULL,
+	"updated_at" timestamp (3) NOT NULL,
+	CONSTRAINT "user_achievement_user_id_achievement_id_unique" UNIQUE("user_id","achievement_id")
+);
+--> statement-breakpoint
 CREATE TABLE "user" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"name" text NOT NULL,
 	"email" text NOT NULL,
 	"email_verified" boolean NOT NULL,
 	"image" text,
-	"created_at" timestamp NOT NULL,
-	"updated_at" timestamp NOT NULL,
+	"total_xp" integer DEFAULT 0 NOT NULL,
+	"best_streak" integer DEFAULT 0 NOT NULL,
+	"current_streak" integer DEFAULT 0 NOT NULL,
+	"last_activity_date" timestamp,
+	"created_at" timestamp (3) DEFAULT now() NOT NULL,
+	"updated_at" timestamp (3) NOT NULL,
 	CONSTRAINT "user_email_unique" UNIQUE("email")
 );
 --> statement-breakpoint
@@ -86,4 +113,6 @@ ALTER TABLE "question" ADD CONSTRAINT "question_quiz_id_quiz_id_fk" FOREIGN KEY 
 ALTER TABLE "quiz_attempt" ADD CONSTRAINT "quiz_attempt_quiz_id_quiz_id_fk" FOREIGN KEY ("quiz_id") REFERENCES "public"."quiz"("id") ON DELETE cascade ON UPDATE cascade;--> statement-breakpoint
 ALTER TABLE "quiz_attempt" ADD CONSTRAINT "quiz_attempt_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE cascade;--> statement-breakpoint
 ALTER TABLE "quiz" ADD CONSTRAINT "quiz_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE restrict ON UPDATE cascade;--> statement-breakpoint
-ALTER TABLE "session" ADD CONSTRAINT "session_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE no action ON UPDATE no action;
+ALTER TABLE "session" ADD CONSTRAINT "session_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "user_achievement" ADD CONSTRAINT "user_achievement_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE cascade;--> statement-breakpoint
+ALTER TABLE "user_achievement" ADD CONSTRAINT "user_achievement_achievement_id_achievement_id_fk" FOREIGN KEY ("achievement_id") REFERENCES "public"."achievement"("id") ON DELETE cascade ON UPDATE cascade;

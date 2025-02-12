@@ -6,6 +6,7 @@ import {
   serial,
   text,
   timestamp,
+  unique,
 } from "drizzle-orm/pg-core";
 
 export const users = pgTable("user", {
@@ -14,11 +15,19 @@ export const users = pgTable("user", {
   email: text("email").notNull().unique(),
   emailVerified: boolean("email_verified").notNull(),
   image: text("image"),
-  createdAt: timestamp("created_at").notNull(),
-  updatedAt: timestamp("updated_at").notNull(),
+  totalXp: integer("total_xp").notNull().default(0),
+  bestStreak: integer("best_streak").notNull().default(0),
+  currentStreak: integer("current_streak").notNull().default(0),
+  lastActivityDate: timestamp("last_activity_date"),
+  createdAt: timestamp("created_at", { mode: "date", precision: 3 })
+    .defaultNow()
+    .notNull(),
+  updatedAt: timestamp("updated_at", { mode: "date", precision: 3 })
+    .$onUpdate(() => new Date())
+    .notNull(),
 });
 
-export const session = pgTable("session", {
+export const sessions = pgTable("session", {
   id: serial("id").primaryKey(),
   expiresAt: timestamp("expires_at").notNull(),
   token: text("token").notNull().unique(),
@@ -31,7 +40,7 @@ export const session = pgTable("session", {
     .references(() => users.id),
 });
 
-export const account = pgTable("account", {
+export const accounts = pgTable("account", {
   id: serial("id").primaryKey(),
   accountId: text("account_id").notNull(),
   providerId: text("provider_id").notNull(),
@@ -49,7 +58,7 @@ export const account = pgTable("account", {
   updatedAt: timestamp("updated_at").notNull(),
 });
 
-export const verification = pgTable("verification", {
+export const verifications = pgTable("verification", {
   id: serial("id").primaryKey(),
   identifier: text("identifier").notNull(),
   value: text("value").notNull(),
@@ -105,8 +114,10 @@ export const quizAttempts = pgTable("quiz_attempt", {
     .references(() => users.id, { onDelete: "cascade", onUpdate: "cascade" }),
   answers: integer("answers").array().notNull(),
   score: integer("score").notNull(),
+  percentage: integer("percentage").notNull(),
   isCompleted: boolean("is_completed").notNull(),
   timeTaken: integer("time_taken").notNull(),
+  xpEarned: integer("xp_earned").notNull(),
   createdAt: timestamp("created_at", { mode: "date", precision: 3 })
     .defaultNow()
     .notNull(),
@@ -115,9 +126,51 @@ export const quizAttempts = pgTable("quiz_attempt", {
     .notNull(),
 });
 
+export const achievements = pgTable("achievement", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  description: text("description").notNull(),
+  requirement: text("requirement").notNull(),
+  xpReward: integer("xp_reward").notNull(),
+  createdAt: timestamp("created_at", { mode: "date", precision: 3 })
+    .defaultNow()
+    .notNull(),
+  updatedAt: timestamp("updated_at", { mode: "date", precision: 3 })
+    .$onUpdate(() => new Date())
+    .notNull(),
+});
+
+export const userAchievements = pgTable(
+  "user_achievement",
+  {
+    userId: integer("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade", onUpdate: "cascade" }),
+    achievementId: integer("achievement_id")
+      .notNull()
+      .references(() => achievements.id, {
+        onDelete: "cascade",
+        onUpdate: "cascade",
+      }),
+    progress: integer("progress").notNull().default(0),
+    isCompleted: boolean("is_completed").notNull().default(false),
+    completedAt: timestamp("completed_at"),
+    createdAt: timestamp("created_at", { mode: "date", precision: 3 })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { mode: "date", precision: 3 })
+      .$onUpdate(() => new Date())
+      .notNull(),
+  },
+  (table) => ({
+    pk: unique().on(table.userId, table.achievementId),
+  })
+);
+
 export const usersRelations = relations(users, ({ many }) => ({
   quizzes: many(quizzes),
   quizAttempts: many(quizAttempts),
+  userAchievements: many(userAchievements),
 }));
 
 export const quizzesRelations = relations(quizzes, ({ one, many }) => ({
@@ -130,18 +183,18 @@ export const quizzesRelations = relations(quizzes, ({ one, many }) => ({
 }));
 
 export const questionsRelations = relations(questions, ({ one }) => ({
-  quizzes: one(quizzes, {
+  quiz: one(quizzes, {
     fields: [questions.quizId],
     references: [quizzes.id],
   }),
 }));
 
 export const quizAttemptsRelations = relations(quizAttempts, ({ one }) => ({
-  users: one(users, {
+  user: one(users, {
     fields: [quizAttempts.userId],
     references: [users.id],
   }),
-  quizzes: one(quizzes, {
+  quiz: one(quizzes, {
     fields: [quizAttempts.quizId],
     references: [quizzes.id],
   }),
