@@ -8,12 +8,14 @@ import {
   questions,
   quizAttempts,
   quizzes,
+  users,
 } from "@/database/schema";
 import { quizFormSchema, QuizFormValues } from "@/lib/quiz-form-schema";
-import { desc, eq, and, count, inArray } from "drizzle-orm";
+import { desc, eq, and } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
-import { formatDistanceToNow } from "date-fns";
+import { calculateXP, updateUserXP } from "./user-xp";
+import { updateUserStreak } from "./user-streak";
 
 class QuizActionError extends Error {
   constructor(
@@ -99,7 +101,7 @@ export const createQuiz = async (
           category: quizData.category,
           difficulty: quizData.difficulty,
           isTimeLimited: quizData.isTimeLimited,
-          timeLimit: quizData.isTimeLimited ? quizData.timeLimit : null,
+          timeLimit: quizData.isTimeLimited ? quizData.timeLimit : 0,
         })
         .returning({
           id: quizzes.id,
@@ -118,6 +120,8 @@ export const createQuiz = async (
           correctAnswer: question.correctAnswer,
         }))
       );
+
+      await updateUserStreak(parseInt(userId));
 
       return createdQuiz;
     });
@@ -401,6 +405,17 @@ export const submitQuizAttempt = async (
       );
     }
 
+    const user = await db.query.users.findFirst({
+      where: eq(users.id, parseInt(userId)),
+      columns: {
+        currentStreak: true,
+      },
+    });
+
+    if (!user) {
+      throw new QuizActionError("User not found", 404, "submitQuizAttempt");
+    }
+
     const quiz = await db.query.quizzes.findFirst({
       where: eq(quizzes.id, quizId),
       with: {
@@ -429,15 +444,41 @@ export const submitQuizAttempt = async (
       return total;
     }, 0);
 
+    const correctAnswers = quiz.questions.filter(
+      (q, idx) => q.correctAnswer === answers[idx]
+    ).length;
+    const scorePercentage = (correctAnswers / quiz.questions.length) * 100;
+    const timeTaken = quiz.timeLimit ? quiz.timeLimit * 60 - timeLeft : 0;
+
+    const xpEarnedPoints = await calculateXP({
+      difficulty: quiz.difficulty,
+      scorePercentage,
+      timeLimit: quiz.timeLimit || 0,
+      timeTaken: timeTaken,
+      currentStreak: user.currentStreak,
+      questionCount: quiz.questions.length,
+    });
+
     // Create quiz attempt record
     await db.insert(quizAttempts).values({
       quizId,
       userId: parseInt(userId),
       answers,
       score,
+      percentage: scorePercentage,
       isCompleted: answers.length === quiz.questions.length,
       timeTaken: quiz.timeLimit ? quiz.timeLimit * 60 - timeLeft : 0,
+      xpEarned: xpEarnedPoints,
     });
+
+    // Update user's XP
+    await updateUserXP(parseInt(userId), xpEarnedPoints);
+
+    // Update user streak
+    await updateUserStreak(parseInt(userId));
+
+    // Check and update achievements
+    // await checkAndUpdateAchievements(parseInt(userId));
 
     return {
       score,
@@ -535,6 +576,8 @@ export const updateQuiz = async (
         }))
       );
 
+      await updateUserStreak(parseInt(userId));
+
       return updatedQuiz;
     });
 
@@ -562,131 +605,3 @@ export const updateQuiz = async (
     };
   }
 };
-
-// types/dashboard.ts
-export interface DashboardStats {
-  totalQuizzesTaken: number; // Changed from totalQuizzes to match UI
-  averageScore: number;
-  topCategory: string;
-}
-
-export interface RecentQuiz {
-  id: string;
-  title: string;
-  category: string;
-  dateTaken: string;
-  percentage: number;
-  timeTaken: number;
-}
-
-export interface DashboardData {
-  stats: DashboardStats;
-  recentQuizzes: RecentQuiz[];
-}
-
-export async function getDashboardData(userId: string): Promise<DashboardData> {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
-
-  if (!session?.user || userId !== session.user.id) {
-    throw new Error("Unauthorized access");
-  }
-
-  const userIdNum = parseInt(userId);
-
-  // First, get quiz attempts with their question counts
-  const quizAttemptsWithCounts = await db
-    .select({
-      quizId: quizAttempts.quizId,
-      score: quizAttempts.score,
-      questionCount: count(questions.id),
-    })
-    .from(quizAttempts)
-    .innerJoin(questions, eq(questions.quizId, quizAttempts.quizId))
-    .where(eq(quizAttempts.userId, userIdNum))
-    .groupBy(quizAttempts.quizId, quizAttempts.score);
-
-  // Calculate average score
-  const totalScorePercentage = quizAttemptsWithCounts.reduce((acc, curr) => {
-    return acc + (curr.score / curr.questionCount) * 100;
-  }, 0);
-
-  const averageScore = quizAttemptsWithCounts.length
-    ? Math.round(totalScorePercentage / quizAttemptsWithCounts.length)
-    : 0;
-
-  // Get total quizzes taken
-  const [quizCount] = await db
-    .select({
-      count: count(),
-    })
-    .from(quizAttempts)
-    .where(eq(quizAttempts.userId, userIdNum));
-
-  // Get top category
-  const [topCategory] = await db
-    .select({
-      category: quizzes.category,
-    })
-    .from(quizAttempts)
-    .innerJoin(quizzes, eq(quizzes.id, quizAttempts.quizId))
-    .where(eq(quizAttempts.userId, userIdNum))
-    .groupBy(quizzes.category)
-    .orderBy(desc(count(quizAttempts.id)))
-    .limit(1);
-
-  // Get recent quizzes
-  const recentQuizzesRaw = await db
-    .select({
-      id: quizzes.id,
-      title: quizzes.title,
-      category: quizzes.category,
-      score: quizAttempts.score,
-      timeTaken: quizAttempts.timeTaken,
-      createdAt: quizAttempts.createdAt,
-    })
-    .from(quizAttempts)
-    .innerJoin(quizzes, eq(quizzes.id, quizAttempts.quizId))
-    .where(eq(quizAttempts.userId, userIdNum))
-    .orderBy(desc(quizAttempts.createdAt))
-    .limit(5);
-
-  // Get question counts for recent quizzes
-  const recentQuizzesQuestionCounts = await db
-    .select({
-      quizId: questions.quizId,
-      count: count(),
-    })
-    .from(questions)
-    .where(
-      inArray(
-        questions.quizId,
-        recentQuizzesRaw.map((q) => q.id)
-      )
-    )
-    .groupBy(questions.quizId);
-
-  // Create a map of quiz ID to question count
-  const questionCountMap = new Map(
-    recentQuizzesQuestionCounts.map(({ quizId, count }) => [quizId, count])
-  );
-
-  return {
-    stats: {
-      totalQuizzesTaken: quizCount?.count ?? 0,
-      averageScore,
-      topCategory: topCategory?.category ?? "None",
-    },
-    recentQuizzes: recentQuizzesRaw.map((quiz) => ({
-      id: String(quiz.id),
-      title: quiz.title,
-      category: quiz.category,
-      dateTaken: formatDistanceToNow(quiz.createdAt, { addSuffix: true }),
-      percentage: Math.round(
-        (quiz.score / (questionCountMap.get(quiz.id) || 1)) * 100
-      ),
-      timeTaken: Math.round(quiz.timeTaken / 60), // Convert to minutes
-    })),
-  };
-}

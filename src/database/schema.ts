@@ -209,3 +209,5 @@ export type AdminQuestion = Pick<
 >;
 export type PublicQuiz = Quiz & { questions: PublicQuestion[] };
 export type AdminQuiz = Quiz & { questions: AdminQuestion[] };
+export type QuizAttempt = typeof quizAttempts.$inferSelect;
+export type QuizDifficulty = typeof quizzes.$inferSelect.difficulty;
