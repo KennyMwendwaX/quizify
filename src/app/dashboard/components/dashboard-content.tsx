@@ -32,6 +32,7 @@ import {
 } from "recharts";
 import Link from "next/link";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Session } from "@/lib/auth";
 
 const mockDashboardData = {
   stats: {
@@ -108,14 +109,6 @@ const mockDashboardData = {
     { day: "Sat", quizzes: 6, score: 82, xp: 550 },
     { day: "Sun", quizzes: 3, score: 90, xp: 425 },
   ],
-};
-
-const mockSession = {
-  user: {
-    name: "John Doe",
-    email: "john@example.com",
-    image: "/avatars/john-doe.png",
-  },
 };
 
 // Component definitions
@@ -213,7 +206,11 @@ const ActionButton = ({
   </Link>
 );
 
-const DashboardContent = () => {
+type Props = {
+  session: Session;
+};
+
+export default function DashboardContent({ session }: Props) {
   const {
     stats,
     recentQuizzes,
@@ -221,7 +218,6 @@ const DashboardContent = () => {
     weeklyProgress,
     categoryPerformance,
   } = mockDashboardData;
-  const session = mockSession;
   const [activeTab, setActiveTab] = useState("overview");
 
   return (
@@ -448,6 +444,4 @@ const DashboardContent = () => {
       </div>
     </div>
   );
-};
-
-export default DashboardContent;
+}

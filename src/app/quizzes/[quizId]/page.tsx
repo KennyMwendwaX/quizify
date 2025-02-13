@@ -1,6 +1,6 @@
-import { getPublicQuiz } from "@/server/actions";
 import QuizQuestion from "./components/quiz-question";
 import { auth } from "@/lib/auth";
+import { getPublicQuiz } from "@/server/quiz/get";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 

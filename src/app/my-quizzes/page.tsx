@@ -1,8 +1,8 @@
 import { auth } from "@/lib/auth";
 import MyQuizzesContent from "./components/quizzes-content";
-import { getAdminQuizzes } from "@/server/actions";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { getAdminQuizzes } from "@/server/quiz/get";
 
 export default async function QuizzesPage() {
   const session = await auth.api.getSession({

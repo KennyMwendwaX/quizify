@@ -1,8 +1,8 @@
 import { auth } from "@/lib/auth";
 import QuizzesContent from "./components/quizzes-content";
-import { getPublicQuizzes } from "@/server/actions";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { getPublicQuizzes } from "@/server/quiz/get";
 
 export default async function QuizzesPage() {
   const session = await auth.api.getSession({
