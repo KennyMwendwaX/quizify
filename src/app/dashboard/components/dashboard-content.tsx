@@ -11,7 +11,7 @@ import {
   Trophy,
   Calendar,
   Clock,
-  ActivitySquare,
+  Flame,
   Zap,
   Brain,
   BarChart3,
@@ -41,6 +41,7 @@ const mockDashboardData = {
     topCategory: "Computer Science",
     completionRate: 92,
     bestStreak: 15,
+    currentStreak: 6,
     averageTimePerQuiz: 13,
     totalXP: 12500,
   },
@@ -258,11 +259,10 @@ export default function DashboardContent({ session }: Props) {
                   progress={stats.averageScore}
                 />
                 <StatCard
-                  title="Completion Rate"
-                  value={`${stats.completionRate}%`}
-                  icon={ActivitySquare}
-                  progress={stats.completionRate}
-                  subtitle="Finished vs Started Quizzes"
+                  title="Current Streak"
+                  value={`${stats.currentStreak} days`}
+                  icon={Flame}
+                  subtitle="Consecutive days of activity"
                 />
                 <StatCard
                   title="Total XP"

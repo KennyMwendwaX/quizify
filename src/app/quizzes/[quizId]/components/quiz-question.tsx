@@ -24,7 +24,7 @@ import {
   Target,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { submitQuizAttempt } from "@/server/actions";
+import { submitQuizAttempt } from "@/server/quiz/submit";
 import { toast } from "sonner";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
 import { Session } from "@/lib/auth";

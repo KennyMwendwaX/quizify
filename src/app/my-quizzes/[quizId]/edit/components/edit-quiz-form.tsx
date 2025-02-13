@@ -34,7 +34,7 @@ import {
 import { quizFormSchema, QuizFormValues } from "@/lib/quiz-form-schema";
 import { useTransition } from "react";
 import { toast } from "sonner";
-import { updateQuiz } from "@/server/actions";
+import { updateQuiz } from "@/server/quiz/update";
 import { useRouter } from "next/navigation";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
 import {
