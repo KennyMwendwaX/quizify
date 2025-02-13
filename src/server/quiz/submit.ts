@@ -102,11 +102,25 @@ export const submitQuizAttempt = async (
       xpEarned: xpEarnedPoints,
     });
 
-    await updateUserXP(parseInt(userId), xpEarnedPoints);
+    const xpResult = await updateUserXP(parseInt(userId), xpEarnedPoints);
+    if (xpResult.error) {
+      throw new QuizActionError(
+        xpResult.error,
+        xpResult.statusCode || 500,
+        "submitQuizAttempt"
+      );
+    }
 
-    await updateUserStreak(parseInt(userId));
+    const userStreakResult = await updateUserStreak(parseInt(userId));
+    if (userStreakResult.error) {
+      throw new QuizActionError(
+        userStreakResult.error,
+        userStreakResult.statusCode || 500,
+        "submitQuizAttempt"
+      );
+    }
 
-    // Check and update achievements
+    // Future: Check and update achievements
     // await checkAndUpdateAchievements(parseInt(userId));
 
     return {

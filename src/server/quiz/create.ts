@@ -64,7 +64,14 @@ export const createQuiz = async (
         }))
       );
 
-      await updateUserStreak(parseInt(userId));
+      const userStreakResult = await updateUserStreak(parseInt(userId));
+      if (userStreakResult.error) {
+        throw new QuizActionError(
+          userStreakResult.error,
+          userStreakResult.statusCode || 500,
+          "createQuiz"
+        );
+      }
 
       return createdQuiz;
     });
