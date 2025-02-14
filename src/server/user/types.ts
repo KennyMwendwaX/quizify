@@ -36,7 +36,7 @@ export type UpdateAchievementsResponse = {
   statusCode?: number;
 };
 
-export type GetUserStatsResponse = {
+export type StatsResponse = {
   stats?: {
     totalQuizzesTaken: number;
     averageScore: number;
@@ -51,7 +51,7 @@ export type GetUserStatsResponse = {
   statusCode?: number;
 };
 
-export type GetUserRecentQuizzesResponse = {
+export type RecentQuizzesResponse = {
   quizzes?: {
     id: number;
     title: string;
@@ -65,8 +65,8 @@ export type GetUserRecentQuizzesResponse = {
   statusCode?: number;
 };
 
-export type GetUserCategoryPerformance = {
-  category?: {
+export type CategoryPerformanceResponse = {
+  performances?: {
     name: string;
     score: number;
     quizzes: number;
@@ -75,8 +75,8 @@ export type GetUserCategoryPerformance = {
   statusCode?: number;
 };
 
-export type GetUserWeeklyProgress = {
-  performance?: {
+export type WeeklyProgressResponse = {
+  progress?: {
     day: string;
     quizzes: number;
     score: number;

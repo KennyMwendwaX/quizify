@@ -2,12 +2,14 @@
 
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
-import { UserActionError } from "./types";
+import { RecentQuizzesResponse, UserActionError } from "./types";
 import db from "@/database/db";
 import { eq, desc } from "drizzle-orm";
 import { quizAttempts } from "@/database/schema";
 
-export async function getRecentQuizzes(userId?: string) {
+export async function getRecentQuizzes(
+  userId?: string
+): Promise<RecentQuizzesResponse> {
   try {
     const session = await auth.api.getSession({
       headers: await headers(),
@@ -42,19 +44,21 @@ export async function getRecentQuizzes(userId?: string) {
       },
     });
 
-    return recentAttempts.map((attempt) => ({
-      id: attempt.id,
-      title: attempt.quiz.title,
-      category: attempt.quiz.category,
-      dateTaken: attempt.createdAt.toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-      }),
-      percentage: attempt.percentage,
-      timeTaken: attempt.timeTaken,
-      difficulty: attempt.quiz.difficulty,
-    }));
+    return {
+      quizzes: recentAttempts.map((attempt) => ({
+        id: attempt.id,
+        title: attempt.quiz.title,
+        category: attempt.quiz.category,
+        dateTaken: attempt.createdAt.toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+          year: "numeric",
+        }),
+        percentage: attempt.percentage,
+        timeTaken: attempt.timeTaken,
+        difficulty: attempt.quiz.difficulty,
+      })),
+    };
   } catch (error) {
     if (error instanceof UserActionError) {
       return {

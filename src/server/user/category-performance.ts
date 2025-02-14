@@ -1,13 +1,15 @@
 "use server";
 
-import { UserActionError } from "./types";
+import { CategoryPerformanceResponse, UserActionError } from "./types";
 import db from "@/database/db";
 import { eq } from "drizzle-orm";
 import { quizAttempts } from "@/database/schema";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 
-export async function getCategoryPerformance(userId?: string) {
+export async function getCategoryPerformance(
+  userId?: string
+): Promise<CategoryPerformanceResponse> {
   try {
     const session = await auth.api.getSession({
       headers: await headers(),
@@ -56,11 +58,15 @@ export async function getCategoryPerformance(userId?: string) {
       });
     });
 
-    return Array.from(categoryMap.entries()).map(([name, stats]) => ({
-      name,
-      score: Math.round(stats.totalScore / stats.count),
-      quizzes: stats.count,
-    }));
+    const categoryPerformances = Array.from(categoryMap.entries()).map(
+      ([name, stats]) => ({
+        name,
+        score: Math.round(stats.totalScore / stats.count),
+        quizzes: stats.count,
+      })
+    );
+
+    return { performances: categoryPerformances };
   } catch (error) {
     if (error instanceof UserActionError) {
       return {

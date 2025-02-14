@@ -1,11 +1,15 @@
+"use server";
+
 import db from "@/database/db";
 import { quizAttempts } from "@/database/schema";
 import { auth } from "@/lib/auth";
 import { and, eq, gte } from "drizzle-orm";
 import { headers } from "next/headers";
-import { UserActionError } from "./types";
+import { UserActionError, WeeklyProgressResponse } from "./types";
 
-export async function getWeeklyProgress(userId?: string) {
+export async function getWeeklyProgress(
+  userId?: string
+): Promise<WeeklyProgressResponse> {
   try {
     const session = await auth.api.getSession({
       headers: await headers(),
@@ -40,7 +44,6 @@ export async function getWeeklyProgress(userId?: string) {
       },
     });
 
-    // Process attempts to get daily stats
     const dailyStats = new Map<
       string,
       { quizzes: number; totalScore: number; totalXp: number }
@@ -64,7 +67,7 @@ export async function getWeeklyProgress(userId?: string) {
       });
     });
 
-    return daysOfWeek.map((day) => {
+    const weeklyProgress = daysOfWeek.map((day) => {
       const stats = dailyStats.get(day) || {
         quizzes: 0,
         totalScore: 0,
@@ -78,6 +81,10 @@ export async function getWeeklyProgress(userId?: string) {
         xp: stats.totalXp,
       };
     });
+
+    return {
+      progress: weeklyProgress,
+    };
   } catch (error) {
     if (error instanceof UserActionError) {
       return {
