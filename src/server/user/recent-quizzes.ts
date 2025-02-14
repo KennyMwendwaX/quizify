@@ -16,14 +16,18 @@ export async function getRecentQuizzes(
     });
 
     if (!session?.user) {
-      throw new UserActionError("No active session found", 401, "getUserStats");
+      throw new UserActionError(
+        "No active session found",
+        401,
+        "getRecentQuizzes"
+      );
     }
 
     if (!userId || userId !== session.user.id) {
       throw new UserActionError(
         "User ID mismatch or missing",
         401,
-        "getUserStats"
+        "getRecentQuizzes"
       );
     }
 

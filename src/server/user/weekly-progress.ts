@@ -16,14 +16,18 @@ export async function getWeeklyProgress(
     });
 
     if (!session?.user) {
-      throw new UserActionError("No active session found", 401, "getUserStats");
+      throw new UserActionError(
+        "No active session found",
+        401,
+        "getWeeklyProgress"
+      );
     }
 
     if (!userId || userId !== session.user.id) {
       throw new UserActionError(
         "User ID mismatch or missing",
         401,
-        "getUserStats"
+        "getWeeklyProgress"
       );
     }
 

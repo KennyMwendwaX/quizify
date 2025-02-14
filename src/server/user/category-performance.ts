@@ -16,14 +16,18 @@ export async function getCategoryPerformance(
     });
 
     if (!session?.user) {
-      throw new UserActionError("No active session found", 401, "getUserStats");
+      throw new UserActionError(
+        "No active session found",
+        401,
+        "getCategoryPerformance"
+      );
     }
 
     if (!userId || userId !== session.user.id) {
       throw new UserActionError(
         "User ID mismatch or missing",
         401,
-        "getUserStats"
+        "getCategoryPerformance"
       );
     }
 
