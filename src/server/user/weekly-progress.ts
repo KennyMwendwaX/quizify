@@ -90,6 +90,8 @@ export async function getWeeklyProgress(
       progress: weeklyProgress,
     };
   } catch (error) {
+    console.error("Error in getWeeklyProgress:", error);
+
     if (error instanceof UserActionError) {
       return {
         error: error.message,

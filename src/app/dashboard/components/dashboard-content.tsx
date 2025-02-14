@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 import {
   PlusCircle,
   PlayCircle,
@@ -33,86 +33,26 @@ import {
 import Link from "next/link";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Session } from "@/lib/auth";
+import {
+  CategoryPerformance,
+  RecentQuiz,
+  UserStats,
+  WeeklyProgress,
+} from "@/lib/types";
 
-const mockDashboardData = {
-  stats: {
-    totalQuizzesTaken: 47,
-    averageScore: 78,
-    topCategory: "Computer Science",
-    completionRate: 92,
-    bestStreak: 15,
-    currentStreak: 6,
-    averageTimePerQuiz: 13,
-    totalXP: 12500,
-  },
-  recentQuizzes: [
-    {
-      id: "1",
-      title: "JavaScript Fundamentals",
-      category: "Programming",
-      dateTaken: "Feb 10, 2025",
-      percentage: 85,
-      timeTaken: 12,
-      difficulty: "MEDIUM" as const,
-    },
-    {
-      id: "2",
-      title: "Data Structures",
-      category: "Computer Science",
-      dateTaken: "Feb 9, 2025",
-      percentage: 92,
-      timeTaken: 15,
-      difficulty: "HARD" as const,
-    },
-    {
-      id: "3",
-      title: "Web Development Basics",
-      category: "Programming",
-      dateTaken: "Feb 8, 2025",
-      percentage: 75,
-      timeTaken: 18,
-      difficulty: "EASY" as const,
-    },
-  ],
-  categoryPerformance: [
-    { name: "Programming", score: 82, quizzes: 20 },
-    { name: "Computer Science", score: 78, quizzes: 15 },
-    { name: "Web Development", score: 85, quizzes: 12 },
-    { name: "Data Science", score: 76, quizzes: 8 },
-    { name: "Cybersecurity", score: 80, quizzes: 5 },
-  ],
-  achievements: [
-    {
-      id: 1,
-      title: "Quick Learner",
-      description: "Complete 5 quizzes in one day",
-      progress: 80,
-    },
-    {
-      id: 2,
-      title: "Perfect Score",
-      description: "Get 100% on any quiz",
-      progress: 100,
-    },
-    {
-      id: 3,
-      title: "Knowledge Seeker",
-      description: "Take quizzes in 5 different categories",
-      progress: 60,
-    },
-  ],
-  weeklyProgress: [
-    { day: "Mon", quizzes: 4, score: 85, xp: 450 },
-    { day: "Tue", quizzes: 3, score: 78, xp: 350 },
-    { day: "Wed", quizzes: 5, score: 92, xp: 600 },
-    { day: "Thu", quizzes: 2, score: 88, xp: 300 },
-    { day: "Fri", quizzes: 4, score: 76, xp: 400 },
-    { day: "Sat", quizzes: 6, score: 82, xp: 550 },
-    { day: "Sun", quizzes: 3, score: 90, xp: 425 },
-  ],
-};
+const EmptyState = ({
+  icon: Icon,
+  message,
+}: {
+  icon: React.ElementType;
+  message: string;
+}) => (
+  <div className="flex flex-col items-center justify-center p-8 text-center space-y-3">
+    <Icon className="h-12 w-12 text-muted-foreground/50" />
+    <p className="text-muted-foreground text-sm">{message}</p>
+  </div>
+);
 
-// Component definitions
 const StatCard = ({
   title,
   value,
@@ -132,61 +72,41 @@ const StatCard = ({
       <Icon className="h-4 w-4 text-muted-foreground" />
     </CardHeader>
     <CardContent>
-      <div className="text-2xl font-bold">{value}</div>
+      <div className="text-2xl font-bold">{value || "-"}</div>
       {subtitle && <p className="text-xs text-muted-foreground">{subtitle}</p>}
       {progress !== undefined && (
-        <Progress value={progress} className="h-2 mt-2" />
+        <Progress value={progress || 0} className="h-2 mt-2" />
       )}
     </CardContent>
   </Card>
 );
-
-interface Quiz {
-  id: string;
-  title: string;
-  category: string;
-  dateTaken: string;
-  percentage: number;
-  timeTaken: number;
-  difficulty: "EASY" | "MEDIUM" | "HARD";
-}
-
-const QuizCard = ({ quiz }: { quiz: Quiz }) => (
+const QuizCard = ({ quiz }: { quiz: RecentQuiz }) => (
   <div className="flex items-center justify-between p-3 bg-primary/5 rounded-lg hover:bg-primary/10 transition-colors">
     <div>
       <h3 className="font-medium text-sm">{quiz.title}</h3>
-
       <p className="text-xs text-muted-foreground">
-        {quiz.category}• {quiz.dateTaken} • {quiz.difficulty}
+        {quiz.category} • {quiz.dateTaken} • {quiz.difficulty}
       </p>
     </div>
-
     <div className="text-right">
       <div className="text-sm font-bold">{quiz.percentage}%</div>
-
       <div className="text-xs text-muted-foreground">{quiz.timeTaken} mins</div>
     </div>
   </div>
 );
-interface Achievement {
-  id: number;
-  title: string;
-  description: string;
-  progress: number;
-}
 
-const AchievementCard = ({ achievement }: { achievement: Achievement }) => (
-  <div className="p-4 border rounded-lg bg-card hover:bg-accent transition-colors">
-    <h3 className="font-medium mb-1">{achievement.title}</h3>
-    <p className="text-sm text-muted-foreground mb-2">
-      {achievement.description}
-    </p>
-    <Progress value={achievement.progress} className="h-2" />
-    <p className="text-xs text-muted-foreground mt-1">
-      {achievement.progress}% Complete
-    </p>
-  </div>
-);
+// const AchievementCard = ({ achievement }: { achievement: Achievement }) => (
+//   <div className="p-4 border rounded-lg bg-card hover:bg-accent transition-colors">
+//     <h3 className="font-medium mb-1">{achievement.title}</h3>
+//     <p className="text-sm text-muted-foreground mb-2">
+//       {achievement.description}
+//     </p>
+//     <Progress value={achievement.progress} className="h-2" />
+//     <p className="text-xs text-muted-foreground mt-1">
+//       {achievement.progress}% Complete
+//     </p>
+//   </div>
+// );
 
 const ActionButton = ({
   href,
@@ -209,22 +129,24 @@ const ActionButton = ({
 
 type Props = {
   session: Session;
+  stats: UserStats;
+  recentQuizzes: RecentQuiz[];
+  categoryPerformance: CategoryPerformance;
+  weeklyProgress: WeeklyProgress;
 };
 
-export default function DashboardContent({ session }: Props) {
-  const {
-    stats,
-    recentQuizzes,
-    achievements,
-    weeklyProgress,
-    categoryPerformance,
-  } = mockDashboardData;
+export default function DashboardContent({
+  session,
+  stats,
+  recentQuizzes,
+  categoryPerformance,
+  weeklyProgress,
+}: Props) {
   const [activeTab, setActiveTab] = useState("overview");
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-background/90 py-8">
       <div className="container mx-auto px-4">
-        {/* Welcome Section */}
         <div className="text-center mb-8 animate-fade-in">
           <h1 className="text-3xl font-semibold text-foreground mb-2">
             Welcome, {session.user.name}
@@ -234,7 +156,6 @@ export default function DashboardContent({ session }: Props) {
           </p>
         </div>
 
-        {/* Dashboard Tabs */}
         <div className="mb-8">
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList>
@@ -244,7 +165,6 @@ export default function DashboardContent({ session }: Props) {
             </TabsList>
 
             <TabsContent value="overview" className="space-y-8">
-              {/* Stats Grid */}
               <div className="grid md:grid-cols-4 gap-6">
                 <StatCard
                   title="Quizzes Taken"
@@ -254,27 +174,27 @@ export default function DashboardContent({ session }: Props) {
                 />
                 <StatCard
                   title="Average Score"
-                  value={`${stats.averageScore}%`}
+                  value={stats.averageScore ? `${stats.averageScore}%` : "-"}
                   icon={TrendingUp}
                   progress={stats.averageScore}
                 />
                 <StatCard
                   title="Current Streak"
-                  value={`${stats.currentStreak} days`}
+                  value={
+                    stats.currentStreak ? `${stats.currentStreak} days` : "-"
+                  }
                   icon={Flame}
                   subtitle="Consecutive days of activity"
                 />
                 <StatCard
                   title="Total XP"
-                  value={stats.totalXP.toLocaleString()}
+                  value={stats.totalXP ? stats.totalXP.toLocaleString() : "-"}
                   icon={Zap}
                   subtitle="Experience Points"
                 />
               </div>
 
-              {/* Main Content Grid */}
               <div className="grid md:grid-cols-3 gap-6">
-                {/* Recent Quizzes */}
                 <Card className="md:col-span-2">
                   <CardHeader>
                     <CardTitle className="flex items-center">
@@ -282,14 +202,22 @@ export default function DashboardContent({ session }: Props) {
                       Recent Quizzes
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="space-y-4">
-                    {recentQuizzes.map((quiz) => (
-                      <QuizCard key={quiz.id} quiz={quiz} />
-                    ))}
+                  <CardContent>
+                    {recentQuizzes.length > 0 ? (
+                      <div className="space-y-4">
+                        {recentQuizzes.map((quiz) => (
+                          <QuizCard key={quiz.id} quiz={quiz} />
+                        ))}
+                      </div>
+                    ) : (
+                      <EmptyState
+                        icon={PlayCircle}
+                        message="No quizzes taken yet. Start your learning journey!"
+                      />
+                    )}
                   </CardContent>
                 </Card>
 
-                {/* Quick Actions */}
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center">
@@ -316,7 +244,6 @@ export default function DashboardContent({ session }: Props) {
             </TabsContent>
 
             <TabsContent value="progress" className="space-y-8">
-              {/* Weekly Progress Chart */}
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center">
@@ -325,35 +252,41 @@ export default function DashboardContent({ session }: Props) {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="h-[300px]">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <LineChart data={weeklyProgress}>
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="day" />
-                        <YAxis yAxisId="left" />
-                        <YAxis yAxisId="right" orientation="right" />
-                        <Tooltip />
-                        <Line
-                          yAxisId="left"
-                          type="monotone"
-                          dataKey="score"
-                          stroke="#3b82f6"
-                          name="Score %"
-                        />
-                        <Line
-                          yAxisId="right"
-                          type="monotone"
-                          dataKey="xp"
-                          stroke="#10b981"
-                          name="XP Gained"
-                        />
-                      </LineChart>
-                    </ResponsiveContainer>
-                  </div>
+                  {weeklyProgress.length > 0 ? (
+                    <div className="h-[300px]">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <LineChart data={weeklyProgress}>
+                          <CartesianGrid strokeDasharray="3 3" />
+                          <XAxis dataKey="day" />
+                          <YAxis yAxisId="left" />
+                          <YAxis yAxisId="right" orientation="right" />
+                          <Tooltip />
+                          <Line
+                            yAxisId="left"
+                            type="monotone"
+                            dataKey="score"
+                            stroke="#3b82f6"
+                            name="Score %"
+                          />
+                          <Line
+                            yAxisId="right"
+                            type="monotone"
+                            dataKey="xp"
+                            stroke="#10b981"
+                            name="XP Gained"
+                          />
+                        </LineChart>
+                      </ResponsiveContainer>
+                    </div>
+                  ) : (
+                    <EmptyState
+                      icon={Calendar}
+                      message="Complete some quizzes to see your weekly progress!"
+                    />
+                  )}
                 </CardContent>
               </Card>
 
-              {/* Category Performance */}
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center">
@@ -362,35 +295,41 @@ export default function DashboardContent({ session }: Props) {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="h-[300px]">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={categoryPerformance}>
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="name" />
-                        <YAxis yAxisId="left" />
-                        <YAxis yAxisId="right" orientation="right" />
-                        <Tooltip />
-                        <Bar
-                          yAxisId="left"
-                          dataKey="score"
-                          fill="#3b82f6"
-                          name="Avg. Score %"
-                        />
-                        <Bar
-                          yAxisId="right"
-                          dataKey="quizzes"
-                          fill="#10b981"
-                          name="Quizzes Taken"
-                        />
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </div>
+                  {categoryPerformance.length > 0 ? (
+                    <div className="h-[300px]">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={categoryPerformance}>
+                          <CartesianGrid strokeDasharray="3 3" />
+                          <XAxis dataKey="name" />
+                          <YAxis yAxisId="left" />
+                          <YAxis yAxisId="right" orientation="right" />
+                          <Tooltip />
+                          <Bar
+                            yAxisId="left"
+                            dataKey="score"
+                            fill="#3b82f6"
+                            name="Avg. Score %"
+                          />
+                          <Bar
+                            yAxisId="right"
+                            dataKey="quizzes"
+                            fill="#10b981"
+                            name="Quizzes Taken"
+                          />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </div>
+                  ) : (
+                    <EmptyState
+                      icon={BarChart3}
+                      message="Take quizzes in different categories to see your performance!"
+                    />
+                  )}
                 </CardContent>
               </Card>
             </TabsContent>
 
             <TabsContent value="achievements" className="space-y-8">
-              {/* Achievements */}
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center">
@@ -398,17 +337,24 @@ export default function DashboardContent({ session }: Props) {
                     Achievements
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="grid md:grid-cols-2 gap-4">
-                  {achievements.map((achievement) => (
-                    <AchievementCard
-                      key={achievement.id}
-                      achievement={achievement}
+                {/* <CardContent>
+                  {achievements.length > 0 ? (
+                    <div className="grid md:grid-cols-2 gap-4">
+                      {achievements.map((achievement) => (
+                        <AchievementCard
+                          key={achievement.id}
+                          achievement={achievement}
+                        />
+                      ))}
+                    </div>
+                  ) : (
+                    <EmptyState
+                      icon={Trophy}
+                      message="Start completing quizzes to earn achievements!"
                     />
-                  ))}
-                </CardContent>
+                  )}
+                </CardContent> */}
               </Card>
-
-              {/* Learning Stats */}
 
               <Card>
                 <CardHeader>
@@ -420,19 +366,23 @@ export default function DashboardContent({ session }: Props) {
                 <CardContent className="grid md:grid-cols-3 gap-4">
                   <StatCard
                     title="Avg. Time per Quiz"
-                    value={`${stats.averageTimePerQuiz} min`}
+                    value={
+                      stats.averageTimePerQuiz
+                        ? `${stats.averageTimePerQuiz} min`
+                        : "-"
+                    }
                     icon={Clock}
                     subtitle="Time management score"
                   />
                   <StatCard
                     title="Top Category"
-                    value={stats.topCategory}
+                    value={stats.topCategory || "-"}
                     icon={Medal}
                     subtitle="Your strongest subject"
                   />
                   <StatCard
                     title="Best Streak"
-                    value={`${stats.bestStreak} days`}
+                    value={stats.bestStreak ? `${stats.bestStreak} days` : "-"}
                     icon={Zap}
                     subtitle="Longest learning streak"
                   />

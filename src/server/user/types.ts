@@ -1,3 +1,10 @@
+import {
+  CategoryPerformance,
+  RecentQuiz,
+  UserStats,
+  WeeklyProgress,
+} from "@/lib/types";
+
 export class UserActionError extends Error {
   constructor(
     message: string,
@@ -37,51 +44,25 @@ export type UpdateAchievementsResponse = {
 };
 
 export type StatsResponse = {
-  stats?: {
-    totalQuizzesTaken: number;
-    averageScore: number;
-    topCategory: string;
-    completionRate: number;
-    bestStreak: number;
-    currentStreak: number;
-    averageTimePerQuiz: number;
-    totalXP: number;
-  };
+  stats?: UserStats;
   error?: string;
   statusCode?: number;
 };
 
 export type RecentQuizzesResponse = {
-  quizzes?: {
-    id: number;
-    title: string;
-    category: string;
-    dateTaken: string;
-    percentage: number;
-    timeTaken: number;
-    difficulty: "EASY" | "MEDIUM" | "HARD";
-  }[];
+  quizzes?: RecentQuiz[];
   error?: string;
   statusCode?: number;
 };
 
 export type CategoryPerformanceResponse = {
-  performances?: {
-    name: string;
-    score: number;
-    quizzes: number;
-  }[];
+  performances?: CategoryPerformance;
   error?: string;
   statusCode?: number;
 };
 
 export type WeeklyProgressResponse = {
-  progress?: {
-    day: string;
-    quizzes: number;
-    score: number;
-    xp: number;
-  }[];
+  progress?: WeeklyProgress;
   error?: string;
   statusCode?: number;
 };

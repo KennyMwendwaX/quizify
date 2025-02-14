@@ -64,6 +64,7 @@ export async function getRecentQuizzes(
       })),
     };
   } catch (error) {
+    console.error("Error in getRecentQuizzes:", error);
     if (error instanceof UserActionError) {
       return {
         error: error.message,

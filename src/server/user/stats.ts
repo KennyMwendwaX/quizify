@@ -4,8 +4,8 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { UserActionError } from "./types";
 import db from "@/database/db";
-import { eq, count, desc } from "drizzle-orm";
-import { users, quizAttempts } from "@/database/schema";
+import { eq, count, desc, sql } from "drizzle-orm";
+import { users, quizAttempts, quizzes } from "@/database/schema";
 
 export async function getUserStats(userId?: string) {
   try {
@@ -49,6 +49,19 @@ export async function getUserStats(userId?: string) {
       },
     });
 
+    // Get category with most attempts
+    const topCategoryResult = await db
+      .select({
+        category: quizzes.category,
+        attemptCount: count(quizAttempts.id),
+      })
+      .from(quizzes)
+      .innerJoin(quizAttempts, eq(quizAttempts.quizId, quizzes.id))
+      .where(eq(quizAttempts.userId, userIdNum))
+      .groupBy(quizzes.category)
+      .orderBy(desc(sql`count(*)`))
+      .limit(1);
+
     const totalQuizzesTaken = attemptsStats.length;
     const averageScore =
       attemptsStats.length > 0
@@ -74,25 +87,10 @@ export async function getUserStats(userId?: string) {
           )
         : 0;
 
-    const topCategory = await db.query.quizzes.findFirst({
-      where: eq(quizAttempts.userId, userIdNum),
-      columns: {
-        category: true,
-      },
-      with: {
-        quizAttempts: {
-          columns: {
-            id: true,
-          },
-        },
-      },
-      orderBy: (quiz) => desc(count(quiz.id)),
-    });
-
     const stats = {
       totalQuizzesTaken,
       averageScore,
-      topCategory: topCategory?.category ?? "None",
+      topCategory: topCategoryResult[0]?.category ?? "None",
       completionRate,
       bestStreak: user.bestStreak,
       currentStreak: user.currentStreak,
@@ -104,6 +102,7 @@ export async function getUserStats(userId?: string) {
       stats,
     };
   } catch (error) {
+    console.error(error);
     if (error instanceof UserActionError) {
       return {
         error: error.message,

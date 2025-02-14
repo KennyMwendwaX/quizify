@@ -72,6 +72,7 @@ export async function getCategoryPerformance(
 
     return { performances: categoryPerformances };
   } catch (error) {
+    console.error("Error in getCategoryPerformance:", error);
     if (error instanceof UserActionError) {
       return {
         error: error.message,
