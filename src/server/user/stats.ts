@@ -9,7 +9,6 @@ import { users, quizAttempts } from "@/database/schema";
 
 export async function getUserStats(userId?: string) {
   try {
-    // Validate session
     const session = await auth.api.getSession({
       headers: await headers(),
     });
@@ -28,7 +27,6 @@ export async function getUserStats(userId?: string) {
 
     const userIdNum = parseInt(userId);
 
-    // Get user data for streaks and XP
     const user = await db.query.users.findFirst({
       where: eq(users.id, userIdNum),
       columns: {
@@ -42,7 +40,6 @@ export async function getUserStats(userId?: string) {
       throw new UserActionError("User not found", 404, "getUserStats");
     }
 
-    // Get quiz attempts statistics
     const attemptsStats = await db.query.quizAttempts.findMany({
       where: eq(quizAttempts.userId, userIdNum),
       columns: {
@@ -52,7 +49,6 @@ export async function getUserStats(userId?: string) {
       },
     });
 
-    // Calculate statistics from the attempts
     const totalQuizzesTaken = attemptsStats.length;
     const averageScore =
       attemptsStats.length > 0
@@ -78,7 +74,6 @@ export async function getUserStats(userId?: string) {
           )
         : 0;
 
-    // Get top category using query builder
     const topCategory = await db.query.quizzes.findFirst({
       where: eq(quizAttempts.userId, userIdNum),
       columns: {
@@ -106,19 +101,16 @@ export async function getUserStats(userId?: string) {
     };
 
     return {
-      success: true,
       stats,
     };
   } catch (error) {
     if (error instanceof UserActionError) {
       return {
-        success: false,
         error: error.message,
         statusCode: error.statusCode,
       };
     }
     return {
-      success: false,
       error: "Failed to fetch user statistics",
       statusCode: 500,
     };
