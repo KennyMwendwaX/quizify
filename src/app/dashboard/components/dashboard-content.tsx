@@ -9,28 +9,12 @@ import {
   Book,
   Target,
   Trophy,
-  Calendar,
   Clock,
   Flame,
   Zap,
   Brain,
-  BarChart3,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  LineChart,
-  Line,
-} from "recharts";
-import Link from "next/link";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Session } from "@/lib/auth";
 import {
@@ -39,61 +23,12 @@ import {
   UserStats,
   WeeklyProgress,
 } from "@/lib/types";
-
-const EmptyState = ({
-  icon: Icon,
-  message,
-}: {
-  icon: React.ElementType;
-  message: string;
-}) => (
-  <div className="flex flex-col items-center justify-center p-8 text-center space-y-3">
-    <Icon className="h-12 w-12 text-muted-foreground/50" />
-    <p className="text-muted-foreground text-sm">{message}</p>
-  </div>
-);
-
-const StatCard = ({
-  title,
-  value,
-  icon: Icon,
-  subtitle,
-  progress,
-}: {
-  title: string;
-  value: string | number;
-  icon: React.ElementType;
-  subtitle?: string;
-  progress?: number;
-}) => (
-  <Card>
-    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-      <CardTitle className="text-sm font-medium">{title}</CardTitle>
-      <Icon className="h-4 w-4 text-muted-foreground" />
-    </CardHeader>
-    <CardContent>
-      <div className="text-2xl font-bold">{value || "-"}</div>
-      {subtitle && <p className="text-xs text-muted-foreground">{subtitle}</p>}
-      {progress !== undefined && (
-        <Progress value={progress || 0} className="h-2 mt-2" />
-      )}
-    </CardContent>
-  </Card>
-);
-const QuizCard = ({ quiz }: { quiz: RecentQuiz }) => (
-  <div className="flex items-center justify-between p-3 bg-primary/5 rounded-lg hover:bg-primary/10 transition-colors">
-    <div>
-      <h3 className="font-medium text-sm">{quiz.title}</h3>
-      <p className="text-xs text-muted-foreground">
-        {quiz.category} • {quiz.dateTaken} • {quiz.difficulty}
-      </p>
-    </div>
-    <div className="text-right">
-      <div className="text-sm font-bold">{quiz.percentage}%</div>
-      <div className="text-xs text-muted-foreground">{quiz.timeTaken} mins</div>
-    </div>
-  </div>
-);
+import WeeklyProgressChart from "./weekly-progress-chart";
+import CategoryPerformanceChart from "./category-performance";
+import EmptyState from "./empty-state";
+import StatCard from "./stat-card";
+import QuizCard from "./quiz-card";
+import ActionButton from "./action-button";
 
 // const AchievementCard = ({ achievement }: { achievement: Achievement }) => (
 //   <div className="p-4 border rounded-lg bg-card hover:bg-accent transition-colors">
@@ -107,25 +42,6 @@ const QuizCard = ({ quiz }: { quiz: RecentQuiz }) => (
 //     </p>
 //   </div>
 // );
-
-const ActionButton = ({
-  href,
-  icon: Icon,
-  children,
-}: {
-  href: string;
-  icon: React.ElementType;
-  children: React.ReactNode;
-}) => (
-  <Link href={href} className="block">
-    <Button
-      variant="outline"
-      className="w-full hover:bg-primary/5 transition-colors">
-      <Icon className="mr-2 h-5 w-5" />
-      {children}
-    </Button>
-  </Link>
-);
 
 type Props = {
   session: Session;
@@ -244,89 +160,10 @@ export default function DashboardContent({
             </TabsContent>
 
             <TabsContent value="progress" className="space-y-8">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <Calendar className="mr-2 h-5 w-5" />
-                    Weekly Progress
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {weeklyProgress.length > 0 ? (
-                    <div className="h-[300px]">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <LineChart data={weeklyProgress}>
-                          <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis dataKey="day" />
-                          <YAxis yAxisId="left" />
-                          <YAxis yAxisId="right" orientation="right" />
-                          <Tooltip />
-                          <Line
-                            yAxisId="left"
-                            type="monotone"
-                            dataKey="score"
-                            stroke="#3b82f6"
-                            name="Score %"
-                          />
-                          <Line
-                            yAxisId="right"
-                            type="monotone"
-                            dataKey="xp"
-                            stroke="#10b981"
-                            name="XP Gained"
-                          />
-                        </LineChart>
-                      </ResponsiveContainer>
-                    </div>
-                  ) : (
-                    <EmptyState
-                      icon={Calendar}
-                      message="Complete some quizzes to see your weekly progress!"
-                    />
-                  )}
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <BarChart3 className="mr-2 h-5 w-5" />
-                    Category Performance
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {categoryPerformance.length > 0 ? (
-                    <div className="h-[300px]">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={categoryPerformance}>
-                          <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis dataKey="name" />
-                          <YAxis yAxisId="left" />
-                          <YAxis yAxisId="right" orientation="right" />
-                          <Tooltip />
-                          <Bar
-                            yAxisId="left"
-                            dataKey="score"
-                            fill="#3b82f6"
-                            name="Avg. Score %"
-                          />
-                          <Bar
-                            yAxisId="right"
-                            dataKey="quizzes"
-                            fill="#10b981"
-                            name="Quizzes Taken"
-                          />
-                        </BarChart>
-                      </ResponsiveContainer>
-                    </div>
-                  ) : (
-                    <EmptyState
-                      icon={BarChart3}
-                      message="Take quizzes in different categories to see your performance!"
-                    />
-                  )}
-                </CardContent>
-              </Card>
+              <WeeklyProgressChart weeklyProgress={weeklyProgress} />
+              <CategoryPerformanceChart
+                categoryPerformance={categoryPerformance}
+              />
             </TabsContent>
 
             <TabsContent value="achievements" className="space-y-8">
