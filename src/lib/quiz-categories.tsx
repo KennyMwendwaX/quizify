@@ -1,4 +1,13 @@
 const categories = {
+  "General Knowledge": [
+    "Trivia",
+    "Famous People",
+    "Inventions & Discoveries",
+    "Quotes & Sayings",
+    "Fun Facts",
+    "Riddles & Brain Teasers",
+    "World Records",
+  ],
   Science: [
     "Physics",
     "Chemistry",

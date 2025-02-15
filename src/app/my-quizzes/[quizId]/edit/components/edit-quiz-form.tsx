@@ -10,6 +10,8 @@ import {
   PencilLine,
   Clock,
   GripVertical,
+  Check,
+  ChevronsUpDown,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -46,6 +48,21 @@ import {
 } from "@/components/ui/select";
 import { Session } from "@/lib/auth";
 import { AdminQuiz } from "@/database/schema";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { categoryOptions } from "@/lib/quiz-categories";
+import { cn } from "@/lib/utils";
 
 type Props = {
   quizId: string;
@@ -176,65 +193,98 @@ export default function EditQuizForm({ quizId, quiz, session }: Props) {
                 />
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <FormField
-                    control={form.control}
-                    name="category"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-base font-medium">
-                          Category
-                        </FormLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}>
-                          <FormControl>
-                            <SelectTrigger className="h-12 border-primary/20 focus:border-primary/40">
-                              <SelectValue placeholder="Select a category" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="science">Science</SelectItem>
-                            <SelectItem value="geography">Geography</SelectItem>
-                            <SelectItem value="history">History</SelectItem>
-                            <SelectItem value="mathematics">
-                              Mathematics
-                            </SelectItem>
-                            <SelectItem value="general">
-                              General Knowledge
-                            </SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="difficulty"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-base font-medium">
-                          Difficulty
-                        </FormLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}>
-                          <FormControl>
-                            <SelectTrigger className="h-12 border-primary/20 focus:border-primary/40">
-                              <SelectValue placeholder="Select difficulty" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="EASY">Easy</SelectItem>
-                            <SelectItem value="MEDIUM">Medium</SelectItem>
-                            <SelectItem value="HARD">Hard</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                  <div className="flex flex-col space-y-1.5">
+                    <FormField
+                      control={form.control}
+                      name="category"
+                      render={({ field }) => (
+                        <FormItem className="flex-1">
+                          <FormLabel>Category</FormLabel>
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <FormControl>
+                                <Button
+                                  variant="outline"
+                                  role="combobox"
+                                  className={cn(
+                                    "w-full justify-between",
+                                    !field.value && "text-muted-foreground"
+                                  )}>
+                                  {field.value
+                                    ? categoryOptions.find(
+                                        (category) =>
+                                          category.value === field.value
+                                      )?.label
+                                    : "Select category"}
+                                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                </Button>
+                              </FormControl>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-full p-0">
+                              <Command>
+                                <CommandInput placeholder="Search category..." />
+                                <CommandList>
+                                  <CommandEmpty>
+                                    No category found.
+                                  </CommandEmpty>
+                                  <CommandGroup className="max-h-64 overflow-y-auto">
+                                    {categoryOptions.map((option) => (
+                                      <CommandItem
+                                        value={option.value}
+                                        key={option.value}
+                                        onSelect={() => {
+                                          form.setValue(
+                                            "category",
+                                            option.value
+                                          );
+                                        }}>
+                                        <Check
+                                          className={cn(
+                                            "mr-2 h-4 w-4",
+                                            option.value === field.value
+                                              ? "opacity-100"
+                                              : "opacity-0"
+                                          )}
+                                        />
+                                        {option.label}
+                                      </CommandItem>
+                                    ))}
+                                  </CommandGroup>
+                                </CommandList>
+                              </Command>
+                            </PopoverContent>
+                          </Popover>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  <div className="flex flex-col space-y-1.5">
+                    <FormField
+                      control={form.control}
+                      name="difficulty"
+                      render={({ field }) => (
+                        <FormItem className="flex-1">
+                          <FormLabel>Difficulty</FormLabel>
+                          <Select
+                            onValueChange={field.onChange}
+                            defaultValue={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select difficulty" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="EASY">Easy</SelectItem>
+                              <SelectItem value="MEDIUM">Medium</SelectItem>
+                              <SelectItem value="HARD">Hard</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
                 </div>
 
                 <FormField
