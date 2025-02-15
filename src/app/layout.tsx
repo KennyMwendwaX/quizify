@@ -17,7 +17,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${GeistSans.className} antialiased`}>
+      <body className={`${GeistSans.className}`}>
         <NavbarWrapper>{children}</NavbarWrapper>
         <Toaster richColors />
       </body>

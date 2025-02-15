@@ -371,7 +371,7 @@ export default function QuizForm({ session }: Props) {
                           <div className="w-8 h-8 bg-primary/10 text-primary rounded-lg flex items-center justify-center text-sm font-medium">
                             {qIndex + 1}
                           </div>
-                          <span className="text-lg font-medium">
+                          <span className="text-base font-medium">
                             {question.title || `Question ${qIndex + 1}`}
                           </span>
                         </div>
@@ -379,8 +379,8 @@ export default function QuizForm({ session }: Props) {
                           variant="ghost"
                           size="sm"
                           onClick={() => remove(qIndex)}
-                          className="text-destructive hover:text-destructive/90">
-                          <Trash2 className="w-4 h-4 mr-2" />
+                          className="text-destructive hover:text-destructive/90 hover:bg-red-50 text-sm">
+                          <Trash2 className="w-4 h-4 mr-1" />
                           Remove Question
                         </Button>
                       </div>
