@@ -2,16 +2,15 @@
 
 import { BarChart3 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-
 import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-} from "recharts";
+  ChartConfig,
+  ChartContainer,
+  ChartLegend,
+  ChartLegendContent,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/components/ui/chart";
+import { BarChart, Bar, XAxis, YAxis } from "recharts";
 import { CategoryPerformance } from "@/lib/types";
 import EmptyState from "./empty-state";
 
@@ -22,6 +21,19 @@ type Props = {
 export default function CategoryPerformanceChart({
   categoryPerformance,
 }: Props) {
+  const yAxisMax = Math.max(
+    ...categoryPerformance.map((item) => Math.max(item.score, item.quizzes))
+  );
+  const chartConfig = {
+    score: {
+      label: "Score",
+      color: "hsl(var(--primary))",
+    },
+    quizzes: {
+      label: "Quizzes",
+      color: "hsl(var(--muted-foreground))",
+    },
+  } satisfies ChartConfig;
   return (
     <Card>
       <CardHeader>
@@ -32,29 +44,40 @@ export default function CategoryPerformanceChart({
       </CardHeader>
       <CardContent>
         {categoryPerformance.length > 0 ? (
-          <div className="h-[300px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={categoryPerformance}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
-                <YAxis yAxisId="left" />
-                <YAxis yAxisId="right" orientation="right" />
-                <Tooltip />
-                <Bar
-                  yAxisId="left"
-                  dataKey="score"
-                  fill="#3b82f6"
-                  name="Avg. Score %"
-                />
-                <Bar
-                  yAxisId="right"
-                  dataKey="quizzes"
-                  fill="#10b981"
-                  name="Quizzes Taken"
-                />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
+          <ChartContainer config={chartConfig} className="min-h-[350px] w-full">
+            <BarChart accessibilityLayer data={categoryPerformance}>
+              <XAxis
+                dataKey="name"
+                stroke="#888888"
+                fontSize={12}
+                tickLine={false}
+                axisLine={false}
+              />
+              <YAxis
+                stroke="#888888"
+                fontSize={12}
+                tickLine={false}
+                axisLine={false}
+                domain={[0, yAxisMax]}
+                allowDecimals={false}
+              />
+              <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
+              <ChartLegend content={<ChartLegendContent />} />
+
+              <Bar
+                dataKey="score"
+                fill="hsl(var(--primary))"
+                radius={[4, 4, 0, 0]}
+                name="Avg. Score %"
+              />
+              <Bar
+                dataKey="quizzes"
+                fill="hsl(var(--primary))"
+                radius={[4, 4, 0, 0]}
+                name="Quizzes Taken"
+              />
+            </BarChart>
+          </ChartContainer>
         ) : (
           <EmptyState
             icon={BarChart3}
