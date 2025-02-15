@@ -23,7 +23,7 @@ import {
   UserStats,
   WeeklyProgress,
 } from "@/lib/types";
-import WeeklyProgressChart from "./weekly-progress-chart";
+import WeeklyProgressChart from "./weekly-progress";
 import CategoryPerformanceChart from "./category-performance";
 import EmptyState from "./empty-state";
 import StatCard from "./stat-card";
