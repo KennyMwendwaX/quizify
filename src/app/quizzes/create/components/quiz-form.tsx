@@ -61,7 +61,11 @@ import {
 } from "@/components/ui/popover";
 import { Session } from "@/lib/auth";
 import { cn } from "@/lib/utils";
-import { categoryOptions } from "@/lib/quiz-categories";
+import {
+  categories,
+  flattenCategories,
+  getCategoryNameFromPath,
+} from "@/lib/quiz-categories";
 
 type Props = {
   session: Session;
@@ -83,6 +87,8 @@ export default function QuizForm({ session }: Props) {
     control: form.control,
     name: "questions",
   });
+
+  const flattenedCategories = flattenCategories(categories);
 
   const addQuestion = () => {
     append({
@@ -208,10 +214,10 @@ export default function QuizForm({ session }: Props) {
                                     !field.value && "text-muted-foreground"
                                   )}>
                                   {field.value
-                                    ? categoryOptions.find(
-                                        (category) =>
-                                          category.value === field.value
-                                      )?.label
+                                    ? getCategoryNameFromPath(
+                                        field.value,
+                                        categories
+                                      )
                                     : "Select category"}
                                   <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                                 </Button>
@@ -225,25 +231,28 @@ export default function QuizForm({ session }: Props) {
                                     No category found.
                                   </CommandEmpty>
                                   <CommandGroup className="max-h-64 overflow-y-auto">
-                                    {categoryOptions.map((option) => (
+                                    {flattenedCategories.map((category) => (
                                       <CommandItem
-                                        value={option.value}
-                                        key={option.value}
+                                        value={category.value}
+                                        key={category.value}
                                         onSelect={() => {
                                           form.setValue(
                                             "category",
-                                            option.value
+                                            category.value
                                           );
                                         }}>
                                         <Check
                                           className={cn(
                                             "mr-2 h-4 w-4",
-                                            option.value === field.value
+                                            category.value === field.value
                                               ? "opacity-100"
                                               : "opacity-0"
                                           )}
                                         />
-                                        {option.label}
+                                        {getCategoryNameFromPath(
+                                          category.value,
+                                          categories
+                                        )}
                                       </CommandItem>
                                     ))}
                                   </CommandGroup>
