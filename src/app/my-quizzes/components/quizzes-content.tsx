@@ -1,21 +1,22 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState, useCallback } from "react";
 import Link from "next/link";
-import { motion } from "motion/react";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   Search,
   Clock,
-  Users,
   ArrowRight,
-  BookOpen,
-  Globe2,
-  Lightbulb,
-  Atom,
-  Hash,
+  ChevronDown,
+  CalendarDays,
+  ArrowUpDown,
+  Users,
   Plus,
   Settings,
   MoreVertical,
+  BookOpen,
+  Target,
+  Trophy,
 } from "lucide-react";
 import {
   Card,
@@ -23,10 +24,12 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
+  CardDescription,
 } from "@/components/ui/card";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -35,233 +38,334 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { PublicQuiz } from "@/database/schema";
+import { Separator } from "@/components/ui/separator";
+import type { PublicQuiz, QuizDifficulty } from "@/database/schema";
 
-const categories = [
-  { id: "all", name: "All Quizzes", icon: Hash },
-  { id: "history", name: "History", icon: BookOpen },
-  { id: "geography", name: "Geography", icon: Globe2 },
-  { id: "general", name: "General Knowledge", icon: Lightbulb },
-  { id: "science", name: "Science", icon: Atom },
-];
-
-const getDifficultyColor = (difficulty: string) => {
+const getDifficultyConfig = (
+  difficulty: QuizDifficulty
+): { color: string; icon: string; bgColor: string } => {
   switch (difficulty.toLowerCase()) {
     case "easy":
-      return "bg-green-100 text-green-700";
+      return {
+        color: "text-emerald-700 dark:text-emerald-400",
+        bgColor: "bg-emerald-100 dark:bg-emerald-900",
+        icon: "🌱",
+      };
     case "medium":
-      return "bg-yellow-100 text-yellow-700";
+      return {
+        color: "text-amber-700 dark:text-amber-400",
+        bgColor: "bg-amber-100 dark:bg-amber-900",
+        icon: "🌟",
+      };
     case "hard":
-      return "bg-red-100 text-red-700";
+      return {
+        color: "text-rose-700 dark:text-rose-400",
+        bgColor: "bg-rose-100 dark:bg-rose-900",
+        icon: "⚡",
+      };
     default:
-      return "bg-gray-100 text-gray-700";
+      return {
+        color: "text-slate-700 dark:text-slate-400",
+        bgColor: "bg-slate-100 dark:bg-slate-900",
+        icon: "✨",
+      };
   }
 };
 
-type Props = {
+export default function MyQuizzesContent({
+  quizzes,
+}: {
   quizzes: PublicQuiz[];
-};
-
-export default function MyQuizzesContent({ quizzes }: Props) {
+}) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [searchTerm, setSearchTerm] = useState("");
-  const [activeCategory, setActiveCategory] = useState("all");
+  const [difficultyFilter, setDifficultyFilter] = useState("all");
+  const [sortBy, setSortBy] = useState("date_desc");
+  const [hoveredCard, setHoveredCard] = useState<string | null>(null);
 
-  const filteredQuizzes = quizzes.filter((quiz) => {
-    const matchesSearch = quiz.title
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase());
-    const matchesCategory =
-      activeCategory === "all" || quiz.category === activeCategory;
-    return matchesSearch && matchesCategory;
-  });
+  const updateUrlParams = useCallback(
+    (newSearch: string, newDifficulty: string, newSort: string) => {
+      const params = new URLSearchParams(searchParams);
+      if (newSearch !== undefined) params.set("search", newSearch);
+      if (newDifficulty !== undefined) params.set("difficulty", newDifficulty);
+      if (newSort !== undefined) params.set("sort", newSort);
+      router.push(`?${params.toString()}`, { scroll: false });
+    },
+    [router, searchParams]
+  );
+
+  const filteredAndSortedQuizzes = useMemo(() => {
+    return quizzes
+      .filter((quiz) => {
+        const matchesSearch = quiz.title
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase());
+        const matchesDifficulty =
+          difficultyFilter === "all" || quiz.difficulty === difficultyFilter;
+        return matchesSearch && matchesDifficulty;
+      })
+      .sort((a, b) => {
+        switch (sortBy) {
+          case "date_desc":
+            return (
+              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+            );
+          case "date_asc":
+            return (
+              new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+            );
+          case "name_asc":
+            return a.title.localeCompare(b.title);
+          case "name_desc":
+            return b.title.localeCompare(a.title);
+          default:
+            return 0;
+        }
+      });
+  }, [quizzes, searchTerm, difficultyFilter, sortBy]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-background/90 py-6">
-      <div className="container mx-auto px-4 py-4">
-        <div className="max-w-6xl mx-auto mb-8 space-y-6">
-          {/* Header Section */}
-          <div className="flex justify-between items-start mb-6">
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.5 }}>
-              <h1 className="text-4xl font-bold text-foreground mb-2">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-background/90 py-4">
+      <div className="container mx-auto px-4 py-6">
+        <div className="flex flex-col space-y-8">
+          <div className="flex justify-between items-center">
+            <div>
+              <h1 className="text-2xl font-semibold text-foreground">
                 My Quizzes
               </h1>
-              <p className="text-sm text-muted-foreground">
-                Create and manage your collection of quizzes
+              <p className="text-sm text-muted-foreground mt-1">
+                Manage and organize your quiz collection
               </p>
-            </motion.div>
+            </div>
+            <Button className="h-10" asChild>
+              <Link href="/quizzes/create" className="flex items-center gap-2">
+                <Plus className="h-4 w-4" />
+                Create Quiz
+              </Link>
+            </Button>
+          </div>
+          <div className="bg-background shadow-lg border rounded-xl p-4">
+            <div className="flex flex-col sm:flex-row gap-4">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                <Input
+                  type="text"
+                  placeholder="Search your quizzes..."
+                  className="pl-9 h-11"
+                  value={searchTerm}
+                  onChange={(e) => {
+                    setSearchTerm(e.target.value);
+                    updateUrlParams(e.target.value, difficultyFilter, sortBy);
+                  }}
+                />
+              </div>
 
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.5 }}>
-              <Button size="lg" className="h-12 px-6 rounded-xl">
-                <Link
-                  href="/quizzes/create"
-                  className="flex items-center gap-2">
-                  <Plus className="w-5 h-5" />
-                  Create New Quiz
-                </Link>
-              </Button>
-            </motion.div>
+              <div className="flex gap-3">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" className="h-11 px-4">
+                      <Target className="mr-2 h-4 w-4" />
+                      {difficultyFilter === "all"
+                        ? "All Levels"
+                        : difficultyFilter}
+                      <ChevronDown className="ml-2 h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-48">
+                    <DropdownMenuLabel>Filter by difficulty</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuGroup>
+                      <DropdownMenuItem
+                        onClick={() => setDifficultyFilter("all")}>
+                        ✨ All Levels
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => setDifficultyFilter("EASY")}>
+                        🌱 Easy
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => setDifficultyFilter("MEDIUM")}>
+                        🌟 Medium
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => setDifficultyFilter("HARD")}>
+                        ⚡ Hard
+                      </DropdownMenuItem>
+                    </DropdownMenuGroup>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" className="h-11 px-4">
+                      <ArrowUpDown className="mr-2 h-4 w-4" />
+                      Sort
+                      <ChevronDown className="ml-2 h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-48">
+                    <DropdownMenuLabel>Sort quizzes</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuGroup>
+                      <DropdownMenuItem onClick={() => setSortBy("date_desc")}>
+                        <CalendarDays className="mr-2 h-4 w-4" />
+                        Newest first
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => setSortBy("date_asc")}>
+                        <CalendarDays className="mr-2 h-4 w-4" />
+                        Oldest first
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => setSortBy("name_asc")}>
+                        <ArrowUpDown className="mr-2 h-4 w-4" />
+                        Name (A-Z)
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => setSortBy("name_desc")}>
+                        <ArrowUpDown className="mr-2 h-4 w-4" />
+                        Name (Z-A)
+                      </DropdownMenuItem>
+                    </DropdownMenuGroup>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            </div>
           </div>
 
-          {/* Search and Filter Section */}
-          <div className="flex flex-col md:flex-row gap-4 items-stretch md:items-center">
-            <div className="relative flex-grow">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground h-4 w-4" />
-              <Input
-                type="text"
-                placeholder="Search your quizzes..."
-                className="pl-10 pr-4 h-12 text-sm rounded-xl border-border/50 focus:border-primary/40 transition-all"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
-            <div className="flex gap-2 overflow-x-auto pb-2 md:pb-0">
-              {categories.map((category) => {
-                const Icon = category.icon;
-                return (
-                  <Button
-                    key={category.id}
-                    size="sm"
-                    variant={
-                      activeCategory === category.id ? "secondary" : "ghost"
-                    }
-                    onClick={() =>
-                      setActiveCategory(
-                        activeCategory === category.id ? "all" : category.id
-                      )
-                    }
-                    className="h-12 px-4 whitespace-nowrap">
-                    <Icon className="w-4 h-4 mr-2" />
-                    {category.name}
-                  </Button>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-
-        {/* Quiz Grid */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
-          {filteredQuizzes.map((quiz, index) => (
-            <motion.div
-              key={quiz.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: index * 0.1 }}>
-              <Card className="group h-full flex flex-col bg-white/50 dark:bg-gray-800/50 shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl overflow-hidden">
-                <CardHeader className="relative pb-4">
-                  <div className="flex justify-between items-start mb-2">
-                    <div className="flex gap-2">
-                      <Badge className={getDifficultyColor(quiz.difficulty)}>
-                        {quiz.difficulty}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredAndSortedQuizzes.map((quiz) => {
+              const diffConfig = getDifficultyConfig(quiz.difficulty);
+              return (
+                <Card
+                  key={quiz.id}
+                  className="group relative overflow-hidden border border-border/50 dark:border-border/50 bg-background/50 backdrop-blur supports-[backdrop-filter]:bg-background/50 h-full flex flex-col transition-all duration-300 hover:shadow-lg"
+                  onMouseEnter={() => setHoveredCard(quiz.id.toString())}
+                  onMouseLeave={() => setHoveredCard(null)}>
+                  <CardHeader className="space-y-2">
+                    <div className="flex justify-between items-start">
+                      <Badge
+                        variant="secondary"
+                        className={`${diffConfig.color} ${diffConfig.bgColor} px-2 py-0.5`}>
+                        {diffConfig.icon} {quiz.difficulty}
                       </Badge>
-                      <Badge variant="secondary" className="text-xs">
-                        {quiz.questions.length} questions
-                      </Badge>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 w-8 p-0">
+                            <MoreVertical className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem>Duplicate</DropdownMenuItem>
+                          <DropdownMenuItem>Archive</DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem className="text-red-600">
+                            Delete
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </div>
+                    <CardTitle className="text-2xl leading-tight">
+                      {quiz.title}
+                    </CardTitle>
+                    <CardDescription className="line-clamp-2">
+                      {quiz.description}
+                    </CardDescription>
+                  </CardHeader>
 
-                    <DropdownMenu>
-                      <DropdownMenuTrigger>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-8 w-8 p-0">
-                          <MoreVertical className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent>
-                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem>Preview</DropdownMenuItem>
-                        <DropdownMenuItem>Edit</DropdownMenuItem>
-                        <DropdownMenuItem>Delete</DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
-                  <CardTitle className="text-2xl font-bold group-hover:text-primary transition-colors">
-                    {quiz.title}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="flex-grow pb-4">
-                  <p className="text-muted-foreground mb-6">
-                    {quiz.description}
-                  </p>
-                  <div className="flex gap-4 text-sm text-muted-foreground">
-                    <div className="flex items-center gap-2 bg-primary/5 px-3 py-1.5 rounded-lg">
-                      <Clock className="w-4 h-4" />
-                      {quiz.timeLimit} mins
+                  <CardContent className="space-y-6 flex-grow">
+                    <Separator />
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="flex items-center gap-3 p-2.5 rounded-lg bg-muted/50">
+                        <Clock className="h-5 w-5 text-muted-foreground" />
+                        <div>
+                          <p className="text-sm">{quiz.timeLimit} mins</p>
+                          <p className="text-xs text-muted-foreground">
+                            Time limit
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3 p-2.5 rounded-lg bg-muted/50">
+                        <BookOpen className="h-5 w-5 text-muted-foreground" />
+                        <div>
+                          <p className="text-sm">{quiz.questions.length}</p>
+                          <p className="text-xs text-muted-foreground">
+                            Questions
+                          </p>
+                        </div>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2 bg-primary/5 px-3 py-1.5 rounded-lg">
-                      <Users className="w-4 h-4" />
-                      150 attempts
+                    <div className="flex justify-between items-center text-sm text-muted-foreground">
+                      <div className="flex items-center gap-1">
+                        <Users className="h-4 w-4" />
+                        <span>150 attempts</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Trophy className="h-4 w-4" />
+                        <span>85% avg. score</span>
+                      </div>
                     </div>
-                  </div>
-                </CardContent>
-                <CardFooter className="pt-4 pb-6">
-                  <div className="flex gap-2 w-full">
-                    <Button
-                      variant="outline"
-                      className="flex-1 h-12 rounded-xl"
-                      asChild>
-                      <Link
-                        href={`/my-quizzes/${quiz.id}/edit`}
-                        className="flex items-center justify-center gap-2">
-                        <Settings className="w-4 h-4 mr-2" />
+                  </CardContent>
+
+                  <CardFooter className="grid grid-cols-2 gap-3">
+                    <Button variant="outline" className="w-full h-11" asChild>
+                      <Link href={`/my-quizzes/${quiz.id}/edit`}>
+                        <Settings className="mr-2 h-4 w-4" />
                         Edit
                       </Link>
                     </Button>
-                    <Button className="flex-1 h-12 rounded-xl" asChild>
-                      <Link
-                        href={`/my-quizzes/${quiz.id}`}
-                        className="flex items-center justify-center gap-2">
+                    <Button
+                      className="w-full h-11"
+                      variant={
+                        hoveredCard === quiz.id.toString()
+                          ? "default"
+                          : "secondary"
+                      }
+                      asChild>
+                      <Link href={`/my-quizzes/${quiz.id}`}>
                         Preview
-                        <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                        <ArrowRight
+                          className={`ml-2 h-4 w-4 transition-all duration-300 ${
+                            hoveredCard === quiz.id.toString()
+                              ? "translate-x-1"
+                              : ""
+                          }`}
+                        />
                       </Link>
                     </Button>
-                  </div>
-                </CardFooter>
-              </Card>
-            </motion.div>
-          ))}
-        </motion.div>
+                  </CardFooter>
+                </Card>
+              );
+            })}
+          </div>
 
-        {/* Empty State */}
-        {filteredQuizzes.length === 0 && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.5 }}
-            className="text-center mt-16 p-8 bg-white/50 dark:bg-gray-800/50 backdrop-blur-xl rounded-2xl shadow-lg max-w-2xl mx-auto">
-            <div className="mb-4">
-              <Plus className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-              <p className="text-xl font-semibold mb-2">No quizzes found</p>
-              <p className="text-muted-foreground mb-6">
-                {searchTerm || activeCategory !== "all"
-                  ? "Try a different search term or category"
-                  : "Create your first quiz to get started"}
-              </p>
-              {!searchTerm && activeCategory === "all" && (
-                <Button size="lg" className="h-12 px-6 rounded-xl">
-                  <Link
-                    href="/quizzes/create"
-                    className="flex items-center gap-2">
-                    <Plus className="w-5 h-5" />
-                    Create New Quiz
-                  </Link>
-                </Button>
-              )}
-            </div>
-          </motion.div>
-        )}
+          {filteredAndSortedQuizzes.length === 0 && (
+            <Card className="p-12">
+              <div className="text-center space-y-4">
+                <Plus className="h-12 w-12 mx-auto text-muted-foreground/40" />
+                <div className="space-y-2">
+                  <h3 className="text-xl font-semibold">No quizzes found</h3>
+                  <p className="text-muted-foreground max-w-sm mx-auto">
+                    {searchTerm || difficultyFilter !== "all"
+                      ? "Try adjusting your search terms or filters to find what you're looking for."
+                      : "Create your first quiz to get started."}
+                  </p>
+                  {!searchTerm && difficultyFilter === "all" && (
+                    <Button size="lg" className="mt-4" asChild>
+                      <Link
+                        href="/quizzes/create"
+                        className="flex items-center gap-2">
+                        <Plus className="h-5 w-5" />
+                        Create New Quiz
+                      </Link>
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </Card>
+          )}
+        </div>
       </div>
     </div>
   );

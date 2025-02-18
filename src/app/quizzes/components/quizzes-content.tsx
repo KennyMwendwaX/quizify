@@ -282,21 +282,19 @@ export default function QuizzesContent({ quizzes }: { quizzes: PublicQuiz[] }) {
                     <CardContent className="space-y-6 flex-grow">
                       <Separator />
                       <div className="grid grid-cols-2 gap-4">
-                        <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
+                        <div className="flex items-center gap-3 p-2.5 rounded-lg bg-muted/50">
                           <Clock className="h-5 w-5 text-muted-foreground" />
                           <div>
-                            <p className="font-medium">{quiz.timeLimit} mins</p>
+                            <p className="text-sm">{quiz.timeLimit} mins</p>
                             <p className="text-xs text-muted-foreground">
                               Time limit
                             </p>
                           </div>
                         </div>
-                        <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
+                        <div className="flex items-center gap-3 p-2.5 rounded-lg bg-muted/50">
                           <BookOpen className="h-5 w-5 text-muted-foreground" />
                           <div>
-                            <p className="font-medium">
-                              {quiz.questions.length}
-                            </p>
+                            <p className="text-sm">{quiz.questions.length}</p>
                             <p className="text-xs text-muted-foreground">
                               Questions
                             </p>
