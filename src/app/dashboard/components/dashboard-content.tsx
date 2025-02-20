@@ -29,6 +29,7 @@ import EmptyState from "./empty-state";
 import StatCard from "./stat-card";
 import QuizCard from "./quiz-card";
 import ActionButton from "./action-button";
+import { formatSecondsToMinutes } from "@/lib/format-time";
 
 // const AchievementCard = ({ achievement }: { achievement: Achievement }) => (
 //   <div className="p-4 border rounded-lg bg-card hover:bg-accent transition-colors">
@@ -113,7 +114,7 @@ export default function DashboardContent({
               <div className="grid md:grid-cols-3 gap-6">
                 <Card className="md:col-span-2">
                   <CardHeader>
-                    <CardTitle className="flex items-center">
+                    <CardTitle className="flex items-center text-xl">
                       <PlayCircle className="mr-2 h-5 w-5" />
                       Recent Quizzes
                     </CardTitle>
@@ -136,7 +137,7 @@ export default function DashboardContent({
 
                 <Card>
                   <CardHeader>
-                    <CardTitle className="flex items-center">
+                    <CardTitle className="flex items-center text-xl">
                       <Zap className="mr-2 h-5 w-5" />
                       Quick Actions
                     </CardTitle>
@@ -205,7 +206,7 @@ export default function DashboardContent({
                     title="Avg. Time per Quiz"
                     value={
                       stats.averageTimePerQuiz
-                        ? `${stats.averageTimePerQuiz} min`
+                        ? `${formatSecondsToMinutes(stats.averageTimePerQuiz)}`
                         : "-"
                     }
                     icon={Clock}

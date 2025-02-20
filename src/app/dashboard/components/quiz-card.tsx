@@ -1,15 +1,9 @@
 "use client";
 
+import { formatSecondsToMinutes } from "@/lib/format-time";
 import { RecentQuiz } from "@/lib/types";
 
 export default function QuizCard({ quiz }: { quiz: RecentQuiz }) {
-  function formatSecondsToMinutes(totalSeconds: number) {
-    const minutes = Math.floor(totalSeconds / 60);
-    const remainingSeconds = totalSeconds % 60;
-
-    return `${minutes}min ${remainingSeconds.toString().padStart(2, "0")}sec`;
-  }
-
   return (
     <div className="flex items-center justify-between p-3 bg-primary/5 rounded-lg hover:bg-primary/10 transition-colors">
       <div>
