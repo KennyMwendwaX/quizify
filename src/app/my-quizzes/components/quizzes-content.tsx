@@ -354,29 +354,34 @@ export default function MyQuizzesContent({
           </motion.div>
 
           {filteredAndSortedQuizzes.length === 0 && (
-            <Card className="p-12">
-              <div className="text-center space-y-4">
-                <Plus className="h-12 w-12 mx-auto text-muted-foreground/40" />
-                <div className="space-y-2">
-                  <h3 className="text-xl font-semibold">No quizzes found</h3>
-                  <p className="text-muted-foreground max-w-sm mx-auto">
-                    {searchTerm || difficultyFilter !== "all"
-                      ? "Try adjusting your search terms or filters to find what you're looking for."
-                      : "Create your first quiz to get started."}
-                  </p>
-                  {!searchTerm && difficultyFilter === "all" && (
-                    <Button size="lg" className="mt-4" asChild>
-                      <Link
-                        href="/quizzes/create"
-                        className="flex items-center gap-2">
-                        <Plus className="h-5 w-5" />
-                        Create New Quiz
-                      </Link>
-                    </Button>
-                  )}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.5, delay: 0.6 }}>
+              <Card className="p-12">
+                <div className="text-center space-y-4">
+                  <Plus className="h-12 w-12 mx-auto text-muted-foreground/40" />
+                  <div className="space-y-2">
+                    <h3 className="text-xl font-semibold">No quizzes found</h3>
+                    <p className="text-muted-foreground max-w-sm mx-auto">
+                      {searchTerm || difficultyFilter !== "all"
+                        ? "Try adjusting your search terms or filters to find what you're looking for."
+                        : "Create your first quiz to get started."}
+                    </p>
+                    {!searchTerm && difficultyFilter === "all" && (
+                      <Button size="lg" className="mt-4" asChild>
+                        <Link
+                          href="/quizzes/create"
+                          className="flex items-center gap-2">
+                          <Plus className="h-5 w-5" />
+                          Create New Quiz
+                        </Link>
+                      </Button>
+                    )}
+                  </div>
                 </div>
-              </div>
-            </Card>
+              </Card>
+            </motion.div>
           )}
         </div>
       </div>
