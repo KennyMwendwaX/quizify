@@ -38,7 +38,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import type { PublicQuiz, QuizDifficulty } from "@/database/schema";
 import { Separator } from "@/components/ui/separator";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 
 const getDifficultyConfig = (
   difficulty: QuizDifficulty

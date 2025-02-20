@@ -4,6 +4,7 @@ type CategoryType = {
   icon: string;
   subcategories?: CategoryType[];
 };
+
 export const categories: CategoryType[] = [
   {
     id: "academic",
@@ -105,6 +106,59 @@ export const categories: CategoryType[] = [
     ],
   },
   {
+    id: "history",
+    name: "History",
+    icon: "Clock",
+    subcategories: [
+      { id: "ancient", name: "Ancient History", icon: "Monument" },
+      { id: "medieval", name: "Medieval History", icon: "Sword" },
+      { id: "modern", name: "Modern History", icon: "Building" },
+      { id: "world-wars", name: "World Wars", icon: "Milestone" },
+    ],
+  },
+  {
+    id: "geography",
+    name: "Geography",
+    icon: "Globe",
+    subcategories: [
+      { id: "physical", name: "Physical Geography", icon: "Mountain" },
+      { id: "political", name: "Political Geography", icon: "Flag" },
+      { id: "human", name: "Human Geography", icon: "Users" },
+      { id: "climate", name: "Climate & Weather", icon: "Cloud" },
+    ],
+  },
+  {
+    id: "culture",
+    name: "Culture",
+    icon: "Globe",
+    subcategories: [
+      { id: "art", name: "Art History", icon: "Palette" },
+      { id: "literature", name: "Literature", icon: "Book" },
+      { id: "mythology", name: "Mythology", icon: "Sparkles" },
+      { id: "religion", name: "Religion", icon: "PrayingHands" },
+    ],
+  },
+  {
+    id: "current-events",
+    name: "Current Events",
+    icon: "Newspaper",
+  },
+  {
+    id: "politics",
+    name: "Politics",
+    icon: "Building2",
+  },
+  {
+    id: "economics",
+    name: "Economics",
+    icon: "TrendingUp",
+  },
+  {
+    id: "general",
+    name: "General Knowledge",
+    icon: "Lightbulb",
+  },
+  {
     id: "entertainment",
     name: "Entertainment",
     icon: "Film",
@@ -188,50 +242,7 @@ export const categories: CategoryType[] = [
         ],
       },
       { id: "olympics", name: "Olympics", icon: "Medal" },
-      { id: "esports", name: "Esports", icon: "Gamepad" },
-    ],
-  },
-  {
-    id: "general",
-    name: "General Knowledge",
-    icon: "Lightbulb",
-    subcategories: [
-      {
-        id: "history",
-        name: "History",
-        icon: "Clock",
-        subcategories: [
-          { id: "ancient", name: "Ancient History", icon: "Monument" },
-          { id: "medieval", name: "Medieval History", icon: "Sword" },
-          { id: "modern", name: "Modern History", icon: "Building" },
-          { id: "world-wars", name: "World Wars", icon: "Milestone" },
-        ],
-      },
-      {
-        id: "geography",
-        name: "Geography",
-        icon: "Globe",
-        subcategories: [
-          { id: "physical", name: "Physical Geography", icon: "Mountain" },
-          { id: "political", name: "Political Geography", icon: "Flag" },
-          { id: "human", name: "Human Geography", icon: "Users" },
-          { id: "climate", name: "Climate & Weather", icon: "Cloud" },
-        ],
-      },
-      {
-        id: "culture",
-        name: "Culture",
-        icon: "Globe",
-        subcategories: [
-          { id: "art", name: "Art History", icon: "Palette" },
-          { id: "literature", name: "Literature", icon: "Book" },
-          { id: "mythology", name: "Mythology", icon: "Sparkles" },
-          { id: "religion", name: "Religion", icon: "PrayingHands" },
-        ],
-      },
-      { id: "current-events", name: "Current Events", icon: "Newspaper" },
-      { id: "politics", name: "Politics", icon: "Building2" },
-      { id: "economics", name: "Economics", icon: "TrendingUp" },
+      { id: "esports", name: "E-Sports", icon: "Gamepad" },
     ],
   },
   {
