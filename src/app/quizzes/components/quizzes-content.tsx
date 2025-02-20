@@ -131,17 +131,17 @@ export default function QuizzesContent({ quizzes }: { quizzes: PublicQuiz[] }) {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-background/90 py-6">
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-6">
         <div className="flex flex-col space-y-8">
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
             className="text-center space-y-4">
-            <h1 className="text-4xl font-bold tracking-tight bg-clip-text">
+            <h1 className="text-3xl font-bold tracking-tight bg-clip-text">
               Challenge Yourself
             </h1>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-sm text-muted-foreground max-w-2xl mx-auto">
               Discover and master new topics through our curated collection of
               quizzes
             </p>
@@ -151,7 +151,7 @@ export default function QuizzesContent({ quizzes }: { quizzes: PublicQuiz[] }) {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="bg-background shadow-lg border rounded-xl p-6">
+            className="bg-background shadow-lg border rounded-xl p-4">
             <div className="flex flex-col sm:flex-row gap-4">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground h-4 w-4" />

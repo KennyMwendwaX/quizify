@@ -40,6 +40,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import type { PublicQuiz, QuizDifficulty } from "@/database/schema";
+import { motion } from "motion/react";
 
 const getDifficultyConfig = (
   difficulty: QuizDifficulty
@@ -129,7 +130,11 @@ export default function MyQuizzesContent({
     <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-background/90 py-4">
       <div className="container mx-auto px-4 py-6">
         <div className="flex flex-col space-y-8">
-          <div className="flex justify-between items-center">
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="flex justify-between items-center">
             <div>
               <h1 className="text-2xl font-semibold text-foreground">
                 My Quizzes
@@ -144,8 +149,12 @@ export default function MyQuizzesContent({
                 Create Quiz
               </Link>
             </Button>
-          </div>
-          <div className="bg-background shadow-lg border rounded-xl p-4">
+          </motion.div>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="bg-background shadow-lg border rounded-xl p-4">
             <div className="flex flex-col sm:flex-row gap-4">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground h-4 w-4" />
@@ -229,9 +238,13 @@ export default function MyQuizzesContent({
                 </DropdownMenu>
               </div>
             </div>
-          </div>
+          </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5, delay: 0.4 }}
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredAndSortedQuizzes.map((quiz) => {
               const diffConfig = getDifficultyConfig(quiz.difficulty);
               return (
@@ -338,7 +351,7 @@ export default function MyQuizzesContent({
                 </Card>
               );
             })}
-          </div>
+          </motion.div>
 
           {filteredAndSortedQuizzes.length === 0 && (
             <Card className="p-12">
