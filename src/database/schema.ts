@@ -200,6 +200,20 @@ export const quizAttemptsRelations = relations(quizAttempts, ({ one }) => ({
   }),
 }));
 
+export const achievementsRelations = relations(achievements, ({ many }) => ({
+  userAchievements: many(userAchievements),
+}));
+
+export const userAchievementsRelations = relations(
+  userAchievements,
+  ({ one }) => ({
+    achievement: one(achievements, {
+      fields: [userAchievements.achievementId],
+      references: [achievements.id],
+    }),
+  })
+);
+
 export type Quiz = typeof quizzes.$inferSelect;
 export type Question = typeof questions.$inferSelect;
 export type PublicQuestion = Pick<Question, "id" | "title" | "choices">;
