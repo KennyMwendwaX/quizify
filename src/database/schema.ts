@@ -211,6 +211,10 @@ export const userAchievementsRelations = relations(
       fields: [userAchievements.achievementId],
       references: [achievements.id],
     }),
+    user: one(users, {
+      fields: [userAchievements.userId],
+      references: [users.id],
+    }),
   })
 );
 
