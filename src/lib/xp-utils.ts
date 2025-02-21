@@ -3,9 +3,9 @@ import { QuizDifficulty } from "@/database/schema";
 // constants.ts
 export const XP_CONFIG = {
   BASE_XP: {
-    EASY: 100,
-    MEDIUM: 200,
-    HARD: 300,
+    EASY: 10,
+    MEDIUM: 20,
+    HARD: 30,
   },
   SCORE_MULTIPLIERS: {
     PERFECT: 1.5, // 100%
