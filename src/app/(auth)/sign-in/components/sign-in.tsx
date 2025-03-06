@@ -17,8 +17,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
 import { signIn } from "@/lib/auth-client";
-import { FcGoogle } from "react-icons/fc";
-import { FaGithub } from "react-icons/fa";
+import { Eye, EyeOff } from "lucide-react";
 
 const signInSchema = z.object({
   email: z.string().email({ message: "Invalid email address" }),
@@ -31,6 +30,7 @@ type SignInFormValues = z.infer<typeof signInSchema>;
 
 export default function SignIn() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [showPassword, setShowPassword] = useState<boolean>(false);
 
   const signInForm = useForm<SignInFormValues>({
     resolver: zodResolver(signInSchema),
@@ -69,7 +69,11 @@ export default function SignIn() {
               <FormItem>
                 <FormLabel>Email</FormLabel>
                 <FormControl>
-                  <Input placeholder="john@gmail.com" {...field} />
+                  <Input
+                    className="h-8"
+                    placeholder="john@gmail.com"
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -78,16 +82,33 @@ export default function SignIn() {
           <FormField
             name="password"
             render={({ field }) => (
-              <FormItem>
-                <FormLabel>Password</FormLabel>
+              <FormItem className="space-y-1">
+                <FormLabel className="text-sm">Password</FormLabel>
                 <FormControl>
-                  <Input type="password" placeholder="••••••••" {...field} />
+                  <div className="relative">
+                    <Input
+                      type={showPassword ? "text" : "password"}
+                      placeholder="••••••••"
+                      {...field}
+                      className="h-8 pr-10"
+                    />
+                    <button
+                      type="button"
+                      className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                      onClick={() => setShowPassword(!showPassword)}>
+                      {showPassword ? (
+                        <EyeOff className="h-4 w-4" />
+                      ) : (
+                        <Eye className="h-4 w-4" />
+                      )}
+                    </button>
+                  </div>
                 </FormControl>
-                <FormMessage />
+                <FormMessage className="text-xs" />
               </FormItem>
             )}
           />
-          <Button type="submit" className="w-full" disabled={isLoading}>
+          <Button type="submit" className="w-full h-8" disabled={isLoading}>
             {isLoading && (
               <AiOutlineLoading3Quarters className="mr-2 h-4 w-4 animate-spin" />
             )}
@@ -95,36 +116,6 @@ export default function SignIn() {
           </Button>
         </form>
       </Form>
-      <div className="flex flex-col space-y-4">
-        <div className="relative">
-          <div className="absolute inset-0 flex items-center">
-            <span className="w-full border-t" />
-          </div>
-          <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-background px-2 text-muted-foreground">
-              Or continue with
-            </span>
-          </div>
-        </div>
-        <div className="grid grid-cols-1 gap-2 w-full">
-          <Button variant="outline" className="w-full" disabled={isLoading}>
-            {isLoading ? (
-              <AiOutlineLoading3Quarters className="mr-2 h-4 w-4 animate-spin" />
-            ) : (
-              <FcGoogle className="mr-2 h-4 w-4" />
-            )}
-            Google
-          </Button>
-          <Button variant="outline" className="w-full" disabled={isLoading}>
-            {isLoading ? (
-              <AiOutlineLoading3Quarters className="mr-2 h-4 w-4 animate-spin" />
-            ) : (
-              <FaGithub className="mr-2 h-4 w-4" />
-            )}
-            Github
-          </Button>
-        </div>
-      </div>
     </>
   );
 }
