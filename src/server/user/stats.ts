@@ -6,6 +6,7 @@ import { UserActionError } from "./types";
 import db from "@/database/db";
 import { eq, count, desc, sql } from "drizzle-orm";
 import { users, quizAttempts, quizzes } from "@/database/schema";
+import { resetStreak } from "./streak";
 
 export async function getUserStats(userId?: string) {
   try {
@@ -26,6 +27,8 @@ export async function getUserStats(userId?: string) {
     }
 
     const userIdNum = parseInt(userId);
+
+    const streakResult = await resetStreak(userIdNum);
 
     const user = await db.query.users.findFirst({
       where: eq(users.id, userIdNum),
@@ -93,7 +96,7 @@ export async function getUserStats(userId?: string) {
       topCategory: topCategoryResult[0]?.category ?? "None",
       completionRate,
       bestStreak: user.bestStreak,
-      currentStreak: user.currentStreak,
+      currentStreak: streakResult.currentStreak,
       averageTimePerQuiz,
       totalXP: user.totalXp,
     };
