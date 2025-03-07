@@ -153,7 +153,6 @@ export default function MyQuizzesContent({
     <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-background/90 py-4">
       <div className="container mx-auto px-4 py-6">
         <div className="flex flex-col space-y-6">
-          {/* Header and Search - More compact */}
           <div className="flex flex-col space-y-4">
             <motion.div
               initial={{ opacity: 0, y: -10 }}
@@ -274,7 +273,6 @@ export default function MyQuizzesContent({
             </motion.div>
           </div>
 
-          {/* Quiz Cards - Modernized */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -407,7 +405,6 @@ export default function MyQuizzesContent({
             })}
           </motion.div>
 
-          {/* Empty state - Modernized */}
           {filteredAndSortedQuizzes.length === 0 && (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
