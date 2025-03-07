@@ -111,3 +111,80 @@ export async function updateUserStreak(
     };
   }
 }
+
+type ResetStreakResponse = {
+  success?: boolean;
+  error?: string;
+  statusCode?: number;
+  wasReset?: boolean;
+  currentStreak: number;
+};
+
+export async function resetStreak(
+  userId: number
+): Promise<ResetStreakResponse> {
+  try {
+    const user = await db.query.users.findFirst({
+      where: eq(users.id, userId),
+      columns: {
+        currentStreak: true,
+        lastActivityDate: true,
+      },
+    });
+
+    if (!user) {
+      throw new UserActionError("User not found", 404, "resetStreak");
+    }
+
+    // If no streak or no last activity, nothing to reset
+    if (!user.lastActivityDate || user.currentStreak === 0) {
+      return {
+        success: true,
+        wasReset: false,
+        currentStreak: user.currentStreak,
+      };
+    }
+
+    // Check if more than 24 hours have passed
+    const now = new Date();
+    const hoursSinceLastActivity =
+      (now.getTime() - user.lastActivityDate.getTime()) / (1000 * 60 * 60);
+
+    // If 24 hours have passed, reset the streak
+    if (hoursSinceLastActivity >= 24) {
+      await db
+        .update(users)
+        .set({ currentStreak: 0 })
+        .where(eq(users.id, userId));
+
+      return {
+        success: true,
+        wasReset: true,
+        currentStreak: 0,
+      };
+    }
+
+    // No reset needed
+    return {
+      success: true,
+      wasReset: false,
+      currentStreak: user.currentStreak,
+    };
+  } catch (error) {
+    console.error("Error in resetStreak:", error);
+
+    if (error instanceof UserActionError) {
+      return {
+        error: error.message,
+        statusCode: error.statusCode,
+        currentStreak: 0,
+      };
+    }
+
+    return {
+      error: "Failed to reset user streak",
+      statusCode: 500,
+      currentStreak: 0,
+    };
+  }
+}
