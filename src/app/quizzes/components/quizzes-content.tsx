@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useCallback } from "react";
+import { useMemo, useState, useCallback, useEffect } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
@@ -82,24 +82,49 @@ export default function QuizzesContent({ quizzes }: { quizzes: PublicQuiz[] }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [searchTerm, setSearchTerm] = useState("");
-  const [categoryFilter] = useState("all");
   const [difficultyFilter, setDifficultyFilter] = useState("all");
   const [sortBy, setSortBy] = useState("date_desc");
   const [hoveredCard, setHoveredCard] = useState<string | null>(null);
 
+  // Initialize state from URL params when component mounts
+  useEffect(() => {
+    const search = searchParams.get("search") || "";
+    const difficulty = searchParams.get("difficulty") || "all";
+    const sort = searchParams.get("sort") || "date_desc";
+
+    setSearchTerm(search);
+    setDifficultyFilter(difficulty);
+    setSortBy(sort);
+  }, [searchParams]);
+
   const updateUrlParams = useCallback(
-    (
-      newSearch: string,
-      newCategory: string,
-      newDifficulty: string,
-      newSort: string
-    ) => {
+    (newSearch: string, newDifficulty: string, newSort: string) => {
       const params = new URLSearchParams(searchParams);
-      if (newSearch !== undefined) params.set("search", newSearch);
-      if (newCategory !== undefined) params.set("category", newCategory);
-      if (newDifficulty !== undefined) params.set("difficulty", newDifficulty);
-      if (newSort !== undefined) params.set("sort", newSort);
-      router.push(`?${params.toString()}`, { scroll: false });
+
+      if (newSearch) {
+        params.set("search", newSearch);
+      } else {
+        params.delete("search");
+      }
+
+      if (newDifficulty && newDifficulty !== "all") {
+        params.set("difficulty", newDifficulty);
+      } else {
+        params.delete("difficulty");
+      }
+
+      if (newSort && newSort !== "date_desc") {
+        params.set("sort", newSort);
+      } else {
+        params.delete("sort");
+      }
+
+      // Create the new URL based on the current pathname (not just ".")
+      const queryString = params.toString();
+      const currentPath = window.location.pathname;
+      router.push(queryString ? `${currentPath}?${queryString}` : currentPath, {
+        scroll: false,
+      });
     },
     [router, searchParams]
   );
@@ -107,17 +132,17 @@ export default function QuizzesContent({ quizzes }: { quizzes: PublicQuiz[] }) {
   const handleDifficultyChange = useCallback(
     (newDifficulty: string) => {
       setDifficultyFilter(newDifficulty);
-      updateUrlParams(searchTerm, categoryFilter, newDifficulty, sortBy);
+      updateUrlParams(searchTerm, newDifficulty, sortBy);
     },
-    [setDifficultyFilter, updateUrlParams, searchTerm, categoryFilter, sortBy]
+    [setDifficultyFilter, updateUrlParams, searchTerm, sortBy]
   );
 
   const handleSortChange = useCallback(
     (newSort: string) => {
       setSortBy(newSort);
-      updateUrlParams(searchTerm, categoryFilter, difficultyFilter, newSort);
+      updateUrlParams(searchTerm, difficultyFilter, newSort);
     },
-    [setSortBy, updateUrlParams, searchTerm, categoryFilter, difficultyFilter]
+    [setSortBy, updateUrlParams, searchTerm, difficultyFilter]
   );
 
   const filteredAndSortedQuizzes = useMemo(() => {
@@ -126,11 +151,9 @@ export default function QuizzesContent({ quizzes }: { quizzes: PublicQuiz[] }) {
         const matchesSearch = quiz.title
           .toLowerCase()
           .includes(searchTerm.toLowerCase());
-        const matchesCategory =
-          categoryFilter === "all" || quiz.category.startsWith(categoryFilter);
         const matchesDifficulty =
           difficultyFilter === "all" || quiz.difficulty === difficultyFilter;
-        return matchesSearch && matchesCategory && matchesDifficulty;
+        return matchesSearch && matchesDifficulty;
       })
       .sort((a, b) => {
         switch (sortBy) {
@@ -150,7 +173,7 @@ export default function QuizzesContent({ quizzes }: { quizzes: PublicQuiz[] }) {
             return 0;
         }
       });
-  }, [quizzes, searchTerm, categoryFilter, difficultyFilter, sortBy]);
+  }, [quizzes, searchTerm, difficultyFilter, sortBy]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-background/90 py-4">
@@ -192,12 +215,7 @@ export default function QuizzesContent({ quizzes }: { quizzes: PublicQuiz[] }) {
                     value={searchTerm}
                     onChange={(e) => {
                       setSearchTerm(e.target.value);
-                      updateUrlParams(
-                        e.target.value,
-                        categoryFilter,
-                        difficultyFilter,
-                        sortBy
-                      );
+                      updateUrlParams(e.target.value, difficultyFilter, sortBy);
                     }}
                   />
                 </div>
@@ -398,7 +416,7 @@ export default function QuizzesContent({ quizzes }: { quizzes: PublicQuiz[] }) {
                       onClick={() => {
                         setSearchTerm("");
                         setDifficultyFilter("all");
-                        updateUrlParams("", categoryFilter, "all", sortBy);
+                        updateUrlParams("", "all", sortBy);
                       }}>
                       Clear filters
                     </Button>

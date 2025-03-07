@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useCallback } from "react";
+import { useMemo, useState, useCallback, useEffect } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
@@ -92,13 +92,45 @@ export default function MyQuizzesContent({
   const [sortBy, setSortBy] = useState("date_desc");
   const [hoveredCard, setHoveredCard] = useState<string | null>(null);
 
+  // Initialize state from URL params when component mounts
+  useEffect(() => {
+    const search = searchParams.get("search") || "";
+    const difficulty = searchParams.get("difficulty") || "all";
+    const sort = searchParams.get("sort") || "date_desc";
+
+    setSearchTerm(search);
+    setDifficultyFilter(difficulty);
+    setSortBy(sort);
+  }, [searchParams]);
+
   const updateUrlParams = useCallback(
     (newSearch: string, newDifficulty: string, newSort: string) => {
       const params = new URLSearchParams(searchParams);
-      if (newSearch !== undefined) params.set("search", newSearch);
-      if (newDifficulty !== undefined) params.set("difficulty", newDifficulty);
-      if (newSort !== undefined) params.set("sort", newSort);
-      router.push(`?${params.toString()}`, { scroll: false });
+
+      if (newSearch) {
+        params.set("search", newSearch);
+      } else {
+        params.delete("search");
+      }
+
+      if (newDifficulty && newDifficulty !== "all") {
+        params.set("difficulty", newDifficulty);
+      } else {
+        params.delete("difficulty");
+      }
+
+      if (newSort && newSort !== "date_desc") {
+        params.set("sort", newSort);
+      } else {
+        params.delete("sort");
+      }
+
+      // Create the new URL based on the current pathname (not just ".")
+      const queryString = params.toString();
+      const currentPath = window.location.pathname;
+      router.push(queryString ? `${currentPath}?${queryString}` : currentPath, {
+        scroll: false,
+      });
     },
     [router, searchParams]
   );
@@ -246,7 +278,10 @@ export default function MyQuizzesContent({
                       size="sm"
                       className="h-9 px-3 text-sm">
                       <ArrowUpDown className="mr-1.5 h-3.5 w-3.5" />
-                      Sort
+                      Sort:{" "}
+                      {sortBy
+                        .replace("_", " ")
+                        .replace(/\b\w/g, (c) => c.toUpperCase())}
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-40">
