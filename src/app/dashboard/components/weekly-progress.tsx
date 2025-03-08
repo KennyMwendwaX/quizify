@@ -23,6 +23,7 @@ type Props = {
 };
 
 export default function WeeklyProgressChart({ weeklyProgress }: Props) {
+  console.log(weeklyProgress);
   const chartConfig = {
     score: {
       label: "Score",

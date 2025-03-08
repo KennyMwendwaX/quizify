@@ -48,37 +48,63 @@ export async function getWeeklyProgress(
       },
     });
 
-    const dailyStats = new Map<
-      string,
-      { quizzes: number; totalScore: number; totalXp: number }
-    >();
-    const daysOfWeek = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+    // Create an array of the last 7 days in chronological order
+    const last7Days = [];
+    for (let i = 6; i >= 0; i--) {
+      const date = new Date();
+      date.setDate(date.getDate() - i);
 
-    attempts.forEach((attempt) => {
-      const day = attempt.createdAt
+      // Generate a consistent date string format for comparison
+      const dateString = date.toISOString().split("T")[0];
+
+      // Get short day name (Mon, Tue, etc.)
+      const dayName = date
         .toLocaleDateString("en-US", { weekday: "short" })
         .substring(0, 3);
-      const current = dailyStats.get(day) || {
-        quizzes: 0,
-        totalScore: 0,
-        totalXp: 0,
-      };
 
-      dailyStats.set(day, {
-        quizzes: current.quizzes + 1,
-        totalScore: current.totalScore + attempt.percentage,
-        totalXp: current.totalXp + attempt.xpEarned,
+      last7Days.push({
+        date: dateString,
+        dayName: dayName,
+        fullDate: new Date(date),
       });
+    }
+
+    // Initialize statistics for each day
+    const dailyStats = new Map(
+      last7Days.map(({ date, dayName }) => [
+        date,
+        {
+          dayName,
+          quizzes: 0,
+          totalScore: 0,
+          totalXp: 0,
+        },
+      ])
+    );
+
+    // Process attempts and organize by actual date (not just day of week)
+    attempts.forEach((attempt) => {
+      const attemptDate = attempt.createdAt.toISOString().split("T")[0];
+
+      // Only process if the attempt falls within our 7-day window
+      if (dailyStats.has(attemptDate)) {
+        const current = dailyStats.get(attemptDate)!;
+
+        dailyStats.set(attemptDate, {
+          ...current,
+          quizzes: current.quizzes + 1,
+          totalScore: current.totalScore + attempt.percentage,
+          totalXp: current.totalXp + attempt.xpEarned,
+        });
+      }
     });
 
-    const weeklyProgress = daysOfWeek.map((day) => {
-      const stats = dailyStats.get(day) || {
-        quizzes: 0,
-        totalScore: 0,
-        totalXp: 0,
-      };
+    // Convert to array in chronological order (past to present)
+    const weeklyProgress = last7Days.map(({ date }) => {
+      const stats = dailyStats.get(date)!;
       return {
-        day,
+        day: stats.dayName,
+        fullDate: date, // Include the full date for reference
         quizzes: stats.quizzes,
         score:
           stats.quizzes > 0 ? Math.round(stats.totalScore / stats.quizzes) : 0,
