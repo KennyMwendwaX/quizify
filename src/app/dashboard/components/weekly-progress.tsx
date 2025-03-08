@@ -23,17 +23,21 @@ type Props = {
 };
 
 export default function WeeklyProgressChart({ weeklyProgress }: Props) {
-  console.log(weeklyProgress);
+  const sortedProgress = [...weeklyProgress].sort(
+    (a, b) => new Date(a.fullDate).getTime() - new Date(b.fullDate).getTime()
+  );
+
   const chartConfig = {
     score: {
-      label: "Score",
+      label: "Score %",
       color: "hsl(var(--chart-1))",
     },
     xp: {
-      label: "XP",
+      label: "XP Gained",
       color: "hsl(var(--chart-2))",
     },
   } satisfies ChartConfig;
+
   return (
     <Card>
       <CardHeader>
@@ -48,7 +52,7 @@ export default function WeeklyProgressChart({ weeklyProgress }: Props) {
             <ResponsiveContainer width="100%" height="100%">
               <LineChart
                 accessibilityLayer
-                data={weeklyProgress}
+                data={sortedProgress}
                 margin={{
                   left: 12,
                   right: 12,
@@ -59,20 +63,25 @@ export default function WeeklyProgressChart({ weeklyProgress }: Props) {
                   tickLine={false}
                   axisLine={false}
                   tickMargin={8}
-                  tickFormatter={(value) => value.slice(0, 3)}
                 />
                 <ChartTooltip
                   cursor={false}
                   content={<ChartTooltipContent />}
                 />
-
                 <Line
                   name="Score %"
                   dataKey="score"
                   type="monotone"
                   stroke="var(--color-desktop)"
                   strokeWidth={2}
-                  dot={false}
+                  dot={{
+                    r: 3,
+                    strokeWidth: 0,
+                  }}
+                  activeDot={{
+                    r: 5,
+                    strokeWidth: 0,
+                  }}
                 />
                 <Line
                   name="XP Gained"
@@ -80,7 +89,14 @@ export default function WeeklyProgressChart({ weeklyProgress }: Props) {
                   type="monotone"
                   stroke="var(--color-mobile)"
                   strokeWidth={2}
-                  dot={false}
+                  dot={{
+                    r: 3,
+                    strokeWidth: 0,
+                  }}
+                  activeDot={{
+                    r: 5,
+                    strokeWidth: 0,
+                  }}
                 />
               </LineChart>
             </ResponsiveContainer>
