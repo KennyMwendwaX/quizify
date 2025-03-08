@@ -226,6 +226,9 @@ export default function QuizQuestion({ quiz, session }: QuizQuestionProps) {
         state.timeLeft,
         session.user.id
       );
+      console.log(
+        `quizId: ${quiz.id}, validAnswers: ${validAnswers}, timeLeft: ${state.timeLeft}, id: ${session.user.id}`
+      );
 
       if (result.error) {
         toast.error(result.error);

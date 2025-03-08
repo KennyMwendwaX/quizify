@@ -2,7 +2,7 @@
 
 import db from "@/database/db";
 import { quizzes } from "@/database/schema";
-import { desc, eq } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import {
@@ -38,6 +38,7 @@ export const getAdminQuizzes = async (
     }
 
     const quizResults = await db.query.quizzes.findMany({
+      where: eq(quizzes.userId, parseInt(userId)),
       with: {
         questions: {
           columns: {
@@ -138,7 +139,7 @@ export const getAdminQuiz = async (
     }
 
     const quiz = await db.query.quizzes.findFirst({
-      where: eq(quizzes.id, quizId),
+      where: and(eq(quizzes.id, quizId), eq(quizzes.userId, parseInt(userId))),
       with: {
         questions: {
           columns: {
