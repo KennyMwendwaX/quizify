@@ -4,6 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   ChartConfig,
   ChartContainer,
+  ChartLegend,
+  ChartLegendContent,
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
@@ -30,11 +32,15 @@ export default function WeeklyProgressChart({ weeklyProgress }: Props) {
   const chartConfig = {
     score: {
       label: "Score %",
-      color: "hsl(var(--chart-1))",
+      color: "hsl(215, 100%, 50%)",
     },
     xp: {
       label: "XP Gained",
-      color: "hsl(var(--chart-2))",
+      color: "hsl(140, 100%, 40%)",
+    },
+    quizzes: {
+      label: "Quizzes Completed",
+      color: "hsl(350, 100%, 60%)",
     },
   } satisfies ChartConfig;
 
@@ -68,18 +74,21 @@ export default function WeeklyProgressChart({ weeklyProgress }: Props) {
                   cursor={false}
                   content={<ChartTooltipContent />}
                 />
+                <ChartLegend content={<ChartLegendContent />} />
                 <Line
                   name="Score %"
                   dataKey="score"
                   type="monotone"
-                  stroke="var(--color-desktop)"
-                  strokeWidth={2}
+                  stroke={chartConfig.score.color}
+                  strokeWidth={2.5}
                   dot={{
-                    r: 3,
+                    r: 4,
+                    fill: chartConfig.score.color,
                     strokeWidth: 0,
                   }}
                   activeDot={{
-                    r: 5,
+                    r: 6,
+                    fill: chartConfig.score.color,
                     strokeWidth: 0,
                   }}
                 />
@@ -87,14 +96,33 @@ export default function WeeklyProgressChart({ weeklyProgress }: Props) {
                   name="XP Gained"
                   dataKey="xp"
                   type="monotone"
-                  stroke="var(--color-mobile)"
-                  strokeWidth={2}
+                  stroke={chartConfig.xp.color}
+                  strokeWidth={2.5}
                   dot={{
-                    r: 3,
+                    r: 4,
+                    fill: chartConfig.xp.color,
                     strokeWidth: 0,
                   }}
                   activeDot={{
-                    r: 5,
+                    r: 6,
+                    fill: chartConfig.xp.color,
+                    strokeWidth: 0,
+                  }}
+                />
+                <Line
+                  name="Quizzes Completed"
+                  dataKey="quizzes"
+                  type="monotone"
+                  stroke={chartConfig.quizzes.color}
+                  strokeWidth={2.5}
+                  dot={{
+                    r: 4,
+                    fill: chartConfig.quizzes.color,
+                    strokeWidth: 0,
+                  }}
+                  activeDot={{
+                    r: 6,
+                    fill: chartConfig.quizzes.color,
                     strokeWidth: 0,
                   }}
                 />
