@@ -75,7 +75,7 @@ export async function updateUserStreak(
         newBestStreak = newCurrentStreak;
       }
     }
-    // If there was a gap in activity, reset streak to 1
+    // If there was a gap in activity (more than 1 day), reset streak to 1
     else {
       newCurrentStreak = 1;
     }
@@ -145,13 +145,24 @@ export async function resetStreak(
       };
     }
 
-    // Check if more than 24 hours have passed
     const now = new Date();
-    const hoursSinceLastActivity =
-      (now.getTime() - user.lastActivityDate.getTime()) / (1000 * 60 * 60);
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
-    // If 24 hours have passed, reset the streak
-    if (hoursSinceLastActivity >= 24) {
+    // Convert lastActivityDate to start of day for comparison
+    const lastActivity = new Date(user.lastActivityDate);
+    const lastActivityDay = new Date(
+      lastActivity.getFullYear(),
+      lastActivity.getMonth(),
+      lastActivity.getDate()
+    );
+
+    // Calculate the difference in days
+    const diffInDays = Math.floor(
+      (today.getTime() - lastActivityDay.getTime()) / (1000 * 60 * 60 * 24)
+    );
+
+    // Reset streak only if more than 1 day has passed
+    if (diffInDays > 1) {
       await db
         .update(users)
         .set({ currentStreak: 0 })
