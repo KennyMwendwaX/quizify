@@ -160,7 +160,7 @@ export default function DashboardContent({
               </div>
             </TabsContent>
 
-            <TabsContent value="progress" className="space-y-8">
+            <TabsContent value="progress" className="grid md:grid-cols-2 gap-5">
               <WeeklyProgressChart weeklyProgress={weeklyProgress} />
               <CategoryPerformanceChart
                 categoryPerformance={categoryPerformance}

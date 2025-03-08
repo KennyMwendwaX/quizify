@@ -18,6 +18,7 @@ import {
   LineChart,
   ResponsiveContainer,
   XAxis,
+  YAxis,
 } from "recharts";
 
 type Props = {
@@ -28,6 +29,13 @@ export default function WeeklyProgressChart({ weeklyProgress }: Props) {
   const sortedProgress = [...weeklyProgress].sort(
     (a, b) => new Date(a.fullDate).getTime() - new Date(b.fullDate).getTime()
   );
+
+  const maxScore = Math.max(...sortedProgress.map((item) => item.score), 10);
+  const maxXP = Math.max(...sortedProgress.map((item) => item.xp), 10);
+
+  // Calculate padded maximums for more spacious charts
+  const paddedMaxScore = Math.ceil((maxScore * 1.15) / 10) * 10; // 15% padding
+  const paddedMaxXP = Math.ceil((maxXP * 1.15) / 100) * 100; // 15% padding
 
   const chartConfig = {
     score: {
@@ -47,7 +55,7 @@ export default function WeeklyProgressChart({ weeklyProgress }: Props) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center">
+        <CardTitle className="flex items-center text-xl">
           <Calendar className="mr-2 h-5 w-5" />
           Weekly Progress
         </CardTitle>
@@ -61,7 +69,7 @@ export default function WeeklyProgressChart({ weeklyProgress }: Props) {
                 data={sortedProgress}
                 margin={{
                   left: 12,
-                  right: 12,
+                  right: 24,
                 }}>
                 <CartesianGrid vertical={false} />
                 <XAxis
@@ -70,12 +78,34 @@ export default function WeeklyProgressChart({ weeklyProgress }: Props) {
                   axisLine={false}
                   tickMargin={8}
                 />
+                <YAxis
+                  yAxisId="score"
+                  orientation="left"
+                  stroke={chartConfig.score.color}
+                  domain={[0, paddedMaxScore]} // Using padded max for more space
+                  tickLine={false}
+                  axisLine={false}
+                  tickMargin={8}
+                  fontSize={12}
+                  tickFormatter={(value) => `${value}%`}
+                />
+                <YAxis
+                  yAxisId="xp"
+                  orientation="right"
+                  stroke={chartConfig.xp.color}
+                  domain={[0, paddedMaxXP]} // Using padded max for more space
+                  tickLine={false}
+                  axisLine={false}
+                  tickMargin={8}
+                  fontSize={12}
+                />
                 <ChartTooltip
                   cursor={false}
                   content={<ChartTooltipContent />}
                 />
                 <ChartLegend content={<ChartLegendContent />} />
                 <Line
+                  yAxisId="score"
                   name="Score %"
                   dataKey="score"
                   type="monotone"
@@ -93,6 +123,7 @@ export default function WeeklyProgressChart({ weeklyProgress }: Props) {
                   }}
                 />
                 <Line
+                  yAxisId="xp"
                   name="XP Gained"
                   dataKey="xp"
                   type="monotone"
@@ -110,6 +141,7 @@ export default function WeeklyProgressChart({ weeklyProgress }: Props) {
                   }}
                 />
                 <Line
+                  yAxisId="xp"
                   name="Quizzes Completed"
                   dataKey="quizzes"
                   type="monotone"

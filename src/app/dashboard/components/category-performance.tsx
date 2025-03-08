@@ -37,14 +37,14 @@ export default function CategoryPerformanceChart({
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center">
+        <CardTitle className="flex items-center text-xl">
           <BarChart3 className="mr-2 h-5 w-5" />
           Category Performance
         </CardTitle>
       </CardHeader>
       <CardContent>
         {categoryPerformance.length > 0 ? (
-          <ChartContainer config={chartConfig} className="min-h-[350px] w-full">
+          <ChartContainer config={chartConfig}>
             <BarChart accessibilityLayer data={categoryPerformance}>
               <XAxis
                 dataKey="name"
