@@ -10,7 +10,6 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart";
 import { Calendar } from "lucide-react";
-import { WeeklyProgress } from "@/lib/types";
 import EmptyState from "./empty-state";
 import {
   CartesianGrid,
@@ -20,22 +19,66 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { WeeklyProgress } from "@/lib/types";
 
 type Props = {
-  weeklyProgress: WeeklyProgress;
+  weeklyProgress: WeeklyProgress[];
 };
 
 export default function WeeklyProgressChart({ weeklyProgress }: Props) {
-  const sortedProgress = [...weeklyProgress].sort(
-    (a, b) => new Date(a.fullDate).getTime() - new Date(b.fullDate).getTime()
-  );
+  console.log(weeklyProgress);
+  // Extract the progress array
+  const progressData = weeklyProgress || [];
 
-  const maxScore = Math.max(...sortedProgress.map((item) => item.score), 10);
-  const maxXP = Math.max(...sortedProgress.map((item) => item.xp), 10);
+  // Get today's date
+  // Get today's date without time components (to avoid timezone issues)
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  // Calculate the start date (7 days ago)
+  const startDate = new Date(today);
+  startDate.setDate(today.getDate() - 6); // Go back 6 days to get 7 days total
+
+  // Create an array of the last 7 days (with zero values as defaults)
+  const last7Days = Array.from({ length: 7 }, (_, i) => {
+    const date = new Date(startDate);
+    date.setDate(startDate.getDate() + i);
+
+    const dayName = date.toLocaleDateString("en-US", { weekday: "short" });
+
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    const fullDateStr = `${year}-${month}-${day}`;
+
+    return {
+      day: dayName,
+      fullDate: fullDateStr,
+      quizzes: 0,
+      score: 0,
+      xp: 0,
+    };
+  });
+
+  // Merge actual progress data with our placeholder data using exact string comparison
+  const mergedProgress = last7Days.map((placeholder) => {
+    // Find matching data from progressData or use placeholder
+    const matchingData = progressData.find(
+      (item) => item.fullDate === placeholder.fullDate
+    );
+
+    return matchingData || placeholder;
+  });
+
+  const maxScore = Math.max(...mergedProgress.map((item) => item.score), 10);
+  const maxXP = Math.max(...mergedProgress.map((item) => item.xp), 10);
 
   // Calculate padded maximums for more spacious charts
   const paddedMaxScore = Math.ceil((maxScore * 1.15) / 10) * 10; // 15% padding
   const paddedMaxXP = Math.ceil((maxXP * 1.15) / 100) * 100; // 15% padding
+
+  // Modify the hasActivity check to be more explicit
+  const hasActivity = mergedProgress.some((day) => day.quizzes > 0);
 
   const chartConfig = {
     score: {
@@ -61,12 +104,12 @@ export default function WeeklyProgressChart({ weeklyProgress }: Props) {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        {weeklyProgress.length > 0 ? (
+        {hasActivity ? (
           <ChartContainer config={chartConfig}>
             <ResponsiveContainer width="100%" height="100%">
               <LineChart
                 accessibilityLayer
-                data={sortedProgress}
+                data={mergedProgress}
                 margin={{
                   left: 12,
                   right: 24,
@@ -82,7 +125,7 @@ export default function WeeklyProgressChart({ weeklyProgress }: Props) {
                   yAxisId="score"
                   orientation="left"
                   stroke={chartConfig.score.color}
-                  domain={[0, paddedMaxScore]} // Using padded max for more space
+                  domain={[0, paddedMaxScore]}
                   tickLine={false}
                   axisLine={false}
                   tickMargin={8}
@@ -93,7 +136,7 @@ export default function WeeklyProgressChart({ weeklyProgress }: Props) {
                   yAxisId="xp"
                   orientation="right"
                   stroke={chartConfig.xp.color}
-                  domain={[0, paddedMaxXP]} // Using padded max for more space
+                  domain={[0, paddedMaxXP]}
                   tickLine={false}
                   axisLine={false}
                   tickMargin={8}

@@ -3,9 +3,10 @@
 import db from "@/database/db";
 import { quizAttempts } from "@/database/schema";
 import { auth } from "@/lib/auth";
+import { WeeklyProgress } from "@/lib/types";
+import { UserActionError, WeeklyProgressResponse } from "@/server/user/types";
 import { and, eq, gte } from "drizzle-orm";
 import { headers } from "next/headers";
-import { UserActionError, WeeklyProgressResponse } from "./types";
 
 export async function getWeeklyProgress(
   userId?: string
@@ -32,9 +33,19 @@ export async function getWeeklyProgress(
     }
 
     const userIdNum = parseInt(userId);
+
+    // Get today and 7 days ago (exactly one week)
     const today = new Date();
     const weekAgo = new Date(today);
     weekAgo.setDate(today.getDate() - 7);
+
+    // Set time to beginning of day for weekAgo to ensure full 7 days
+    weekAgo.setHours(0, 0, 0, 0);
+
+    console.log("Date range for query:", {
+      from: weekAgo.toISOString(),
+      to: today.toISOString(),
+    });
 
     const attempts = await db.query.quizAttempts.findMany({
       where: and(
@@ -54,27 +65,22 @@ export async function getWeeklyProgress(
       const date = new Date();
       date.setDate(date.getDate() - i);
 
-      // Generate a consistent date string format for comparison
-      const dateString = date.toISOString().split("T")[0];
-
-      // Get short day name (Mon, Tue, etc.)
-      const dayName = date
-        .toLocaleDateString("en-US", { weekday: "short" })
-        .substring(0, 3);
+      // Format to YYYY-MM-DD without timezone issues
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+      const dateString = `${year}-${month}-${day}`;
 
       last7Days.push({
         date: dateString,
-        dayName: dayName,
-        fullDate: new Date(date),
       });
     }
 
     // Initialize statistics for each day
     const dailyStats = new Map(
-      last7Days.map(({ date, dayName }) => [
+      last7Days.map(({ date }) => [
         date,
         {
-          dayName,
           quizzes: 0,
           totalScore: 0,
           totalXp: 0,
@@ -82,15 +88,19 @@ export async function getWeeklyProgress(
       ])
     );
 
-    // Process attempts and organize by actual date (not just day of week)
+    // Process attempts with better date formatting
     attempts.forEach((attempt) => {
-      const attemptDate = attempt.createdAt.toISOString().split("T")[0];
+      const attemptDate = new Date(attempt.createdAt);
+      const year = attemptDate.getFullYear();
+      const month = String(attemptDate.getMonth() + 1).padStart(2, "0");
+      const day = String(attemptDate.getDate()).padStart(2, "0");
+      const attemptDateString = `${year}-${month}-${day}`;
 
       // Only process if the attempt falls within our 7-day window
-      if (dailyStats.has(attemptDate)) {
-        const current = dailyStats.get(attemptDate)!;
+      if (dailyStats.has(attemptDateString)) {
+        const current = dailyStats.get(attemptDateString)!;
 
-        dailyStats.set(attemptDate, {
+        dailyStats.set(attemptDateString, {
           ...current,
           quizzes: current.quizzes + 1,
           totalScore: current.totalScore + attempt.percentage,
@@ -99,12 +109,11 @@ export async function getWeeklyProgress(
       }
     });
 
-    // Convert to array in chronological order (past to present)
-    const weeklyProgress = last7Days.map(({ date }) => {
+    // Convert to array in chronological order with consistent types
+    const weeklyProgress: WeeklyProgress[] = last7Days.map(({ date }) => {
       const stats = dailyStats.get(date)!;
       return {
-        day: stats.dayName,
-        fullDate: date, // Include the full date for reference
+        fullDate: date, // YYYY-MM-DD format string
         quizzes: stats.quizzes,
         score:
           stats.quizzes > 0 ? Math.round(stats.totalScore / stats.quizzes) : 0,
@@ -120,11 +129,13 @@ export async function getWeeklyProgress(
 
     if (error instanceof UserActionError) {
       return {
+        progress: [],
         error: error.message,
         statusCode: error.statusCode,
       };
     }
     return {
+      progress: [],
       error: "Failed to fetch weekly progress",
       statusCode: 500,
     };

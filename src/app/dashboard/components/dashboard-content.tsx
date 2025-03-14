@@ -49,7 +49,7 @@ type Props = {
   stats: UserStats;
   recentQuizzes: RecentQuiz[];
   categoryPerformance: CategoryPerformance;
-  weeklyProgress: WeeklyProgress;
+  weeklyProgress: WeeklyProgress[];
 };
 
 export default function DashboardContent({

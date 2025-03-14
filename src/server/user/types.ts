@@ -62,7 +62,7 @@ export type CategoryPerformanceResponse = {
 };
 
 export type WeeklyProgressResponse = {
-  progress?: WeeklyProgress;
+  progress: WeeklyProgress[];
   error?: string;
   statusCode?: number;
 };
