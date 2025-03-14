@@ -140,7 +140,8 @@ export const submitQuizAttempt = async (
     }
 
     return {
-      error: `Failed to validate quiz submission attempt. Please try again later. ${error}`,
+      error:
+        "Failed to validate quiz submission attempt. Please try again later.",
       statusCode: 500,
     };
   }
