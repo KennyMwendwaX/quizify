@@ -26,6 +26,7 @@ export type CategoryPerformance = {
 }[];
 
 export type WeeklyProgress = {
+  day: string;
   fullDate: string;
   quizzes: number;
   score: number;

@@ -1,6 +1,6 @@
 "use client";
 
-import { TrendingUp } from "lucide-react";
+import { Activity, TrendingUp } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -80,8 +80,11 @@ export default function CategoryPerformanceChart({
 
   return (
     <Card>
-      <CardHeader className="items-center pb-4">
-        <CardTitle>Category Performance</CardTitle>
+      <CardHeader>
+        <CardTitle className="flex items-center text-xl font-bold">
+          <Activity className="mr-2 h-5 w-5 text-primary" />
+          Category Performance
+        </CardTitle>
         <CardDescription>Your quiz scores by category</CardDescription>
       </CardHeader>
       <CardContent className="pb-0">

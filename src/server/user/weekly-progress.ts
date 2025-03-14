@@ -42,11 +42,6 @@ export async function getWeeklyProgress(
     // Set time to beginning of day for weekAgo to ensure full 7 days
     weekAgo.setHours(0, 0, 0, 0);
 
-    console.log("Date range for query:", {
-      from: weekAgo.toISOString(),
-      to: today.toISOString(),
-    });
-
     const attempts = await db.query.quizAttempts.findMany({
       where: and(
         eq(quizAttempts.userId, userIdNum),
@@ -71,7 +66,10 @@ export async function getWeeklyProgress(
       const day = String(date.getDate()).padStart(2, "0");
       const dateString = `${year}-${month}-${day}`;
 
+      const dayName = date.toLocaleDateString("en-US", { weekday: "short" });
+
       last7Days.push({
+        day: dayName,
         date: dateString,
       });
     }
@@ -110,9 +108,10 @@ export async function getWeeklyProgress(
     });
 
     // Convert to array in chronological order with consistent types
-    const weeklyProgress: WeeklyProgress[] = last7Days.map(({ date }) => {
+    const weeklyProgress: WeeklyProgress[] = last7Days.map(({ date, day }) => {
       const stats = dailyStats.get(date)!;
       return {
+        day: day,
         fullDate: date, // YYYY-MM-DD format string
         quizzes: stats.quizzes,
         score:
