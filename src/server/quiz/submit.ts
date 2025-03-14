@@ -96,7 +96,7 @@ export const submitQuizAttempt = async (
       userId: parseInt(userId),
       answers,
       score,
-      percentage: scorePercentage,
+      percentage: Math.round(scorePercentage),
       isCompleted: answers.length === quiz.questions.length,
       timeTaken: quiz.timeLimit ? quiz.timeLimit * 60 - timeLeft : 0,
       xpEarned: xpEarnedPoints,
@@ -140,8 +140,7 @@ export const submitQuizAttempt = async (
     }
 
     return {
-      error:
-        "Failed to validate quiz submission attempt. Please try again later.",
+      error: `Failed to validate quiz submission attempt. Please try again later. ${error}`,
       statusCode: 500,
     };
   }
