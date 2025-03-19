@@ -33,7 +33,6 @@ type Props = {
 export default function CategoryPerformanceChart({
   categoryPerformance,
 }: Props) {
-  // Check if we have data
   if (categoryPerformance.length === 0) {
     return (
       <Card>
