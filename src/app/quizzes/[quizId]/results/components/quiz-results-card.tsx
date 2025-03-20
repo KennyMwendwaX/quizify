@@ -8,22 +8,35 @@ import {
   Award,
   Clock,
   FileText,
+  Flame,
   LayoutDashboard,
+  Zap,
   Medal,
   Rocket,
   Target,
-  TrendingUp,
+  Timer,
   Trophy,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
+
 interface StatCardProps {
   icon: React.ReactNode;
   value: string;
   label: string;
   color: string;
+  tooltip?: string;
 }
 
-const StatCard: React.FC<StatCardProps> = ({ icon, value, label, color }) => (
-  <div className="flex items-center gap-4 p-4 border rounded-lg">
+const StatCard: React.FC<StatCardProps> = ({
+  icon,
+  value,
+  label,
+  color,
+  tooltip,
+}) => (
+  <div
+    className="flex items-center gap-4 p-4 border rounded-lg hover:shadow-md transition-shadow"
+    title={tooltip}>
     <div
       className={cn(
         "p-3 rounded-full",
@@ -47,15 +60,24 @@ export default function QuizResultsCard({
   quiz,
   quizAttempt,
 }: QuizResultsProps) {
-  const percentage = Math.round(
-    (quizAttempt.score / quiz.questions.length) * 100
-  );
+  const router = useRouter();
+
+  const percentage = quizAttempt.percentage;
+  const score = quizAttempt.score;
+  const totalQuestions = quiz.questions.length;
+  const xpEarned = quizAttempt.xpEarned;
 
   const formatTime = (seconds: number): string => {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
     return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
   };
+
+  // Calculate average time per question
+  const avgTimePerQuestion = Math.round(quizAttempt.timeTaken / totalQuestions);
+
+  // Calculate XP efficiency (XP earned per second)
+  const xpPerQuestion = (xpEarned / quizAttempt.answers.length).toFixed(1);
 
   const getPerformanceData = (): {
     message: string;
@@ -167,52 +189,79 @@ export default function QuizResultsCard({
             </CardTitle>
           </div>
           <p className="text-base text-muted-foreground mb-3">
-            You scored {quizAttempt.score} out of {quiz.questions.length}
-            questions
+            You scored {score} out of {totalQuestions} questions
           </p>
 
-          {percentage < 70 && (
-            <div className="flex items-center gap-2 text-amber-600 text-sm p-2 bg-amber-50 rounded-lg">
-              <span className="w-5 h-5 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center text-xs font-bold">
-                !
-              </span>
-              <span>Review your answers to improve your score next time</span>
-            </div>
-          )}
+          <div
+            className={cn(
+              "flex items-center gap-2 text-sm p-2 rounded-lg",
+              percentage >= 90
+                ? "bg-amber-50 text-amber-600"
+                : percentage >= 75
+                ? "bg-indigo-50 text-indigo-600"
+                : percentage >= 60
+                ? "bg-emerald-50 text-emerald-600"
+                : "bg-blue-50 text-blue-600"
+            )}>
+            <Zap className="w-4 h-4" />
+            <span>
+              You earned <strong>{xpEarned} XP</strong> from this quiz!
+            </span>
+          </div>
         </div>
       </div>
 
       <CardContent className="pt-0 pb-4">
-        {/* Stats Cards */}
-        <div className="grid grid-cols-3 gap-3">
+        {/* Primary Stats */}
+        <div className="grid grid-cols-2 gap-3 mb-3">
           <StatCard
             icon={<Target className="w-5 h-5" />}
-            value={`${quizAttempt.score}/${quiz.questions.length}`}
-            label="Questions"
+            value={`${score}/${totalQuestions}`}
+            label="Correct Answers"
             color={performanceData.color}
+            tooltip="Number of questions answered correctly"
           />
 
+          <StatCard
+            icon={<Zap className="w-5 h-5" />}
+            value={`${xpEarned}`}
+            label="XP Earned"
+            color="text-purple-600"
+            tooltip="Experience points earned from this quiz"
+          />
+        </div>
+
+        {/* Secondary Stats */}
+        <div className="grid grid-cols-3 gap-3">
           <StatCard
             icon={<Clock className="w-5 h-5" />}
             value={formatTime(quizAttempt.timeTaken)}
             label="Time Taken"
             color="text-emerald-600"
+            tooltip="Total time spent on the quiz"
           />
 
           <StatCard
-            icon={<TrendingUp className="w-5 h-5" />}
-            value={`${Math.round(
-              quizAttempt.timeTaken / quiz.questions.length
-            )}s`}
+            icon={<Timer className="w-5 h-5" />}
+            value={`${avgTimePerQuestion}s`}
             label="Per Question"
             color="text-indigo-600"
+            tooltip="Average time spent per question"
+          />
+
+          <StatCard
+            icon={<Flame className="w-5 h-5" />}
+            value={`${xpPerQuestion}`}
+            label="XP/Question"
+            color="text-amber-600"
+            tooltip="Average XP earned per question"
           />
         </div>
       </CardContent>
 
       <CardFooter className="flex gap-3 pt-2 pb-6">
         <Button
-          onClick={() => (window.location.href = "/dashboard")}
+          onClick={() => router.push("/dashboard")}
           className="flex-1 bg-background hover:bg-slate-100 text-foreground border border-input"
           variant="outline">
           <LayoutDashboard className="mr-2 h-5 w-5" />
@@ -220,7 +269,7 @@ export default function QuizResultsCard({
         </Button>
 
         <Button
-          onClick={() => (window.location.href = "/quiz/review")}
+          onClick={() => router.push(`/quizzes/${quiz.id}/review`)}
           className="flex-1 bg-background hover:bg-slate-100 text-foreground border border-input"
           variant="outline">
           <FileText className="mr-2 h-5 w-5" />
@@ -228,7 +277,7 @@ export default function QuizResultsCard({
         </Button>
 
         <Button
-          onClick={() => window.location.reload()}
+          onClick={() => router.push(`/quizzes/${quiz.id}`)}
           className={cn(
             "flex-1",
             percentage >= 90

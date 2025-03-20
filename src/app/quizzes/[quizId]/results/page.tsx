@@ -39,9 +39,11 @@ export default async function QuizResultsPage({ params }: Props) {
   }
 
   return (
-    <QuizResultsCard
-      quiz={quizResult.quiz}
-      quizAttempt={userAttemptResult.quizAttempt}
-    />
+    <div className="min-h-[calc(100vh-150px)] flex items-center justify-center bg-gradient-to-br from-background via-background/95 to-background/90 pt-4">
+      <QuizResultsCard
+        quiz={quizResult.quiz}
+        quizAttempt={userAttemptResult.quizAttempt}
+      />
+    </div>
   );
 }
