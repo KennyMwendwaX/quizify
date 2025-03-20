@@ -124,10 +124,7 @@ export const submitQuizAttempt = async (
     // await checkAndUpdateAchievements(parseInt(userId));
 
     return {
-      score,
-      totalQuestions: quiz.questions.length,
-      questionsAnswered: answers.length,
-      isComplete: answers.length === quiz.questions.length,
+      success: true,
     };
   } catch (error) {
     console.error("Error in submitQuizAttempt:", error);

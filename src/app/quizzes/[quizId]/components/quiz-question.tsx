@@ -262,7 +262,7 @@ const QuizResults: React.FC<QuizResultsProps> = ({
 
           {percentage < 70 && (
             <div className="flex items-center gap-2 text-amber-600 text-sm p-2 bg-amber-50 rounded-lg">
-              <span className="inline-block w-5 h-5 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center text-xs font-bold">
+              <span className="w-5 h-5 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center text-xs font-bold">
                 !
               </span>
               <span>Review your answers to improve your score next time</span>

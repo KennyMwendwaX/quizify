@@ -35,6 +35,12 @@ export type GetPublicQuizzesResponse = {
   statusCode?: number;
 };
 
+export type GetQuizWithAnswersResponse = {
+  quiz?: AdminQuiz;
+  error?: string;
+  statusCode?: number;
+};
+
 export type GetUserQuizAttemptResponse = {
   quizAttempt?: QuizAttempt;
   error?: string;
@@ -48,10 +54,7 @@ export type CreateQuizResponse = {
 };
 
 export type QuizSubmissionResponse = {
-  score?: number;
-  totalQuestions?: number;
-  questionsAnswered?: number;
-  isComplete?: boolean;
+  success?: boolean;
   error?: string;
   statusCode?: number;
 };

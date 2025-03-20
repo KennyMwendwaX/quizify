@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardTitle } from "@/components/ui/card";
-import { QuizAttempt } from "@/database/schema";
+import { AdminQuiz, QuizAttempt } from "@/database/schema";
 import { cn } from "@/lib/utils";
 import {
   Award,
@@ -39,11 +39,17 @@ const StatCard: React.FC<StatCardProps> = ({ icon, value, label, color }) => (
 );
 
 interface QuizResultsProps {
+  quiz: AdminQuiz;
   quizAttempt: QuizAttempt;
 }
 
-export default function QuizResultsCard({ quizAttempt }: QuizResultsProps) {
-  const percentage = Math.round((score / totalQuestions) * 100);
+export default function QuizResultsCard({
+  quiz,
+  quizAttempt,
+}: QuizResultsProps) {
+  const percentage = Math.round(
+    (quizAttempt.score / quiz.questions.length) * 100
+  );
 
   const formatTime = (seconds: number): string => {
     const minutes = Math.floor(seconds / 60);
@@ -161,7 +167,8 @@ export default function QuizResultsCard({ quizAttempt }: QuizResultsProps) {
             </CardTitle>
           </div>
           <p className="text-base text-muted-foreground mb-3">
-            You scored {score} out of {totalQuestions} questions
+            You scored {quizAttempt.score} out of {quiz.questions.length}
+            questions
           </p>
 
           {percentage < 70 && (
@@ -180,21 +187,23 @@ export default function QuizResultsCard({ quizAttempt }: QuizResultsProps) {
         <div className="grid grid-cols-3 gap-3">
           <StatCard
             icon={<Target className="w-5 h-5" />}
-            value={`${score}/${totalQuestions}`}
+            value={`${quizAttempt.score}/${quiz.questions.length}`}
             label="Questions"
             color={performanceData.color}
           />
 
           <StatCard
             icon={<Clock className="w-5 h-5" />}
-            value={formatTime(timeTaken)}
+            value={formatTime(quizAttempt.timeTaken)}
             label="Time Taken"
             color="text-emerald-600"
           />
 
           <StatCard
             icon={<TrendingUp className="w-5 h-5" />}
-            value={`${Math.round(timeTaken / totalQuestions)}s`}
+            value={`${Math.round(
+              quizAttempt.timeTaken / quiz.questions.length
+            )}s`}
             label="Per Question"
             color="text-indigo-600"
           />
