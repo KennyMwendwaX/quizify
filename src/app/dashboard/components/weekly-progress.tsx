@@ -1,6 +1,13 @@
 "use client";
 
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import {
   ChartConfig,
   ChartContainer,
@@ -101,19 +108,27 @@ export default function WeeklyProgressChart({ weeklyProgress }: Props) {
   const paddedMaxXP = Math.ceil((maxXP * 1.15) / 100) * 100; // 15% padding
 
   // Calculate summary statistics for footer
-  const totalQuizzes = mergedProgress.reduce((sum, day) => sum + day.quizzes, 0);
+  const totalQuizzes = mergedProgress.reduce(
+    (sum, day) => sum + day.quizzes,
+    0
+  );
   const totalXP = mergedProgress.reduce((sum, day) => sum + day.xp, 0);
-  
+
   // Calculate average score (only for days with quizzes)
-  const daysWithQuizzes = mergedProgress.filter(day => day.quizzes > 0);
-  const averageScore = daysWithQuizzes.length > 0 
-    ? Math.round(daysWithQuizzes.reduce((sum, day) => sum + day.score, 0) / daysWithQuizzes.length) 
-    : 0;
-  
+  const daysWithQuizzes = mergedProgress.filter((day) => day.quizzes > 0);
+  const averageScore =
+    daysWithQuizzes.length > 0
+      ? Math.round(
+          daysWithQuizzes.reduce((sum, day) => sum + day.score, 0) /
+            daysWithQuizzes.length
+        )
+      : 0;
+
   // Find best day
-  const bestDay = daysWithQuizzes.length > 0 
-    ? [...daysWithQuizzes].sort((a, b) => b.score - a.score)[0] 
-    : null;
+  const bestDay =
+    daysWithQuizzes.length > 0
+      ? [...daysWithQuizzes].sort((a, b) => b.score - a.score)[0]
+      : null;
 
   const chartConfig = {
     score: {
@@ -176,10 +191,7 @@ export default function WeeklyProgressChart({ weeklyProgress }: Props) {
                 tickMargin={8}
                 fontSize={12}
               />
-              <ChartTooltip
-                cursor={false}
-                content={<ChartTooltipContent />}
-              />
+              <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
               <ChartLegend content={<ChartLegendContent />} />
               <Line
                 yAxisId="score"
@@ -241,15 +253,18 @@ export default function WeeklyProgressChart({ weeklyProgress }: Props) {
       </CardContent>
       <CardFooter className="flex-col gap-2 text-sm">
         <div className="flex items-center gap-2 font-medium leading-none">
-          Average Score: {averageScore}%{" "}
+          Average Score (this week): {averageScore}%{" "}
           {averageScore >= 75 && <TrendingUp className="h-4 w-4" />}
         </div>
         <div className="flex items-center gap-2 leading-none text-muted-foreground">
-          {totalQuizzes} quiz{totalQuizzes !== 1 ? "zes" : ""} completed this week ({totalXP} XP gained)
+          {totalQuizzes} quiz{totalQuizzes !== 1 ? "zes" : ""} completed this
+          week ({totalXP} XP gained)
         </div>
         {bestDay && (
           <div className="text-muted-foreground">
-            Best day: <span className="font-medium">{bestDay.day}</span> with {bestDay.score}% score on {bestDay.quizzes} quiz{bestDay.quizzes !== 1 ? "zes" : ""}
+            Best day: <span className="font-medium">{bestDay.day}</span> with{" "}
+            {bestDay.score}% score on {bestDay.quizzes} quiz
+            {bestDay.quizzes !== 1 ? "zes" : ""}
           </div>
         )}
       </CardFooter>

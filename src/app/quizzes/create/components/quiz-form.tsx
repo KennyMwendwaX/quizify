@@ -214,10 +214,7 @@ export default function QuizForm({ session }: Props) {
                                     !field.value && "text-muted-foreground"
                                   )}>
                                   {field.value
-                                    ? getCategoryNameFromPath(
-                                        field.value,
-                                        categories
-                                      )
+                                    ? field.value
                                     : "Select category"}
                                   <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                                 </Button>
@@ -236,15 +233,16 @@ export default function QuizForm({ session }: Props) {
                                         value={category.value}
                                         key={category.value}
                                         onSelect={() => {
+                                          const categoryName = category.label;
                                           form.setValue(
                                             "category",
-                                            category.value
+                                            categoryName
                                           );
                                         }}>
                                         <Check
                                           className={cn(
                                             "mr-2 h-4 w-4",
-                                            category.value === field.value
+                                            category.label === field.value
                                               ? "opacity-100"
                                               : "opacity-0"
                                           )}
