@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardTitle } from "@/components/ui/card";
+import { QuizAttempt } from "@/database/schema";
 import { cn } from "@/lib/utils";
 import {
   Award,
@@ -14,13 +15,6 @@ import {
   TrendingUp,
   Trophy,
 } from "lucide-react";
-
-interface QuizResultsProps {
-  score: number;
-  totalQuestions: number;
-  timeTaken: number;
-}
-
 interface StatCardProps {
   icon: React.ReactNode;
   value: string;
@@ -44,11 +38,11 @@ const StatCard: React.FC<StatCardProps> = ({ icon, value, label, color }) => (
   </div>
 );
 
-export default function QuizResultsCard({
-  score,
-  totalQuestions,
-  timeTaken,
-}: QuizResultsProps) {
+interface QuizResultsProps {
+  quizAttempt: QuizAttempt;
+}
+
+export default function QuizResultsCard({ quizAttempt }: QuizResultsProps) {
   const percentage = Math.round((score / totalQuestions) * 100);
 
   const formatTime = (seconds: number): string => {

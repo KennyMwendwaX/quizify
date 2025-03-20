@@ -241,3 +241,70 @@ export async function getPublicQuiz(
     };
   }
 }
+
+export const getQuizWithAnswers = async (
+  quizId: number,
+  userId?: string
+): Promise<GetAdminQuizResponse> => {
+  try {
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    if (!session?.user) {
+      throw new QuizActionError(
+        "No active session found",
+        401,
+        "getQuizWithAnswers"
+      );
+    }
+
+    if (!userId || userId !== session.user.id) {
+      throw new QuizActionError(
+        "User ID mismatch or missing",
+        401,
+        "getQuizWithAnswers"
+      );
+    }
+
+    if (!quizId || isNaN(quizId)) {
+      throw new QuizActionError("Invalid quiz ID", 400, "getQuizWithAnswers");
+    }
+
+    const quiz = await db.query.quizzes.findFirst({
+      where: eq(quizzes.id, quizId),
+      with: {
+        questions: {
+          columns: {
+            id: true,
+            title: true,
+            choices: true,
+            correctAnswer: true,
+          },
+        },
+      },
+    });
+
+    if (!quiz) {
+      throw new QuizActionError("Quiz not found", 404, "getQuizWithAnswers");
+    }
+
+    return {
+      quiz: quiz,
+    };
+  } catch (error) {
+    console.error("Error in getQuizWithAnswers:", error);
+
+    if (error instanceof QuizActionError) {
+      return {
+        error: error.message,
+        statusCode: error.statusCode,
+      };
+    }
+
+    return {
+      error: "Failed to fetch quiz. Please try again later.",
+      statusCode: 500,
+    };
+  }
+};
