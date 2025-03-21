@@ -180,7 +180,7 @@ export default function QuizQuestion({ quiz, session }: QuizQuestionProps) {
             Processing your quiz results...
           </h2>
           <p className="text-muted-foreground mt-2">
-            You&pos;ll be redirected shortly.
+            You&apos;ll be redirected shortly.
           </p>
         </div>
       </div>
