@@ -12,8 +12,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Clock, ChevronLeft, ChevronRight, Flag } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { submitQuizAttempt } from "@/server/quiz/submit";
@@ -190,6 +188,7 @@ export default function QuizQuestion({ quiz, session }: QuizQuestionProps) {
   const question = quiz.questions[state.currentQuestion];
   const progress = ((state.currentQuestion + 1) / quiz.questions.length) * 100;
   const isTimeRunningLow = state.timeLeft <= 30;
+  const currentAnswer = state.answers[state.currentQuestion];
 
   return (
     <div className="min-h-[calc(100vh-150px)] flex items-center justify-center bg-gradient-to-br from-background via-background/95 to-background/90">
@@ -234,32 +233,23 @@ export default function QuizQuestion({ quiz, session }: QuizQuestionProps) {
           <CardContent className="space-y-6">
             <div className="space-y-4">
               <h2 className="text-lg font-medium">{question.title}</h2>
-              <RadioGroup
-                value={state.answers[state.currentQuestion]?.toString()}
-                onValueChange={(value) => handleAnswerSelect(Number(value))}
-                className="space-y-3">
+              <div className="space-y-3">
                 {question.choices.map((choice, index) => (
                   <div
                     key={index}
                     className={cn(
-                      "flex items-center space-x-3 rounded-lg border p-3 transition-colors",
-                      state.answers[state.currentQuestion] === index
+                      "flex items-center space-x-3 rounded-lg border p-3 transition-colors cursor-pointer",
+                      currentAnswer === index
                         ? "border-primary bg-primary/5"
                         : "hover:border-primary/50"
-                    )}>
-                    <RadioGroupItem
-                      value={index.toString()}
-                      id={`answer-${index}`}
-                      className="peer hidden"
-                    />
-                    <Label
-                      htmlFor={`answer-${index}`}
-                      className="flex-1 cursor-pointer">
+                    )}
+                    onClick={() => handleAnswerSelect(index)}>
+                    <div className="flex-1">
                       <div className="flex items-center gap-3">
                         <div
                           className={cn(
                             "flex h-7 w-7 items-center justify-center rounded-full border text-sm font-medium",
-                            state.answers[state.currentQuestion] === index
+                            currentAnswer === index
                               ? "border-primary text-primary"
                               : "border-muted"
                           )}>
@@ -267,10 +257,10 @@ export default function QuizQuestion({ quiz, session }: QuizQuestionProps) {
                         </div>
                         <span className="text-sm">{choice}</span>
                       </div>
-                    </Label>
+                    </div>
                   </div>
                 ))}
-              </RadioGroup>
+              </div>
             </div>
           </CardContent>
 
@@ -285,9 +275,7 @@ export default function QuizQuestion({ quiz, session }: QuizQuestionProps) {
             </Button>
             <Button
               onClick={handleNext}
-              disabled={
-                state.answers[state.currentQuestion] === null || isPending
-              }
+              disabled={currentAnswer === null || isPending}
               className={cn(
                 "flex-1",
                 isPending && "opacity-80 cursor-not-allowed"
