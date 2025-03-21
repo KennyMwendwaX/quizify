@@ -13,7 +13,6 @@ import {
   Trophy,
   Filter,
   Sparkles,
-  Zap,
 } from "lucide-react";
 import {
   Card,
@@ -311,10 +310,11 @@ export default function QuizzesContent({ quizzes }: { quizzes: PublicQuiz[] }) {
                           className={`${diffConfig.color} ${diffConfig.bgColor} px-2 py-0.5 text-xs font-medium`}>
                           {diffConfig.icon} {quiz.difficulty}
                         </Badge>
-                        <div className="flex items-center gap-1 text-muted-foreground">
+                        {/* <div className="flex items-center gap-1 text-muted-foreground">
                           <Trophy className="h-3.5 w-3.5" />
                           <span className="text-xs">Top 10%</span>
-                        </div>
+                        </div> */}
+                        <Badge variant="secondary">{quiz.category}</Badge>
                       </div>
                       <CardTitle className="text-xl leading-tight line-clamp-2 font-bold">
                         {quiz.title}
@@ -353,11 +353,11 @@ export default function QuizzesContent({ quizzes }: { quizzes: PublicQuiz[] }) {
                       <div className="flex justify-between items-center text-xs text-muted-foreground pt-1">
                         <div className="flex items-center gap-1">
                           <Users className="h-3.5 w-3.5" />
-                          <span>1.2k participants</span>
+                          <span>150 attempts</span>
                         </div>
                         <div className="flex items-center gap-1">
-                          <Zap className="h-3.5 w-3.5" />
-                          <span>Earn 50 XP</span>
+                          <Trophy className="h-3.5 w-3.5" />
+                          <span>85% avg. score</span>
                         </div>
                       </div>
                     </CardContent>
