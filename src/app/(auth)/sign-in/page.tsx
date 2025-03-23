@@ -21,8 +21,8 @@ export default function SignInPage() {
   const [isLoading] = useState(false);
 
   return (
-    <div className="flex min-h-screen w-screen flex-col items-center justify-center py-6">
-      <Card className="w-[450px]">
+    <div className="flex min-h-screen w-full flex-col items-center justify-center px-4 py-6">
+      <Card className="w-full max-w-md mx-auto">
         <CardHeader className="space-y-1 py-4">
           <CardTitle className="text-xl text-center">
             Welcome to Quizify
@@ -58,7 +58,7 @@ export default function SignInPage() {
             </div>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-2 w-full">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2 w-full">
             <Button variant="outline" className="w-full" disabled={isLoading}>
               {isLoading ? (
                 <AiOutlineLoading3Quarters className="mr-1 h-3 w-3 animate-spin" />
