@@ -18,6 +18,7 @@ import {
   Users,
   ArrowRight,
   Brain,
+  ChevronRight,
 } from "lucide-react";
 import Image from "next/image";
 import {
@@ -192,6 +193,20 @@ export default function HomeContent({ session }: Props) {
               Challenge your mind, create quizzes, and compete in our
               interactive learning platform.
             </p>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+              className="mt-8">
+              <Button
+                size="lg"
+                className="text-lg px-8 py-6 bg-gradient-to-r from-primary to-primary-light hover:opacity-90 transition-all duration-300 rounded-full shadow-lg"
+                onClick={() => router.push("/dashboard")}>
+                Get Started
+                <ChevronRight className="ml-2 h-5 w-5" />
+              </Button>
+            </motion.div>
           </motion.div>
 
           <motion.div
