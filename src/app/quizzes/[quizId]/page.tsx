@@ -1,8 +1,8 @@
-import QuizQuestion from "./components/quiz-question";
 import { auth } from "@/lib/auth";
-import { getPublicQuiz } from "@/server/quiz/get";
+// import { getPublicQuiz } from "@/server/quiz/get";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import QuizDetails from "./components/quiz-details";
 
 type Props = {
   params: Promise<{
@@ -18,13 +18,14 @@ export default async function QuizQuestionPage({ params }: Props) {
   if (!session?.user) {
     redirect("/sign-in");
   }
+  console.log(params);
 
-  const { quizId } = await params;
+  // const { quizId } = await params;
 
-  const result = await getPublicQuiz(parseInt(quizId, 10), session.user.id);
-  if (!result.quiz || result.error) {
-    throw new Error(result.error || "Quiz not found");
-  }
+  // const result = await getPublicQuiz(parseInt(quizId, 10), session.user.id);
+  // if (!result.quiz || result.error) {
+  //   throw new Error(result.error || "Quiz not found");
+  // }
 
-  return <QuizQuestion quiz={result.quiz} session={session} />;
+  return <QuizDetails />;
 }
