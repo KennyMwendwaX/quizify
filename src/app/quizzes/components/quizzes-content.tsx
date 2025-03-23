@@ -185,11 +185,11 @@ export default function QuizzesContent({ quizzes }: { quizzes: PublicQuiz[] }) {
               transition={{ duration: 0.4 }}
               className="flex flex-col items-center text-center gap-2">
               <div className="flex flex-col items-center">
-                <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
-                  <Sparkles className="h-5 w-5 text-primary" />
+                <h1 className="text-xl sm:text-2xl font-bold text-foreground flex items-center gap-2">
+                  <Sparkles className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
                   Challenge Yourself
                 </h1>
-                <p className="text-sm text-muted-foreground mt-1 max-w-2xl">
+                <p className="text-xs sm:text-sm text-muted-foreground mt-1 max-w-2xl px-2">
                   Discover and master new topics through our curated collection
                   of quizzes
                 </p>
@@ -203,14 +203,14 @@ export default function QuizzesContent({ quizzes }: { quizzes: PublicQuiz[] }) {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, delay: 0.1 }}
-              className="bg-background/80 shadow-sm border rounded-lg p-3">
-              <div className="flex gap-2 items-center">
+              className="bg-background/80 shadow-sm border rounded-lg p-2 sm:p-3">
+              <div className="flex flex-col sm:flex-row gap-2">
                 <div className="relative flex-1">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground h-4 w-4" />
                   <Input
                     type="text"
                     placeholder="Search by title or topic..."
-                    className="pl-9 h-9 text-sm"
+                    className="pl-9 h-9 text-sm w-full"
                     value={searchTerm}
                     onChange={(e) => {
                       setSearchTerm(e.target.value);
@@ -219,69 +219,71 @@ export default function QuizzesContent({ quizzes }: { quizzes: PublicQuiz[] }) {
                   />
                 </div>
 
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="h-9 px-3 text-sm">
-                      <Filter className="mr-1.5 h-3.5 w-3.5" />
-                      {difficultyFilter === "all"
-                        ? "All Levels"
-                        : difficultyFilter}
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-40">
-                    <DropdownMenuItem
-                      onClick={() => handleDifficultyChange("all")}>
-                      {difficultyIcons.DEFAULT} All Levels
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem
-                      onClick={() => handleDifficultyChange("EASY")}>
-                      {difficultyIcons.EASY} Easy
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={() => handleDifficultyChange("MEDIUM")}>
-                      {difficultyIcons.MEDIUM} Medium
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={() => handleDifficultyChange("HARD")}>
-                      {difficultyIcons.HARD} Hard
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                <div className="flex gap-2 w-full sm:w-auto">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-9 px-2 sm:px-3 text-xs sm:text-sm flex-1 sm:flex-initial">
+                        <Filter className="mr-1 sm:mr-1.5 h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                        {difficultyFilter === "all"
+                          ? "All Levels"
+                          : difficultyFilter}
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-40">
+                      <DropdownMenuItem
+                        onClick={() => handleDifficultyChange("all")}>
+                        {difficultyIcons.DEFAULT} All Levels
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem
+                        onClick={() => handleDifficultyChange("EASY")}>
+                        {difficultyIcons.EASY} Easy
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => handleDifficultyChange("MEDIUM")}>
+                        {difficultyIcons.MEDIUM} Medium
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => handleDifficultyChange("HARD")}>
+                        {difficultyIcons.HARD} Hard
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
 
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="h-9 px-3 text-sm">
-                      <ArrowUpDown className="mr-1.5 h-3.5 w-3.5" />
-                      Sort
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-40">
-                    <DropdownMenuItem
-                      onClick={() => handleSortChange("date_desc")}>
-                      Newest first
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={() => handleSortChange("date_asc")}>
-                      Oldest first
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem
-                      onClick={() => handleSortChange("name_asc")}>
-                      Name (A-Z)
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={() => handleSortChange("name_desc")}>
-                      Name (Z-A)
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-9 px-2 sm:px-3 text-xs sm:text-sm flex-1 sm:flex-initial">
+                        <ArrowUpDown className="mr-1 sm:mr-1.5 h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                        Sort
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-40">
+                      <DropdownMenuItem
+                        onClick={() => handleSortChange("date_desc")}>
+                        Newest first
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => handleSortChange("date_asc")}>
+                        Oldest first
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem
+                        onClick={() => handleSortChange("name_asc")}>
+                        Name (A-Z)
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => handleSortChange("name_desc")}>
+                        Name (Z-A)
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
               </div>
             </motion.div>
           </div>
