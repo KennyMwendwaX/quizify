@@ -22,7 +22,7 @@ export default function SignInPage() {
 
   return (
     <div className="flex min-h-screen w-screen flex-col items-center justify-center py-6">
-      <Card className="w-[400px]">
+      <Card className="w-[450px]">
         <CardHeader className="space-y-1 py-4">
           <CardTitle className="text-xl text-center">
             Welcome to Quizify
@@ -58,11 +58,8 @@ export default function SignInPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-2 w-full">
-            <Button
-              variant="outline"
-              className="w-full h-8 text-sm"
-              disabled={isLoading}>
+          <div className="grid md:grid-cols-2 gap-2 w-full">
+            <Button variant="outline" className="w-full" disabled={isLoading}>
               {isLoading ? (
                 <AiOutlineLoading3Quarters className="mr-1 h-3 w-3 animate-spin" />
               ) : (
@@ -70,10 +67,7 @@ export default function SignInPage() {
               )}
               Google
             </Button>
-            <Button
-              variant="outline"
-              className="w-full h-8 text-sm"
-              disabled={isLoading}>
+            <Button variant="outline" className="w-full" disabled={isLoading}>
               {isLoading ? (
                 <AiOutlineLoading3Quarters className="mr-1 h-3 w-3 animate-spin" />
               ) : (

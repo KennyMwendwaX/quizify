@@ -69,11 +69,7 @@ export default function SignIn() {
               <FormItem>
                 <FormLabel>Email</FormLabel>
                 <FormControl>
-                  <Input
-                    className="h-8"
-                    placeholder="john@gmail.com"
-                    {...field}
-                  />
+                  <Input placeholder="john@gmail.com" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -90,7 +86,7 @@ export default function SignIn() {
                       type={showPassword ? "text" : "password"}
                       placeholder="••••••••"
                       {...field}
-                      className="h-8 pr-10"
+                      className="pr-10"
                     />
                     <button
                       type="button"
@@ -108,7 +104,7 @@ export default function SignIn() {
               </FormItem>
             )}
           />
-          <Button type="submit" className="w-full h-8" disabled={isLoading}>
+          <Button type="submit" className="w-full" disabled={isLoading}>
             {isLoading && (
               <AiOutlineLoading3Quarters className="mr-2 h-4 w-4 animate-spin" />
             )}
