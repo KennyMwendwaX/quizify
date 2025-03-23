@@ -23,7 +23,7 @@ export type CategoryPerformance = {
   name: string;
   score: number;
   quizzes: number;
-}[];
+};
 
 export type WeeklyProgress = {
   day: string;

@@ -56,7 +56,7 @@ export type RecentQuizzesResponse = {
 };
 
 export type CategoryPerformanceResponse = {
-  performances?: CategoryPerformance;
+  performances?: CategoryPerformance[];
   error?: string;
   statusCode?: number;
 };

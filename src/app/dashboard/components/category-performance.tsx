@@ -24,10 +24,10 @@ import {
 } from "recharts";
 import EmptyState from "./empty-state";
 
-type CategoryPerformance = { name: string; score: number; quizzes: number }[];
+type CategoryPerformance = { name: string; score: number; quizzes: number };
 
 type Props = {
-  categoryPerformance: CategoryPerformance;
+  categoryPerformance: CategoryPerformance[];
 };
 
 export default function CategoryPerformanceChart({
@@ -75,6 +75,10 @@ export default function CategoryPerformanceChart({
       label: "Score %",
       color: "hsl(var(--chart-1))",
     },
+    quizzes: {
+      label: "No. of quizzes",
+      color: "hsl(var(--chart-2))",
+    },
   } satisfies ChartConfig;
 
   return (
@@ -104,6 +108,14 @@ export default function CategoryPerformanceChart({
                 dataKey="score"
                 fill="var(--color-score)"
                 fillOpacity={0.5}
+              />
+              {/* Hidden Radar just for tooltip data */}
+              <Radar
+                name="No. of quizzes"
+                dataKey="quizzes"
+                fill="var(--color-quizzes)"
+                fillOpacity={0}
+                stroke="transparent"
               />
             </RadarChart>
           </ResponsiveContainer>
