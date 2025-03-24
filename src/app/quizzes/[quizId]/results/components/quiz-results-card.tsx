@@ -35,18 +35,22 @@ const StatCard: React.FC<StatCardProps> = ({
   tooltip,
 }) => (
   <div
-    className="flex items-center gap-4 p-4 border rounded-lg hover:shadow-md transition-shadow"
+    className="flex items-center gap-2 sm:gap-4 p-2 sm:p-4 border rounded-lg hover:shadow-md transition-shadow"
     title={tooltip}>
     <div
       className={cn(
-        "p-3 rounded-full",
+        "p-2 sm:p-3 rounded-full",
         color.replace("text-", "bg-").replace("600", "100")
       )}>
       {icon}
     </div>
     <div>
-      <span className={cn("text-xl font-bold", color)}>{value}</span>
-      <div className="text-sm font-medium text-muted-foreground">{label}</div>
+      <span className={cn("text-base sm:text-xl font-bold", color)}>
+        {value}
+      </span>
+      <div className="text-xs sm:text-sm font-medium text-muted-foreground">
+        {label}
+      </div>
     </div>
   </div>
 );
@@ -73,10 +77,7 @@ export default function QuizResultsCard({
     return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
   };
 
-  // Calculate average time per question
   const avgTimePerQuestion = Math.round(quizAttempt.timeTaken / totalQuestions);
-
-  // Calculate XP efficiency (XP earned per second)
   const xpPerQuestion = (xpEarned / quizAttempt.answers.length).toFixed(1);
 
   const getPerformanceData = (): {
@@ -88,27 +89,27 @@ export default function QuizResultsCard({
     if (percentage >= 90)
       return {
         message: "Excellent!",
-        icon: <Trophy className="w-8 h-8 text-amber-600" />,
+        icon: <Trophy className="w-6 sm:w-8 h-6 sm:h-8 text-amber-600" />,
         color: "text-amber-600",
         gradient: "from-amber-500/20 to-amber-300/5",
       };
     if (percentage >= 75)
       return {
         message: "Great Job!",
-        icon: <Award className="w-8 h-8 text-indigo-600" />,
+        icon: <Award className="w-6 sm:w-8 h-6 sm:h-8 text-indigo-600" />,
         color: "text-indigo-600",
         gradient: "from-indigo-500/20 to-indigo-300/5",
       };
     if (percentage >= 60)
       return {
         message: "Good Effort!",
-        icon: <Medal className="w-8 h-8 text-emerald-600" />,
+        icon: <Medal className="w-6 sm:w-8 h-6 sm:h-8 text-emerald-600" />,
         color: "text-emerald-600",
         gradient: "from-emerald-500/20 to-emerald-300/5",
       };
     return {
       message: "Keep Practicing!",
-      icon: <Target className="w-8 h-8 text-blue-600" />,
+      icon: <Target className="w-6 sm:w-8 h-6 sm:h-8 text-blue-600" />,
       color: "text-blue-600",
       gradient: "from-blue-500/20 to-blue-300/5",
     };
@@ -119,7 +120,7 @@ export default function QuizResultsCard({
   return (
     <Card
       className={cn(
-        "max-w-xl mx-auto shadow-lg",
+        "max-w-xl w-full mx-auto shadow-lg",
         "bg-gradient-to-br from-background via-background to-background",
         "border-t-4",
         percentage >= 90
@@ -137,10 +138,12 @@ export default function QuizResultsCard({
         )}
       />
 
-      <div className="flex flex-row p-6 gap-6 items-center relative z-10">
+      <div className="flex flex-col sm:flex-row p-4 sm:p-6 gap-4 sm:gap-6 items-center relative z-10">
         {/* Score Circle */}
-        <div className="relative w-32 h-32 flex-shrink-0">
-          <svg className="w-32 h-32 transform -rotate-90" viewBox="0 0 100 100">
+        <div className="relative w-24 sm:w-32 h-24 sm:h-32 flex-shrink-0">
+          <svg
+            className="w-full h-full transform -rotate-90"
+            viewBox="0 0 100 100">
             <circle
               cx="50"
               cy="50"
@@ -171,7 +174,11 @@ export default function QuizResultsCard({
           </svg>
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="text-center">
-              <span className={cn("text-2xl font-bold", performanceData.color)}>
+              <span
+                className={cn(
+                  "text-xl sm:text-2xl font-bold",
+                  performanceData.color
+                )}>
                 {percentage}%
               </span>
               <p className="text-xs font-medium text-muted-foreground">Score</p>
@@ -180,21 +187,24 @@ export default function QuizResultsCard({
         </div>
 
         {/* Header Text */}
-        <div className="flex-1">
-          <div className="flex items-center gap-2 mb-2">
+        <div className="flex-1 text-center sm:text-left">
+          <div className="flex items-center justify-center sm:justify-start gap-2 mb-2">
             {performanceData.icon}
             <CardTitle
-              className={cn("text-2xl font-bold", performanceData.color)}>
+              className={cn(
+                "text-xl sm:text-2xl font-bold",
+                performanceData.color
+              )}>
               {performanceData.message}
             </CardTitle>
           </div>
-          <p className="text-base text-muted-foreground mb-3">
+          <p className="text-sm sm:text-base text-muted-foreground mb-3 text-center sm:text-left">
             You scored {score} out of {totalQuestions} questions
           </p>
 
           <div
             className={cn(
-              "flex items-center gap-2 text-sm p-2 rounded-lg",
+              "flex items-center justify-center gap-2 text-xs sm:text-sm p-2 rounded-lg",
               percentage >= 90
                 ? "bg-amber-50 text-amber-600"
                 : percentage >= 75
@@ -203,7 +213,7 @@ export default function QuizResultsCard({
                 ? "bg-emerald-50 text-emerald-600"
                 : "bg-blue-50 text-blue-600"
             )}>
-            <Zap className="w-4 h-4" />
+            <Zap className="w-3 h-3 sm:w-4 sm:h-4" />
             <span>
               You earned <strong>{xpEarned} XP</strong> from this quiz!
             </span>
@@ -213,9 +223,9 @@ export default function QuizResultsCard({
 
       <CardContent className="pt-0 pb-4">
         {/* Primary Stats */}
-        <div className="grid grid-cols-2 gap-3 mb-3">
+        <div className="grid grid-cols-2 gap-2 sm:gap-3 mb-3">
           <StatCard
-            icon={<Target className="w-5 h-5" />}
+            icon={<Target className="w-4 h-4 sm:w-5 sm:h-5" />}
             value={`${score}/${totalQuestions}`}
             label="Correct Answers"
             color={performanceData.color}
@@ -223,7 +233,7 @@ export default function QuizResultsCard({
           />
 
           <StatCard
-            icon={<Zap className="w-5 h-5" />}
+            icon={<Zap className="w-4 h-4 sm:w-5 sm:h-5" />}
             value={`${xpEarned}`}
             label="XP Earned"
             color="text-purple-600"
@@ -232,9 +242,9 @@ export default function QuizResultsCard({
         </div>
 
         {/* Secondary Stats */}
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-3 gap-2 sm:gap-3">
           <StatCard
-            icon={<Clock className="w-5 h-5" />}
+            icon={<Clock className="w-4 h-4 sm:w-5 sm:h-5" />}
             value={formatTime(quizAttempt.timeTaken)}
             label="Time Taken"
             color="text-emerald-600"
@@ -242,7 +252,7 @@ export default function QuizResultsCard({
           />
 
           <StatCard
-            icon={<Timer className="w-5 h-5" />}
+            icon={<Timer className="w-4 h-4 sm:w-5 sm:h-5" />}
             value={`${avgTimePerQuestion}s`}
             label="Per Question"
             color="text-indigo-600"
@@ -250,7 +260,7 @@ export default function QuizResultsCard({
           />
 
           <StatCard
-            icon={<Flame className="w-5 h-5" />}
+            icon={<Flame className="w-4 h-4 sm:w-5 sm:h-5" />}
             value={`${xpPerQuestion}`}
             label="XP/Question"
             color="text-amber-600"
@@ -259,27 +269,27 @@ export default function QuizResultsCard({
         </div>
       </CardContent>
 
-      <CardFooter className="flex gap-3 pt-2 pb-6">
+      <CardFooter className="flex flex-col sm:flex-row gap-3 pt-2 pb-6">
         <Button
           onClick={() => router.push("/dashboard")}
-          className="flex-1 bg-background hover:bg-slate-100 text-foreground border border-input"
+          className="w-full sm:flex-1 bg-background hover:bg-slate-100 text-foreground border border-input mb-2 sm:mb-0"
           variant="outline">
-          <LayoutDashboard className="mr-2 h-5 w-5" />
+          <LayoutDashboard className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
           Dashboard
         </Button>
 
         <Button
           onClick={() => router.push(`/quizzes/${quiz.id}/review`)}
-          className="flex-1 bg-background hover:bg-slate-100 text-foreground border border-input"
+          className="w-full sm:flex-1 bg-background hover:bg-slate-100 text-foreground border border-input mb-2 sm:mb-0"
           variant="outline">
-          <FileText className="mr-2 h-5 w-5" />
+          <FileText className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
           Review
         </Button>
 
         <Button
           onClick={() => router.push(`/quizzes/${quiz.id}`)}
           className={cn(
-            "flex-1",
+            "w-full sm:flex-1",
             percentage >= 90
               ? "bg-amber-500 hover:bg-amber-600"
               : percentage >= 75
@@ -288,7 +298,7 @@ export default function QuizResultsCard({
               ? "bg-emerald-500 hover:bg-emerald-600"
               : "bg-blue-500 hover:bg-blue-600"
           )}>
-          <Rocket className="mr-2 h-5 w-5" />
+          <Rocket className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
           Retry Quiz
         </Button>
       </CardFooter>
