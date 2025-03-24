@@ -175,7 +175,7 @@ export const usersRelations = relations(users, ({ many }) => ({
 
 export const quizzesRelations = relations(quizzes, ({ one, many }) => ({
   user: one(users, {
-    fields: [quizzes.id],
+    fields: [quizzes.userId],
     references: [users.id],
   }),
   questions: many(questions),

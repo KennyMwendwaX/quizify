@@ -111,7 +111,6 @@ export default function QuizDetails({
           userAttempts[0]
         )
       : null;
-  console.log(quiz.timeLimit);
 
   return (
     <div className="container mx-auto py-8 px-4 max-w-4xl">
