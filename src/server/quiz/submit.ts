@@ -98,7 +98,7 @@ export const submitQuizAttempt = async (
       score,
       percentage: Math.round(scorePercentage),
       isCompleted: answers.length === quiz.questions.length,
-      timeTaken: quiz.timeLimit ? quiz.timeLimit * 60 - timeLeft : 0,
+      timeTaken: quiz.timeLimit ? quiz.timeLimit - timeLeft : 0,
       xpEarned: xpEarnedPoints,
     });
 

@@ -85,7 +85,9 @@ export default function EditQuizForm({ quizId, quiz, session }: Props) {
       difficulty: quiz.difficulty,
       description: quiz.description,
       isTimeLimited: quiz.isTimeLimited,
-      timeLimit: quiz.timeLimit,
+      timeLimit: quiz.isTimeLimited
+        ? Math.round((quiz.timeLimit ?? 0) / 60)
+        : null,
       questions: quiz.questions,
     },
   });
@@ -138,7 +140,14 @@ export default function EditQuizForm({ quizId, quiz, session }: Props) {
 
   function onSubmit(data: QuizFormValues) {
     startTransition(async () => {
-      const result = await updateQuiz(data, parseInt(quizId), session.user.id);
+      const result = await updateQuiz(
+        {
+          ...data,
+          timeLimit: data.isTimeLimited ? (data.timeLimit ?? 0) * 60 : 0,
+        },
+        parseInt(quizId),
+        session.user.id
+      );
 
       if (result.error) {
         toast.error(result.error);

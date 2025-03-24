@@ -38,6 +38,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import type { PublicQuiz, QuizDifficulty } from "@/database/schema";
 import { motion } from "motion/react";
+import { formatSecondsToMinutes } from "@/lib/format-time";
 
 const difficultyIcons = {
   EASY: "🌱",
@@ -372,7 +373,7 @@ export default function MyQuizzesContent({
                           <Clock className="h-4 w-4 text-primary/70" />
                           <div>
                             <p className="text-sm font-medium">
-                              {quiz.timeLimit} mins
+                              {formatSecondsToMinutes(quiz.timeLimit ?? 0)}
                             </p>
                             <p className="text-xs text-muted-foreground">
                               Time limit

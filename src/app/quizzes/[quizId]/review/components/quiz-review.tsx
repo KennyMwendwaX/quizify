@@ -25,6 +25,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import Link from "next/link";
+import { formatSecondsToMinutes } from "@/lib/format-time";
 
 type AdminQuestion = {
   title: string;
@@ -88,12 +89,6 @@ export default function QuizReview({ quiz, quizAttempt }: QuizReviewProps) {
     }
   };
 
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}m ${secs}s`;
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-background/90 py-6">
       <div className="container mx-auto px-4">
@@ -135,11 +130,11 @@ export default function QuizReview({ quiz, quizAttempt }: QuizReviewProps) {
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                 <div className="flex items-center gap-2 bg-primary/5 px-3 py-1.5 rounded-lg">
                   <Clock className="w-4 h-4" />
-                  {quiz.timeLimit} mins allotted
+                  {formatSecondsToMinutes(quiz.timeLimit ?? 0)} allotted
                 </div>
                 <div className="flex items-center gap-2 bg-primary/5 px-3 py-1.5 rounded-lg">
                   <Clock className="w-4 h-4" />
-                  {formatTime(quizAttempt.timeTaken)} taken
+                  {formatSecondsToMinutes(quizAttempt.timeTaken)} taken
                 </div>
                 <div className="flex items-center gap-2 bg-primary/5 px-3 py-1.5 rounded-lg">
                   <Users className="w-4 h-4" />

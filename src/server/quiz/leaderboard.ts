@@ -27,7 +27,7 @@ export const getQuizLeaderboard = async (
       throw new QuizActionError("Quiz ID missing", 400, "getQuizLeaderboard");
     }
 
-    const leaderboard = await db.query.quizAttempts.findMany({
+    const leaderboardData = await db.query.quizAttempts.findMany({
       where: eq(quizAttempts.quizId, quizId),
       orderBy: desc(quizAttempts.score),
       limit: 5,
@@ -35,12 +35,18 @@ export const getQuizLeaderboard = async (
         user: {
           columns: {
             name: true,
+            image: true,
           },
         },
       },
     });
 
-    return { leaderboard: leaderboard };
+    const leaderboard = leaderboardData.map((entry, index) => ({
+      ...entry,
+      rank: index + 1,
+    }));
+
+    return { leaderboard };
   } catch (error) {
     console.error("Error in getQuizLeaderboard:", error);
     return {

@@ -92,7 +92,7 @@ export default function QuizQuestion({ quiz, session }: QuizQuestionProps) {
   const initialState: QuizState = {
     currentQuestion: 0,
     answers: new Array(quiz.questions.length).fill(null),
-    timeLeft: (quiz.timeLimit ?? 0) * 60,
+    timeLeft: quiz.timeLimit ?? 0,
     isCompleted: false,
     showTimeWarning: false,
   };

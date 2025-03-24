@@ -97,6 +97,12 @@ export const getPublicQuizzes = async (
             choices: true,
           },
         },
+        user: {
+          columns: {
+            name: true,
+            image: true,
+          },
+        },
       },
       orderBy: [desc(quizzes.createdAt)],
     });
@@ -213,6 +219,12 @@ export async function getPublicQuiz(
             id: true,
             title: true,
             choices: true,
+          },
+        },
+        user: {
+          columns: {
+            name: true,
+            image: true,
           },
         },
       },

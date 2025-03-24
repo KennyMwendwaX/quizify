@@ -174,7 +174,7 @@ export const usersRelations = relations(users, ({ many }) => ({
 }));
 
 export const quizzesRelations = relations(quizzes, ({ one, many }) => ({
-  users: one(users, {
+  user: one(users, {
     fields: [quizzes.id],
     references: [users.id],
   }),
@@ -225,7 +225,13 @@ export type AdminQuestion = Pick<
   Question,
   "id" | "title" | "choices" | "correctAnswer"
 >;
-export type PublicQuiz = Quiz & { questions: PublicQuestion[] };
+export type PublicQuiz = Quiz & {
+  questions: PublicQuestion[];
+  user: {
+    name: string;
+    image: string | null;
+  };
+};
 export type AdminQuiz = Quiz & { questions: AdminQuestion[] };
 export type QuizAttempt = typeof quizAttempts.$inferSelect;
 export type QuizDifficulty = typeof quizzes.$inferSelect.difficulty;

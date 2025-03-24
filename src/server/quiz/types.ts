@@ -45,7 +45,9 @@ export type GetQuizLeaderboardResponse = {
   leaderboard?: (QuizAttempt & {
     user: {
       name: string;
+      image: string | null;
     };
+    rank: number;
   })[];
   error?: string;
   statusCode?: number;

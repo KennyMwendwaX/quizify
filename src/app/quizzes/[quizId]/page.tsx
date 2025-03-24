@@ -3,6 +3,9 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import QuizDetails from "./components/quiz-details";
+import { getPublicQuiz } from "@/server/quiz/get";
+import { getUserQuizAttempts } from "@/server/user/quiz-attempts";
+import { getQuizLeaderboard } from "@/server/quiz/leaderboard";
 
 type Props = {
   params: Promise<{
@@ -18,14 +21,33 @@ export default async function QuizQuestionPage({ params }: Props) {
   if (!session?.user) {
     redirect("/sign-in");
   }
-  console.log(params);
 
-  // const { quizId } = await params;
+  const { quizId } = await params;
 
-  // const result = await getPublicQuiz(parseInt(quizId, 10), session.user.id);
-  // if (!result.quiz || result.error) {
-  //   throw new Error(result.error || "Quiz not found");
-  // }
+  const quizResult = await getPublicQuiz(parseInt(quizId, 10), session.user.id);
+  if (!quizResult.quiz || quizResult.error) {
+    throw new Error(quizResult.error || "Quiz not found");
+  }
 
-  return <QuizDetails />;
+  const userAttemptsResults = await getUserQuizAttempts(
+    session.user.id,
+    parseInt(quizId, 10)
+  );
+  if (!userAttemptsResults.quizAttempts || userAttemptsResults.error) {
+    throw new Error(userAttemptsResults.error || "Quiz not found");
+  }
+
+  const leaderboardResult = await getQuizLeaderboard(parseInt(quizId, 10));
+  if (!leaderboardResult.leaderboard || leaderboardResult.error) {
+    throw new Error(leaderboardResult.error || "Leaderboard not found");
+  }
+
+  return (
+    <QuizDetails
+      quiz={quizResult.quiz}
+      userAttempts={userAttemptsResults.quizAttempts}
+      leaderboard={leaderboardResult.leaderboard}
+      session={session}
+    />
+  );
 }

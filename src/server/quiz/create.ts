@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import db from "@/database/db";
 import { questions, quizzes } from "@/database/schema";
-import { quizFormSchema, QuizFormValues } from "@/lib/quiz-form-schema";
+import { QuizFormValues } from "@/lib/quiz-form-schema";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { CreateQuizResponse, QuizActionError } from "./types";
@@ -30,9 +30,7 @@ export const createQuiz = async (
       );
     }
 
-    const validatedData = quizFormSchema.parse(quiz);
-
-    const { questions: quizQuestions, ...quizData } = validatedData;
+    const { questions: quizQuestions, ...quizData } = quiz;
 
     const result = await db.transaction(async (tx) => {
       const [createdQuiz] = await tx

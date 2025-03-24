@@ -78,7 +78,7 @@ export default function QuizForm({ session }: Props) {
     resolver: zodResolver(quizFormSchema),
     defaultValues: {
       isTimeLimited: false,
-      timeLimit: 30,
+      timeLimit: 10,
       questions: [],
     },
   });
@@ -131,7 +131,13 @@ export default function QuizForm({ session }: Props) {
 
   function onSubmit(data: QuizFormValues) {
     startTransition(async () => {
-      const result = await createQuiz(data, session.user.id);
+      const result = await createQuiz(
+        {
+          ...data,
+          timeLimit: data.isTimeLimited ? (data.timeLimit ?? 0) * 60 : 0,
+        },
+        session.user.id
+      );
 
       if (result.error) {
         toast.error(result.error);
