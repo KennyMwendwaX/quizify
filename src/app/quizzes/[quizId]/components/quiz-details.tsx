@@ -41,6 +41,7 @@ import {
 } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
+import { PublicQuiz, QuizAttempt } from "@/database/schema";
 
 // Mock data - in a real app, this would come from props or a data fetching hook
 const quizData = {
@@ -130,6 +131,15 @@ const formatTime = (seconds: number) => {
   return `${minutes}m ${remainingSeconds < 10 ? "0" : ""}${remainingSeconds}s`;
 };
 
+type QuizDetailsProps = {
+  quiz: PublicQuiz;
+  userQuizAttempts: (QuizAttempt & {
+    user: {
+      name: string;
+    };
+  })[];
+};
+
 export default function QuizDetails() {
   const router = useRouter();
 
@@ -179,7 +189,7 @@ export default function QuizDetails() {
 
   return (
     <div className="container mx-auto py-8 px-4 max-w-4xl">
-      <Card className="mb-8 border-2 border-primary/10 shadow-lg">
+      <Card className="mb-8">
         <CardHeader className="pb-4">
           <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-4">
             <div>
