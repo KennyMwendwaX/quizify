@@ -2,7 +2,7 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import QuizResultsCard from "./components/quiz-results-card";
-import { getUserQuizAttempt } from "@/server/quiz/results";
+import { getUserQuizAttempt } from "@/server/user/quiz-attempts";
 import { getQuizWithAnswers } from "@/server/quiz/get";
 
 type Props = {

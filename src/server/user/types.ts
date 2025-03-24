@@ -1,3 +1,4 @@
+import { QuizAttempt } from "@/database/schema";
 import {
   CategoryPerformance,
   RecentQuiz,
@@ -15,6 +16,18 @@ export class UserActionError extends Error {
     this.name = "UserActionError";
   }
 }
+
+export type GetUserQuizAttemptResponse = {
+  quizAttempt?: QuizAttempt;
+  error?: string;
+  statusCode?: number;
+};
+
+export type GetUserQuizAttemptsResponse = {
+  quizAttempts?: QuizAttempt[];
+  error?: string;
+  statusCode?: number;
+};
 
 export type UpdateUserXPResponse = {
   success?: boolean;
