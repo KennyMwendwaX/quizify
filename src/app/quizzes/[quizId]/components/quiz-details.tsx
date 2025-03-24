@@ -38,6 +38,7 @@ import {
   Timer,
   Star,
   Sparkles,
+  ArrowLeft,
 } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
@@ -60,7 +61,7 @@ type QuizDetailsProps = {
   session: Session | null;
 };
 
-export default function QuizDetails({
+export default function QuizDetailsPage({
   quiz,
   userAttempts,
   leaderboard,
@@ -70,6 +71,10 @@ export default function QuizDetails({
 
   const handleStartQuiz = () => {
     router.push(`/quizzes/${quiz.id}/play`);
+  };
+
+  const handleGoBack = () => {
+    router.push("/quizzes");
   };
 
   const getDifficultyColor = (difficulty: string) => {
@@ -113,35 +118,47 @@ export default function QuizDetails({
       : null;
 
   return (
-    <div className="container mx-auto py-8 px-4 max-w-4xl">
-      <Card className="mb-8">
+    <div className="container mx-auto py-4 px-2 sm:py-8 sm:px-4 max-w-4xl">
+      {/* Mobile Back Button */}
+      <div className="mb-4 block sm:hidden">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleGoBack}
+          className="flex items-center">
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Back to Quizzes
+        </Button>
+      </div>
+
+      <Card className="mb-6 sm:mb-8">
         <CardHeader className="pb-4">
           <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-4">
-            <div>
-              <div className="flex items-center gap-2 mb-2">
+            <div className="flex-1 min-w-0">
+              <div className="flex flex-wrap items-center gap-2 mb-2">
                 <Badge
                   className={cn(
-                    "px-3 py-1",
+                    "px-2 py-1 text-xs",
                     getDifficultyColor(quiz.difficulty)
                   )}>
                   {quiz.difficulty}
                 </Badge>
-                <Badge variant="outline" className="px-3 py-1">
+                <Badge variant="outline" className="px-2 py-1 text-xs">
                   {quiz.category}
                 </Badge>
               </div>
-              <CardTitle className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+              <CardTitle className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent break-words">
                 {quiz.title}
               </CardTitle>
-              <CardDescription className="mt-2 text-base">
+              <CardDescription className="mt-2 text-sm sm:text-base break-words">
                 {quiz.description}
               </CardDescription>
             </div>
-            <div className="flex flex-col gap-2 min-w-[140px]">
+            <div className="flex flex-col gap-2 w-full sm:min-w-[140px] sm:w-auto">
               <Button
                 onClick={handleStartQuiz}
                 size="lg"
-                className="group bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 transition-all duration-300 shadow-md">
+                className="w-full group bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 transition-all duration-300 shadow-md">
                 <PlayCircle className="mr-2 h-5 w-5 transition-transform duration-300 group-hover:scale-110" />
                 Play Quiz
                 <ChevronRight className="ml-1 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
@@ -154,69 +171,74 @@ export default function QuizDetails({
         </CardHeader>
         <Separator />
         <CardContent className="pt-6">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-            <div className="flex flex-col items-center p-4 bg-muted/50 rounded-xl transition-all duration-300 hover:bg-muted hover:shadow-md">
-              <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary/10 mb-3">
-                <div className="flex">
-                  {Array.from({
-                    length: getDifficultyStars(quiz.difficulty),
-                  }).map((_, i) => (
-                    <Star
-                      key={i}
-                      className="h-4 w-4 text-primary fill-primary"
-                    />
-                  ))}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4 mb-6">
+            {[
+              {
+                icon: (
+                  <div className="flex">
+                    {Array.from({
+                      length: getDifficultyStars(quiz.difficulty),
+                    }).map((_, i) => (
+                      <Star
+                        key={i}
+                        className="h-3 w-3 sm:h-4 sm:w-4 text-primary fill-primary"
+                      />
+                    ))}
+                  </div>
+                ),
+                title: "Difficulty",
+                value: quiz.difficulty,
+              },
+              {
+                icon: <Timer className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />,
+                title: "Time Limit",
+                value:
+                  quiz.isTimeLimited && quiz.timeLimit
+                    ? formatSecondsToMinutes(quiz.timeLimit)
+                    : "No limit",
+              },
+              {
+                icon: <Brain className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />,
+                title: "Questions",
+                value: `${quiz.questions.length} total`,
+              },
+              {
+                icon: (
+                  <Sparkles className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+                ),
+                title: "XP Reward",
+                value: "Up to 150 XP",
+              },
+            ].map((item, index) => (
+              <div
+                key={index}
+                className="flex flex-col items-center p-2 sm:p-4 bg-muted/50 rounded-xl transition-all duration-300 hover:bg-muted hover:shadow-md">
+                <div className="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-primary/10 mb-2 sm:mb-3">
+                  {item.icon}
                 </div>
+                <span className="text-xs sm:text-sm font-medium">
+                  {item.title}
+                </span>
+                <span className="text-xs text-muted-foreground mt-1">
+                  {item.value}
+                </span>
               </div>
-              <span className="text-sm font-medium">Difficulty</span>
-              <span className="text-xs text-muted-foreground mt-1">
-                {quiz.difficulty}
-              </span>
-            </div>
-            <div className="flex flex-col items-center p-4 bg-muted/50 rounded-xl transition-all duration-300 hover:bg-muted hover:shadow-md">
-              <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary/10 mb-3">
-                <Timer className="h-5 w-5 text-primary" />
-              </div>
-              <span className="text-sm font-medium">Time Limit</span>
-              <span className="text-xs text-muted-foreground mt-1">
-                {quiz.isTimeLimited && quiz.timeLimit
-                  ? formatSecondsToMinutes(quiz.timeLimit)
-                  : "No limit"}
-              </span>
-            </div>
-            <div className="flex flex-col items-center p-4 bg-muted/50 rounded-xl transition-all duration-300 hover:bg-muted hover:shadow-md">
-              <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary/10 mb-3">
-                <Brain className="h-5 w-5 text-primary" />
-              </div>
-              <span className="text-sm font-medium">Questions</span>
-              <span className="text-xs text-muted-foreground mt-1">
-                {quiz.questions.length} total
-              </span>
-            </div>
-            <div className="flex flex-col items-center p-4 bg-muted/50 rounded-xl transition-all duration-300 hover:bg-muted hover:shadow-md">
-              <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary/10 mb-3">
-                <Sparkles className="h-5 w-5 text-primary" />
-              </div>
-              <span className="text-sm font-medium">XP Reward</span>
-              <span className="text-xs text-muted-foreground mt-1">
-                Up to 150 XP
-              </span>
-            </div>
+            ))}
           </div>
 
           {bestAttempt && (
-            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border border-blue-200 dark:border-blue-800 rounded-xl p-5 mb-6 shadow-sm transition-all duration-300 hover:shadow-md">
-              <h3 className="font-medium text-blue-800 dark:text-blue-300 mb-3 flex items-center">
-                <Trophy className="h-5 w-5 mr-2 text-amber-500" /> Your Best
-                Performance
+            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border border-blue-200 dark:border-blue-800 rounded-xl p-3 sm:p-5 mb-6 shadow-sm transition-all duration-300 hover:shadow-md">
+              <h3 className="font-medium text-sm sm:text-base text-blue-800 dark:text-blue-300 mb-3 flex items-center">
+                <Trophy className="h-4 w-4 sm:h-5 sm:w-5 mr-2 text-amber-500" />{" "}
+                Your Best Performance
               </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div className="bg-white/80 dark:bg-slate-900/50 rounded-lg p-3 shadow-sm">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4">
+                <div className="bg-white/80 dark:bg-slate-900/50 rounded-lg p-2 sm:p-3 shadow-sm">
                   <div className="flex items-center mb-1">
-                    <Medal className="h-4 w-4 mr-1 text-primary" />
+                    <Medal className="h-3 w-3 sm:h-4 sm:w-4 mr-1 text-primary" />
                     <p className="text-xs text-muted-foreground">Score</p>
                   </div>
-                  <p className="text-lg font-semibold">
+                  <p className="text-base sm:text-lg font-semibold">
                     {bestAttempt.score}/{quiz.questions.length}
                   </p>
                   <div className="mt-1 w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
@@ -228,12 +250,12 @@ export default function QuizDetails({
                     {bestAttempt.percentage}%
                   </p>
                 </div>
-                <div className="bg-white/80 dark:bg-slate-900/50 rounded-lg p-3 shadow-sm">
+                <div className="bg-white/80 dark:bg-slate-900/50 rounded-lg p-2 sm:p-3 shadow-sm">
                   <div className="flex items-center mb-1">
-                    <Clock className="h-4 w-4 mr-1 text-primary" />
+                    <Clock className="h-3 w-3 sm:h-4 sm:w-4 mr-1 text-primary" />
                     <p className="text-xs text-muted-foreground">Time Taken</p>
                   </div>
-                  <p className="text-lg font-semibold">
+                  <p className="text-base sm:text-lg font-semibold">
                     {formatSecondsToMinutes(bestAttempt.timeTaken)}
                   </p>
                   <div className="mt-1 w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
@@ -258,12 +280,12 @@ export default function QuizDetails({
                       : "No limit"}
                   </p>
                 </div>
-                <div className="bg-white/80 dark:bg-slate-900/50 rounded-lg p-3 shadow-sm">
+                <div className="bg-white/80 dark:bg-slate-900/50 rounded-lg p-2 sm:p-3 shadow-sm">
                   <div className="flex items-center mb-1">
-                    <Award className="h-4 w-4 mr-1 text-primary" />
+                    <Award className="h-3 w-3 sm:h-4 sm:w-4 mr-1 text-primary" />
                     <p className="text-xs text-muted-foreground">XP Earned</p>
                   </div>
-                  <p className="text-lg font-semibold">
+                  <p className="text-base sm:text-lg font-semibold">
                     {bestAttempt.xpEarned} XP
                   </p>
                   <div className="mt-1 w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
@@ -287,23 +309,23 @@ export default function QuizDetails({
       </Card>
 
       <Tabs defaultValue="overview" className="w-full">
-        <TabsList className="mb-4 w-full justify-start bg-muted/50 p-1 rounded-xl">
+        <TabsList className="mb-4 w-full justify-start bg-muted/50 p-1 rounded-xl overflow-x-auto">
           <TabsTrigger
             value="overview"
-            className="rounded-lg data-[state=active]:bg-background">
-            <Info className="h-4 w-4 mr-2" />
+            className="rounded-lg data-[state=active]:bg-background text-xs sm:text-sm">
+            <Info className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
             Overview
           </TabsTrigger>
           <TabsTrigger
             value="attempts"
-            className="rounded-lg data-[state=active]:bg-background">
-            <User className="h-4 w-4 mr-2" />
+            className="rounded-lg data-[state=active]:bg-background text-xs sm:text-sm">
+            <User className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
             My Attempts
           </TabsTrigger>
           <TabsTrigger
             value="leaderboard"
-            className="rounded-lg data-[state=active]:bg-background">
-            <BarChart3 className="h-4 w-4 mr-2" />
+            className="rounded-lg data-[state=active]:bg-background text-xs sm:text-sm">
+            <BarChart3 className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
             Leaderboard
           </TabsTrigger>
         </TabsList>
@@ -334,16 +356,16 @@ export default function QuizDetails({
                       Created By
                     </h3>
                     <p className="flex items-center">
-                      <Avatar className="h-6 w-6 mr-2">
+                      <Avatar className="h-8 w-8 mr-2">
                         <AvatarImage
-                          src={quiz.user?.image || ""}
+                          src={quiz.user.image ? quiz.user.image : undefined}
                           alt="user-profile"
                         />
                         <AvatarFallback>
-                          {quiz.user?.name.substring(0, 2)}
+                          {quiz.user.name.substring(0, 2)}
                         </AvatarFallback>
                       </Avatar>
-                      {quiz.user?.name}
+                      {quiz.user.name}
                     </p>
                   </div>
                 </div>
@@ -631,6 +653,18 @@ export default function QuizDetails({
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Desktop Back Button */}
+      <div className="hidden sm:block fixed top-4 left-4">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleGoBack}
+          className="flex items-center">
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Back to Quizzes
+        </Button>
+      </div>
     </div>
   );
 }
