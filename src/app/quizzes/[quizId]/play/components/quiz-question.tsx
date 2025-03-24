@@ -244,19 +244,13 @@ export default function QuizQuestion({ quiz, session }: QuizQuestionProps) {
                         : "hover:border-primary/50"
                     )}
                     onClick={() => handleAnswerSelect(index)}>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3">
-                        <div
-                          className={cn(
-                            "flex h-7 w-7 items-center justify-center rounded-full border text-sm font-medium",
-                            currentAnswer === index
-                              ? "border-primary text-primary"
-                              : "border-muted"
-                          )}>
-                          {String.fromCharCode(65 + index)}
-                        </div>
-                        <span className="text-sm">{choice}</span>
-                      </div>
+                    <div className="flex items-center gap-2 sm:gap-4 w-full">
+                      <span className="flex-shrink-0 w-5 h-5 sm:w-6 sm:h-6 rounded-full border-2 flex items-center justify-center text-xs">
+                        {String.fromCharCode(65 + index)}
+                      </span>
+                      <span className="flex-grow text-left break-words whitespace-normal overflow-wrap-break-word">
+                        {choice}
+                      </span>
                     </div>
                   </div>
                 ))}

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { motion } from "motion/react";
+import { motion } from "framer-motion";
 import {
   Clock,
   Users,
@@ -60,19 +60,21 @@ export default function QuizPreviewContent({ quiz }: Props) {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-background/90 py-6">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-background/90 py-4 sm:py-6">
       <div className="container mx-auto px-4">
-        <div className="max-w-4xl mx-auto space-y-6">
+        <div className="max-w-4xl mx-auto space-y-4 sm:space-y-6">
           {/* Header */}
-          <div className="flex justify-between items-start mb-8">
-            <Button variant="ghost" asChild className="h-10 gap-2">
-              <Link href={`/my-quizzes`}>
-                <ArrowLeft className="w-4 h-4" />
-                Back to My Quizzes
-              </Link>
-            </Button>
-            <div className="flex items-center gap-3">
-              <Badge variant="outline" className="h-10 gap-2 px-4">
+          <div className="flex items-center justify-between mb-4 sm:mb-8">
+            <div className="flex items-center gap-4">
+              <Button variant="ghost" asChild className="h-10">
+                <Link href={`/my-quizzes`} className="flex items-center gap-2">
+                  <ArrowLeft className="w-4 h-4" />
+                  Back to My Quizzes
+                </Link>
+              </Button>
+              <Badge
+                variant="outline"
+                className="h-10 px-4 flex items-center gap-2">
                 <Eye className="w-4 h-4" />
                 Preview Mode
               </Badge>
@@ -91,7 +93,7 @@ export default function QuizPreviewContent({ quiz }: Props) {
                   {quiz.category}
                 </Badge>
               </div>
-              <CardTitle className="text-3xl font-bold mb-2">
+              <CardTitle className="text-2xl sm:text-3xl font-bold mb-2">
                 {quiz.title}
               </CardTitle>
               <p className="text-muted-foreground">{quiz.description}</p>
@@ -136,7 +138,7 @@ export default function QuizPreviewContent({ quiz }: Props) {
                 <h3 className="text-xl font-semibold mb-6">
                   {currentQuestion.title}
                 </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 sm:gap-4">
                   {currentQuestion.choices.map((choice, index) => {
                     const isSelected =
                       selectedAnswers[currentQuestionIndex] === index;
@@ -147,24 +149,28 @@ export default function QuizPreviewContent({ quiz }: Props) {
                       <Button
                         key={index}
                         variant="outline"
-                        className={`h-auto min-h-[3.5rem] p-4 justify-start gap-4 relative ${
-                          isSelected
-                            ? "border-primary bg-primary/5"
-                            : "hover:border-primary/30"
-                        }`}
+                        className={`h-auto min-h-[3rem] sm:min-h-[3.5rem] p-2 sm:p-4 justify-start gap-2 sm:gap-4 relative 
+                          ${
+                            isSelected
+                              ? "border-primary bg-primary/5"
+                              : "hover:border-primary/30"
+                          }
+                        `}
                         onClick={() => handleAnswerSelect(index)}>
-                        <div className="flex items-center gap-4 w-full">
-                          <span className="w-6 h-6 rounded-full border-2 flex items-center justify-center text-xs">
+                        <div className="flex items-center gap-2 sm:gap-4 w-full">
+                          <span className="flex-shrink-0 w-5 h-5 sm:w-6 sm:h-6 rounded-full border-2 flex items-center justify-center text-xs">
                             {String.fromCharCode(65 + index)}
                           </span>
-                          <span className="flex-grow text-left">{choice}</span>
+                          <span className="flex-grow text-left break-words whitespace-normal overflow-wrap-break-word">
+                            {choice}
+                          </span>
                           {showResult && (
-                            <div className="absolute right-4">
+                            <div className="absolute right-2 sm:right-4 flex-shrink-0">
                               {isCorrect ? (
-                                <CheckCircle className="w-5 h-5 text-green-500" />
+                                <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-green-500" />
                               ) : (
                                 isSelected && (
-                                  <XCircle className="w-5 h-5 text-red-500" />
+                                  <XCircle className="w-4 h-4 sm:w-5 sm:h-5 text-red-500" />
                                 )
                               )}
                             </div>
