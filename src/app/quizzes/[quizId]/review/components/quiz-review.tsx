@@ -94,19 +94,17 @@ export default function QuizReview({ quiz, quizAttempt }: QuizReviewProps) {
       <div className="container mx-auto px-4">
         <div className="max-w-4xl mx-auto space-y-4 sm:space-y-6">
           {/* Header */}
-          <div className="flex justify-between items-center mb-4 sm:mb-8 gap-4">
-            <div className="flex items-center gap-4">
-              <Button variant="ghost" asChild className="h-10 gap-2">
-                <Link href={`/quizzes/${quiz.id}/results`}>
-                  <ArrowLeft className="w-4 h-4" />
-                  Back
-                </Link>
-              </Button>
-              <Badge variant="outline" className="h-10 gap-2 px-4">
-                <Eye className="w-4 h-4" />
-                Review Mode
-              </Badge>
-            </div>
+          <div className="flex items-center justify-between">
+            <Button variant="ghost" asChild className="h-10 gap-2">
+              <Link href={`/quizzes/${quiz.id}/results`}>
+                <ArrowLeft className="w-4 h-4" />
+                Back
+              </Link>
+            </Button>
+            <Badge variant="outline" className="h-10 gap-2 px-4">
+              <Eye className="w-4 h-4" />
+              Review Mode
+            </Badge>
           </div>
 
           {/* Quiz Info Card */}
