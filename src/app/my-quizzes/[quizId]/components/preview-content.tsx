@@ -25,6 +25,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { AdminQuiz } from "@/database/schema";
 import Link from "next/link";
+import { formatSecondsToMinutes } from "@/lib/format-time";
 
 type Props = {
   quiz: AdminQuiz;
@@ -64,21 +65,19 @@ export default function QuizPreviewContent({ quiz }: Props) {
       <div className="container mx-auto px-4">
         <div className="max-w-4xl mx-auto space-y-4 sm:space-y-6">
           {/* Header */}
-          <div className="flex items-center justify-between mb-4 sm:mb-8">
-            <div className="flex items-center gap-4">
-              <Button variant="ghost" asChild className="h-10">
-                <Link href={`/my-quizzes`} className="flex items-center gap-2">
-                  <ArrowLeft className="w-4 h-4" />
-                  Back to My Quizzes
-                </Link>
-              </Button>
-              <Badge
-                variant="outline"
-                className="h-10 px-4 flex items-center gap-2">
-                <Eye className="w-4 h-4" />
-                Preview Mode
-              </Badge>
-            </div>
+          <div className="flex items-center justify-between">
+            <Button variant="ghost" asChild className="h-10">
+              <Link href={`/my-quizzes`} className="flex items-center gap-2">
+                <ArrowLeft className="w-4 h-4" />
+                Back to My Quizzes
+              </Link>
+            </Button>
+            <Badge
+              variant="outline"
+              className="h-10 px-4 flex items-center gap-2">
+              <Eye className="w-4 h-4" />
+              Preview Mode
+            </Badge>
           </div>
 
           {/* Quiz Info Card */}
@@ -100,10 +99,18 @@ export default function QuizPreviewContent({ quiz }: Props) {
             </CardHeader>
             <CardContent>
               <div className="flex gap-4 text-sm text-muted-foreground">
-                <div className="flex items-center gap-2 bg-primary/5 px-3 py-1.5 rounded-lg">
-                  <Clock className="w-4 h-4" />
-                  {quiz.timeLimit} mins
-                </div>
+                {quiz.isTimeLimited ? (
+                  <div className="flex items-center gap-2 bg-primary/5 px-3 py-1.5 rounded-lg">
+                    <Clock className="w-4 h-4" />
+                    {formatSecondsToMinutes(quiz.timeLimit ?? 0)}
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2 bg-primary/5 px-3 py-1.5 rounded-lg">
+                    <Clock className="w-4 h-4" />
+                    No time limit
+                  </div>
+                )}
+
                 <div className="flex items-center gap-2 bg-primary/5 px-3 py-1.5 rounded-lg">
                   <Users className="w-4 h-4" />
                   {quiz.questions.length} questions
