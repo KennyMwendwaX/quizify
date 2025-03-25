@@ -119,8 +119,7 @@ export default function QuizDetailsPage({
 
   return (
     <div className="container mx-auto py-4 px-2 sm:py-8 sm:px-4 max-w-4xl">
-      {/* Mobile Back Button */}
-      <div className="mb-4 block sm:hidden">
+      <div className="mb-4 block">
         <Button
           variant="outline"
           size="sm"
@@ -653,18 +652,6 @@ export default function QuizDetailsPage({
           </Card>
         </TabsContent>
       </Tabs>
-
-      {/* Desktop Back Button */}
-      <div className="hidden sm:block fixed top-4 left-4">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleGoBack}
-          className="flex items-center">
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Quizzes
-        </Button>
-      </div>
     </div>
   );
 }

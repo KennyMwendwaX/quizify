@@ -48,7 +48,7 @@ type Props = {
   session: Session;
   stats: UserStats;
   recentQuizzes: RecentQuiz[];
-  categoryPerformance: CategoryPerformance;
+  categoryPerformance: CategoryPerformance[];
   weeklyProgress: WeeklyProgress[];
 };
 

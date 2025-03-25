@@ -36,7 +36,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import type { PublicQuiz, QuizDifficulty } from "@/database/schema";
+import type { AdminQuiz, QuizDifficulty } from "@/database/schema";
 import { motion } from "motion/react";
 import { formatSecondsToMinutes } from "@/lib/format-time";
 
@@ -84,7 +84,7 @@ const getDifficultyConfig = (
 export default function MyQuizzesContent({
   quizzes,
 }: {
-  quizzes: PublicQuiz[];
+  quizzes: AdminQuiz[];
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
