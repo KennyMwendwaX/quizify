@@ -1,6 +1,11 @@
 "use client";
 
-import React, { useEffect, useReducer, useTransition } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useReducer,
+  useTransition,
+} from "react";
 import { PublicQuiz } from "@/database/schema";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -99,7 +104,7 @@ export default function QuizQuestion({ quiz, session }: QuizQuestionProps) {
 
   const [state, dispatch] = useReducer(createQuizReducer(), initialState);
 
-  const handleFinish = () => {
+  const handleFinish = useCallback(() => {
     const validAnswers = state.answers.filter(
       (answer): answer is number => answer !== null
     );
@@ -128,7 +133,7 @@ export default function QuizQuestion({ quiz, session }: QuizQuestionProps) {
         router.push(`/quizzes/${quiz.id}/results`);
       }
     });
-  };
+  }, [quiz.id, state.answers, state.timeLeft, session.user.id, router]);
 
   useEffect(() => {
     if (state.timeLeft > 0 && !state.isCompleted) {
@@ -140,7 +145,7 @@ export default function QuizQuestion({ quiz, session }: QuizQuestionProps) {
     } else if (state.timeLeft === 0) {
       handleFinish();
     }
-  }, [state.timeLeft, state.isCompleted, state.showTimeWarning]);
+  }, [state.timeLeft, state.isCompleted, state.showTimeWarning, handleFinish]);
 
   const handleAnswerSelect = (answerIndex: number) => {
     dispatch({
