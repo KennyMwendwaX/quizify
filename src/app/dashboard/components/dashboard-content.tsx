@@ -143,14 +143,14 @@ export default function DashboardContent({
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    <ActionButton href="/quizzes/create" icon={PlusCircle}>
-                      Create New Quiz
-                    </ActionButton>
                     <ActionButton href="/quizzes" icon={PlayCircle}>
                       Start a Quiz
                     </ActionButton>
-                    <ActionButton href="/learn" icon={Book}>
-                      Learning Path
+                    <ActionButton href="/quizzes/create" icon={PlusCircle}>
+                      Create New Quiz
+                    </ActionButton>
+                    <ActionButton href="/my-quizzes" icon={Book}>
+                      My Quizzes
                     </ActionButton>
                     <ActionButton href="/goals" icon={Target}>
                       Set Goals
