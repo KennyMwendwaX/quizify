@@ -40,7 +40,7 @@ export const getUserQuizAttempt = async (
       throw new UserActionError("Quiz ID missing", 401, "getUserQuizAttempt");
     }
 
-    const latestAttempt = await db.query.quizAttempts.findFirst({
+    const attempt = await db.query.quizAttempts.findFirst({
       where: and(
         eq(quizAttempts.quizId, quizId),
         eq(quizAttempts.userId, parseInt(userId))
@@ -49,7 +49,7 @@ export const getUserQuizAttempt = async (
     });
 
     return {
-      quizAttempt: latestAttempt,
+      quizAttempt: attempt,
     };
   } catch (error) {
     console.error("Error in getUserQuizAttempt:", error);

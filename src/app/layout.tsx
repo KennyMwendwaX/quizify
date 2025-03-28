@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { GeistSans } from "geist/font/sans";
 import "./globals.css";
+import { ThemeProvider } from "@/providers/theme-provider";
 import { Toaster } from "sonner";
 import NavbarWrapper from "./components/navbar-wrapper";
 
@@ -17,10 +18,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${GeistSans.className} antialiased`}>
-        <NavbarWrapper>{children}</NavbarWrapper>
-        <Toaster richColors />
+      <body className={`${GeistSans.className} antialiased`}>
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          <NavbarWrapper>{children}</NavbarWrapper>
+          <Toaster richColors />
+        </ThemeProvider>
       </body>
     </html>
   );

@@ -20,6 +20,7 @@ import { IoSettingsOutline } from "react-icons/io5";
 import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { signOut, useSession } from "@/lib/auth-client";
+import ThemeToggle from "./theme-toggle";
 
 const links = [
   {
@@ -86,7 +87,8 @@ export default function Navbar() {
         ))}
       </nav>
 
-      <div className="items-center ml-auto">
+      <div className="flex items-center space-x-4 ml-auto">
+        <ThemeToggle />
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Avatar className="h-8 w-8 border border-gray-600 cursor-pointer">

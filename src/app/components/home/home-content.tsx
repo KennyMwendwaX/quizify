@@ -37,6 +37,7 @@ import { cn } from "@/lib/utils";
 import { signOut } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import { Session } from "@/lib/auth";
+import ThemeToggle from "../theme-toggle";
 
 const features = [
   {
@@ -120,7 +121,8 @@ export default function HomeContent({ session }: Props) {
           </div>
         </Link>
 
-        <div className="items-center ml-auto">
+        <div className="flex items-center space-x-4 ml-auto">
+          <ThemeToggle />
           {session ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
