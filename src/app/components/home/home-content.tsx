@@ -20,7 +20,6 @@ import {
   Brain,
   ChevronRight,
 } from "lucide-react";
-import Image from "next/image";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -38,6 +37,7 @@ import { signOut } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import { Session } from "@/lib/auth";
 import ThemeToggle from "../theme-toggle";
+import ThemeLogo from "../theme-logo";
 
 const features = [
   {
@@ -110,11 +110,12 @@ export default function HomeContent({ session }: Props) {
       <header
         className={cn(
           "sticky top-0 flex h-16 items-center gap-4 px-4 md:px-6 z-50 transition-all duration-200",
-          !top && "border-b shadow-sm bg-white"
+          !top &&
+            "border-b shadow-sm bg-background dark:border-slate-700 dark:shadow-slate-900/10"
         )}>
         <Link className="flex items-center gap-1" href="/">
           <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-            <Image src="/logo.svg" width={20} height={20} alt="" />
+            <ThemeLogo width={20} height={20} alt="Quizify logo" />
           </div>
           <div className="flex-1 text-left text-base leading-tight">
             <span className="truncate font-semibold">Quizify</span>
@@ -126,10 +127,10 @@ export default function HomeContent({ session }: Props) {
           {session ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Avatar className="h-8 w-8 border border-gray-600 cursor-pointer">
+                <Avatar className="h-8 w-8 border border-gray-300 dark:border-gray-600 cursor-pointer">
                   <AvatarImage src={""} alt="profile-image" />
-                  <AvatarFallback className="bg-white">
-                    <PersonIcon className="h-5 w-5 text-gray-600" />
+                  <AvatarFallback className="bg-muted">
+                    <PersonIcon className="h-5 w-5 text-gray-600 dark:text-gray-300" />
                   </AvatarFallback>
                 </Avatar>
               </DropdownMenuTrigger>
@@ -139,7 +140,7 @@ export default function HomeContent({ session }: Props) {
                     <p className="text-base font-medium leading-none">
                       {session.user.name}
                     </p>
-                    <p className="text-xs leading-none text-gray-500">
+                    <p className="text-xs leading-none text-muted-foreground">
                       {session.user.email}
                     </p>
                   </div>
@@ -158,7 +159,7 @@ export default function HomeContent({ session }: Props) {
                       },
                     });
                   }}
-                  className="flex items-center hover:bg-red-100">
+                  className="flex items-center hover:bg-red-100 dark:hover:bg-red-900">
                   <MdLogout className="mr-2 w-5 h-5" />
                   Logout
                 </DropdownMenuItem>
