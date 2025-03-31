@@ -23,7 +23,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { AdminQuiz } from "@/database/schema";
+import { AdminQuiz, QuizDifficulty } from "@/database/schema";
 import Link from "next/link";
 import { formatSecondsToMinutes } from "@/lib/format-time";
 
@@ -47,13 +47,13 @@ export default function QuizPreviewContent({ quiz }: Props) {
     setSelectedAnswers(newAnswers);
   };
 
-  const getDifficultyColor = (difficulty: string) => {
-    switch (difficulty.toLowerCase()) {
-      case "easy":
+  const getDifficultyColor = (difficulty: QuizDifficulty) => {
+    switch (difficulty) {
+      case "BEGINNER":
         return "bg-green-100 text-green-700";
-      case "medium":
+      case "INTERMEDIATE":
         return "bg-yellow-100 text-yellow-700";
-      case "hard":
+      case "ADVANCED":
         return "bg-red-100 text-red-700";
       default:
         return "bg-gray-100 text-gray-700";

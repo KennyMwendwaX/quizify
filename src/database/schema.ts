@@ -76,7 +76,7 @@ export const quizzes = pgTable("quiz", {
   description: text("description").notNull(),
   category: text("category").notNull(),
   difficulty: text("difficulty", {
-    enum: ["EASY", "MEDIUM", "HARD"],
+    enum: ["BEGINNER", "INTERMEDIATE", "ADVANCED"],
   }).notNull(),
   isTimeLimited: boolean("is_time_limited").notNull(),
   timeLimit: integer("time_limit"),

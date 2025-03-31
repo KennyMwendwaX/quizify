@@ -26,6 +26,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import Link from "next/link";
 import { formatSecondsToMinutes } from "@/lib/format-time";
+import { QuizDifficulty } from "@/database/schema";
 
 type AdminQuestion = {
   title: string;
@@ -41,7 +42,7 @@ type AdminQuiz = {
   title: string;
   description: string;
   category: string;
-  difficulty: "EASY" | "MEDIUM" | "HARD";
+  difficulty: QuizDifficulty;
   isTimeLimited: boolean;
   timeLimit: number | null;
   questions: AdminQuestion[];
@@ -76,13 +77,13 @@ export default function QuizReview({ quiz, quizAttempt }: QuizReviewProps) {
   const isAnswered = userAnswer !== -1 && userAnswer !== undefined;
   const isCorrect = userAnswer === correctAnswer;
 
-  const getDifficultyColor = (difficulty: string) => {
-    switch (difficulty.toLowerCase()) {
-      case "easy":
+  const getDifficultyColor = (difficulty: QuizDifficulty) => {
+    switch (difficulty) {
+      case "BEGINNER":
         return "bg-green-100 text-green-700";
-      case "medium":
+      case "INTERMEDIATE":
         return "bg-yellow-100 text-yellow-700";
-      case "hard":
+      case "ADVANCED":
         return "bg-red-100 text-red-700";
       default:
         return "bg-gray-100 text-gray-700";

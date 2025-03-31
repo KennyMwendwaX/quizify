@@ -30,9 +30,9 @@ export const quizFormSchema = z.object({
   title: z.string().min(1, "Title is required"),
   description: z.string().min(1, "Description is required"),
   category: z.string().min(1, "Category is required"),
-  difficulty: z.enum(["EASY", "MEDIUM", "HARD"], {
+  difficulty: z.enum(["BEGINNER", "INTERMEDIATE", "ADVANCED"], {
     required_error: "Difficulty is required",
-    invalid_type_error: "Difficulty must be Easy, Medium or Hard",
+    invalid_type_error: "Difficulty must be Beginner, Intermediate or Advanced",
   }),
   isTimeLimited: z.boolean(),
   timeLimit: z

@@ -42,7 +42,7 @@ import {
 } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
-import { PublicQuiz, QuizAttempt } from "@/database/schema";
+import { PublicQuiz, QuizAttempt, QuizDifficulty } from "@/database/schema";
 import { Session } from "@/lib/auth";
 import { formatSecondsToMinutes } from "@/lib/format-time";
 
@@ -77,26 +77,26 @@ export default function QuizDetailsPage({
     router.push("/quizzes");
   };
 
-  const getDifficultyColor = (difficulty: string) => {
+  const getDifficultyColor = (difficulty: QuizDifficulty) => {
     switch (difficulty) {
-      case "EASY":
+      case "BEGINNER":
         return "bg-emerald-500 text-emerald-50";
-      case "MEDIUM":
+      case "INTERMEDIATE":
         return "bg-amber-500 text-amber-50";
-      case "HARD":
+      case "ADVANCED":
         return "bg-rose-500 text-rose-50";
       default:
         return "bg-slate-500 text-slate-50";
     }
   };
 
-  const getDifficultyStars = (difficulty: string) => {
+  const getDifficultyStars = (difficulty: QuizDifficulty) => {
     switch (difficulty) {
-      case "EASY":
+      case "BEGINNER":
         return 1;
-      case "MEDIUM":
+      case "INTERMEDIATE":
         return 2;
-      case "HARD":
+      case "ADVANCED":
         return 3;
       default:
         return 0;
@@ -388,9 +388,9 @@ export default function QuizDetailsPage({
                         <li>Time bonus applied for fast completion</li>
                         <li>
                           Difficulty bonus:{" "}
-                          {quiz.difficulty === "EASY"
+                          {quiz.difficulty === "BEGINNER"
                             ? "0"
-                            : quiz.difficulty === "MEDIUM"
+                            : quiz.difficulty === "INTERMEDIATE"
                             ? "25"
                             : "50"}{" "}
                           XP

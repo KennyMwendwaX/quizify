@@ -38,36 +38,33 @@ import { motion } from "motion/react";
 import { formatSecondsToMinutes } from "@/lib/format-time";
 
 const difficultyIcons = {
-  EASY: "🌱",
-  MEDIUM: "🌟",
-  HARD: "⚡",
+  BEGINNER: "🌱",
+  INTERMEDIATE: "🌟",
+  ADVANCED: "⚡",
   DEFAULT: "✨",
 };
 
 const getDifficultyConfig = (
   difficulty: QuizDifficulty
 ): { color: string; icon: string; bgColor: string } => {
-  const normalizedDifficulty =
-    difficulty.toUpperCase() as keyof typeof difficultyIcons;
-
-  switch (normalizedDifficulty) {
-    case "EASY":
+  switch (difficulty) {
+    case "BEGINNER":
       return {
         color: "text-emerald-700 dark:text-emerald-400",
         bgColor: "bg-emerald-100 dark:bg-emerald-900/40",
-        icon: difficultyIcons.EASY,
+        icon: difficultyIcons.BEGINNER,
       };
-    case "MEDIUM":
+    case "INTERMEDIATE":
       return {
         color: "text-amber-700 dark:text-amber-400",
         bgColor: "bg-amber-100 dark:bg-amber-900/40",
-        icon: difficultyIcons.MEDIUM,
+        icon: difficultyIcons.INTERMEDIATE,
       };
-    case "HARD":
+    case "ADVANCED":
       return {
         color: "text-rose-700 dark:text-rose-400",
         bgColor: "bg-rose-100 dark:bg-rose-900/40",
-        icon: difficultyIcons.HARD,
+        icon: difficultyIcons.ADVANCED,
       };
     default:
       return {
@@ -240,16 +237,16 @@ export default function QuizzesContent({ quizzes }: { quizzes: PublicQuiz[] }) {
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem
-                        onClick={() => handleDifficultyChange("EASY")}>
-                        {difficultyIcons.EASY} Easy
+                        onClick={() => handleDifficultyChange("BEGINNER")}>
+                        {difficultyIcons.BEGINNER} Beginner
                       </DropdownMenuItem>
                       <DropdownMenuItem
-                        onClick={() => handleDifficultyChange("MEDIUM")}>
-                        {difficultyIcons.MEDIUM} Medium
+                        onClick={() => handleDifficultyChange("INTERMEDIATE")}>
+                        {difficultyIcons.INTERMEDIATE} Intermediate
                       </DropdownMenuItem>
                       <DropdownMenuItem
-                        onClick={() => handleDifficultyChange("HARD")}>
-                        {difficultyIcons.HARD} Hard
+                        onClick={() => handleDifficultyChange("ADVANCED")}>
+                        {difficultyIcons.ADVANCED} Advanced
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>

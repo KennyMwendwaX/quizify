@@ -1,3 +1,5 @@
+import { QuizDifficulty } from "@/database/schema";
+
 export type UserStats = {
   totalQuizzesTaken: number;
   averageScore: number;
@@ -16,7 +18,7 @@ export type RecentQuiz = {
   dateTaken: string;
   percentage: number;
   timeTaken: number;
-  difficulty: "EASY" | "MEDIUM" | "HARD";
+  difficulty: QuizDifficulty;
 };
 
 export type CategoryPerformance = {
