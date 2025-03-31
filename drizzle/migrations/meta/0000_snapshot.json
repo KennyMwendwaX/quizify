@@ -1,5 +1,5 @@
 {
-  "id": "20e6cdd3-dcd3-470a-9a05-d15eb277c43b",
+  "id": "6e547e66-5c7d-4f47-99cc-f5ffce18e701",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -381,6 +381,13 @@
           "type": "text",
           "primaryKey": false,
           "notNull": true
+        },
+        "rating": {
+          "name": "rating",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
         },
         "is_time_limited": {
           "name": "is_time_limited",

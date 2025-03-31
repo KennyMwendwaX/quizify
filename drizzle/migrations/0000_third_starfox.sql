@@ -55,6 +55,7 @@ CREATE TABLE "quiz" (
 	"description" text NOT NULL,
 	"category" text NOT NULL,
 	"difficulty" text NOT NULL,
+	"rating" integer DEFAULT 0 NOT NULL,
 	"is_time_limited" boolean NOT NULL,
 	"time_limit" integer,
 	"created_at" timestamp (3) DEFAULT now() NOT NULL,
