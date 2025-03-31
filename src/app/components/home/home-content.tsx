@@ -146,7 +146,9 @@ export default function HomeContent({ session }: Props) {
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem className="flex items-center">
+                <DropdownMenuItem
+                  onClick={() => router.push("/settings")}
+                  className="flex items-center">
                   <IoSettingsOutline className="mr-2 w-5 h-5" /> Settings
                 </DropdownMenuItem>
                 <DropdownMenuItem

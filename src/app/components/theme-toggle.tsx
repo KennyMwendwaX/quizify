@@ -1,7 +1,6 @@
 "use client";
 
-import * as React from "react";
-import { Moon, Sun, Monitor } from "lucide-react";
+import { Moon, Sun, Monitor, Check } from "lucide-react";
 import { useTheme } from "next-themes";
 
 import { Button } from "@/components/ui/button";
@@ -13,22 +12,19 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 export default function ThemeToggle() {
-  const { setTheme } = useTheme();
+  const { theme, setTheme } = useTheme();
 
   const themes = [
     {
-      name: "Light",
-      value: "light",
+      name: "light",
       icon: <Sun className="h-4 w-4" />,
     },
     {
-      name: "Dark",
-      value: "dark",
+      name: "dark",
       icon: <Moon className="h-4 w-4" />,
     },
     {
-      name: "System",
-      value: "system",
+      name: "system",
       icon: <Monitor className="h-4 w-4" />,
     },
   ];
@@ -44,11 +40,10 @@ export default function ThemeToggle() {
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         {themes.map((t) => (
-          <DropdownMenuItem onClick={() => setTheme(t.value)} key={t.value}>
-            <div className="flex items-center gap-2">
-              {t.icon}
-              <span>{t.name}</span>
-            </div>
+          <DropdownMenuItem onClick={() => setTheme(t.name)} key={t.name}>
+            {t.icon}
+            <span className="capitalize">{t.name}</span>
+            {theme === t.name && <Check className="ml-auto h-4 w-4" />}
           </DropdownMenuItem>
         ))}
       </DropdownMenuContent>
