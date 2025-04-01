@@ -1,18 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import {
-  Bell,
-  Check,
-  ChevronsUpDown,
-  Moon,
-  Sun,
-  User,
-  Monitor,
-} from "lucide-react";
+import { Bell, User, Sun, Moon, Monitor } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -45,13 +37,8 @@ import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { useTheme } from "next-themes";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 const profileFormSchema = z.object({
   name: z
@@ -99,8 +86,14 @@ const defaultValues: Partial<ProfileFormValues> = {
 };
 
 export default function SettingsForm() {
-  const { setTheme, theme } = useTheme();
+  const { setTheme, theme, resolvedTheme, systemTheme } = useTheme();
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [mounted, setMounted] = useState(false);
+
+  // useEffect only runs on the client, so we can safely check for mounted status here
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
@@ -116,6 +109,33 @@ export default function SettingsForm() {
       console.log(data);
       setIsLoading(false);
     }, 1000);
+  }
+
+  // Get the actual resolved theme for visual display when system is selected
+  const actualTheme =
+    theme === "system"
+      ? systemTheme || (resolvedTheme === "dark" ? "dark" : "light")
+      : theme;
+
+  // Get icon for the current theme
+  const getThemeIcon = (themeValue: string) => {
+    switch (themeValue) {
+      case "light":
+        return <Sun className="h-4 w-4" />;
+      case "dark":
+        return <Moon className="h-4 w-4" />;
+      case "system":
+        return <Monitor className="h-4 w-4" />;
+      default:
+        return <Sun className="h-4 w-4" />;
+    }
+  };
+
+  // Determine if system theme is dark, regardless of the currently selected theme
+  const isSystemThemeDark = systemTheme === "dark";
+
+  if (!mounted) {
+    return null;
   }
 
   return (
@@ -136,55 +156,149 @@ export default function SettingsForm() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <div className="flex flex-col space-y-1">
+              <div className="flex flex-col space-y-1">
+                <div className="flex items-center gap-2">
                   <h3 className="font-medium">Theme</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Select your preferred theme.
-                  </p>
+                  {getThemeIcon(theme || "light")}
+                  <span className="text-sm text-muted-foreground capitalize">
+                    {theme || "light"}
+                    {theme === "system" && actualTheme && ` (${actualTheme})`}
+                  </span>
                 </div>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="ml-auto gap-1">
-                      {theme === "light" ? (
-                        <Sun className="mr-2 h-4 w-4" />
-                      ) : theme === "dark" ? (
-                        <Moon className="mr-2 h-4 w-4" />
-                      ) : (
-                        <Monitor className="mr-2 h-4 w-4" />
-                      )}
-                      <span className="capitalize">{theme}</span>
-                      <ChevronsUpDown className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={() => setTheme("light")}>
-                      <Sun className="mr-2 h-4 w-4" />
-                      <span>Light</span>
-                      {theme === "light" && (
-                        <Check className="ml-auto h-4 w-4" />
-                      )}
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => setTheme("dark")}>
-                      <Moon className="mr-2 h-4 w-4" />
-                      <span>Dark</span>
-                      {theme === "dark" && (
-                        <Check className="ml-auto h-4 w-4" />
-                      )}
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => setTheme("system")}>
-                      <Monitor className="mr-2 h-4 w-4" />
-                      <span>System</span>
-                      {theme === "system" && (
-                        <Check className="ml-auto h-4 w-4" />
-                      )}
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                <p className="text-sm text-muted-foreground">
+                  Select your preferred theme.
+                </p>
               </div>
+              <RadioGroup
+                value={theme || "light"}
+                onValueChange={setTheme}
+                className="grid grid-cols-3 gap-4 pt-2">
+                <div className="[&:has([data-state=checked])>div]:border-primary">
+                  <div>
+                    <RadioGroupItem
+                      value="light"
+                      id="light"
+                      className="sr-only"
+                    />
+                  </div>
+                  <div className="items-center rounded-md border-2 border-muted p-1 hover:border-accent">
+                    <div className="space-y-2 rounded-sm bg-[#ecedef] p-2">
+                      <div className="space-y-2 rounded-md bg-white p-2 shadow-sm">
+                        <div className="h-2 w-[80px] rounded-lg bg-[#ecedef]" />
+                        <div className="h-2 w-[100px] rounded-lg bg-[#ecedef]" />
+                      </div>
+                      <div className="flex items-center space-x-2 rounded-md bg-white p-2 shadow-sm">
+                        <div className="h-4 w-4 rounded-full bg-[#ecedef]" />
+                        <div className="h-2 w-[100px] rounded-lg bg-[#ecedef]" />
+                      </div>
+                      <div className="flex items-center space-x-2 rounded-md bg-white p-2 shadow-sm">
+                        <div className="h-4 w-4 rounded-full bg-[#ecedef]" />
+                        <div className="h-2 w-[100px] rounded-lg bg-[#ecedef]" />
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between w-full p-2">
+                    <span className="text-center font-normal">Light</span>
+                    {theme === "light" && <Sun className="h-4 w-4" />}
+                  </div>
+                </div>
+
+                <div className="[&:has([data-state=checked])>div]:border-primary">
+                  <div>
+                    <RadioGroupItem
+                      value="dark"
+                      id="dark"
+                      className="sr-only"
+                    />
+                  </div>
+                  <div className="items-center rounded-md border-2 border-muted bg-popover p-1 hover:bg-accent hover:text-accent-foreground">
+                    <div className="space-y-2 rounded-sm bg-slate-950 p-2">
+                      <div className="space-y-2 rounded-md bg-slate-800 p-2 shadow-sm">
+                        <div className="h-2 w-[80px] rounded-lg bg-slate-400" />
+                        <div className="h-2 w-[100px] rounded-lg bg-slate-400" />
+                      </div>
+                      <div className="flex items-center space-x-2 rounded-md bg-slate-800 p-2 shadow-sm">
+                        <div className="h-4 w-4 rounded-full bg-slate-400" />
+                        <div className="h-2 w-[100px] rounded-lg bg-slate-400" />
+                      </div>
+                      <div className="flex items-center space-x-2 rounded-md bg-slate-800 p-2 shadow-sm">
+                        <div className="h-4 w-4 rounded-full bg-slate-400" />
+                        <div className="h-2 w-[100px] rounded-lg bg-slate-400" />
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between w-full p-2">
+                    <span className="text-center font-normal">Dark</span>
+                    {theme === "dark" && <Moon className="h-4 w-4" />}
+                  </div>
+                </div>
+
+                <div className="[&:has([data-state=checked])>div]:border-primary">
+                  <div>
+                    <RadioGroupItem
+                      value="system"
+                      id="system"
+                      className="sr-only"
+                    />
+                  </div>
+                  <div className="items-center rounded-md border-2 border-muted p-1 hover:border-accent">
+                    <div
+                      className={`space-y-2 rounded-sm ${
+                        isSystemThemeDark ? "bg-slate-950" : "bg-[#ecedef]"
+                      } p-2`}>
+                      <div
+                        className={`space-y-2 rounded-md ${
+                          isSystemThemeDark ? "bg-slate-800" : "bg-white"
+                        } p-2 shadow-sm`}>
+                        <div
+                          className={`h-2 w-[80px] rounded-lg ${
+                            isSystemThemeDark ? "bg-slate-400" : "bg-[#ecedef]"
+                          }`}
+                        />
+                        <div
+                          className={`h-2 w-[100px] rounded-lg ${
+                            isSystemThemeDark ? "bg-slate-400" : "bg-[#ecedef]"
+                          }`}
+                        />
+                      </div>
+                      <div
+                        className={`flex items-center space-x-2 rounded-md ${
+                          isSystemThemeDark ? "bg-slate-800" : "bg-white"
+                        } p-2 shadow-sm`}>
+                        <div
+                          className={`h-4 w-4 rounded-full ${
+                            isSystemThemeDark ? "bg-slate-400" : "bg-[#ecedef]"
+                          }`}
+                        />
+                        <div
+                          className={`h-2 w-[100px] rounded-lg ${
+                            isSystemThemeDark ? "bg-slate-400" : "bg-[#ecedef]"
+                          }`}
+                        />
+                      </div>
+                      <div
+                        className={`flex items-center space-x-2 rounded-md ${
+                          isSystemThemeDark ? "bg-slate-800" : "bg-white"
+                        } p-2 shadow-sm`}>
+                        <div
+                          className={`h-4 w-4 rounded-full ${
+                            isSystemThemeDark ? "bg-slate-400" : "bg-[#ecedef]"
+                          }`}
+                        />
+                        <div
+                          className={`h-2 w-[100px] rounded-lg ${
+                            isSystemThemeDark ? "bg-slate-400" : "bg-[#ecedef]"
+                          }`}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between w-full p-2">
+                    <span className="text-center font-normal">System</span>
+                    {theme === "system" && <Monitor className="h-4 w-4" />}
+                  </div>
+                </div>
+              </RadioGroup>
             </div>
 
             <Separator />
@@ -197,7 +311,7 @@ export default function SettingsForm() {
                     Set your default quiz difficulty.
                   </p>
                 </div>
-                <Select defaultValue="MEDIUM">
+                <Select defaultValue="BEGINNER">
                   <SelectTrigger className="w-[180px]">
                     <SelectValue placeholder="Select difficulty" />
                   </SelectTrigger>
