@@ -18,7 +18,7 @@ export default function DeleteAccountModal() {
 
   const handleDeleteAccount = async () => {
     setIsPending(true);
-    toast.success("Account deletion in progress...", {
+    toast.success("Account deleted successfully", {
       duration: 2000,
     });
     setIsPending(false);
