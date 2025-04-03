@@ -19,8 +19,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
+import DeleteAccountModal from "./delete-account-modal";
 
 export default function GeneralSettings() {
   const { setTheme, theme, resolvedTheme, systemTheme } = useTheme();
@@ -285,9 +285,7 @@ export default function GeneralSettings() {
                   Permanently delete your account and all your data.
                 </p>
               </div>
-              <Button variant="destructive" size="sm">
-                Delete Account
-              </Button>
+              <DeleteAccountModal />
             </div>
           </div>
         </CardContent>
