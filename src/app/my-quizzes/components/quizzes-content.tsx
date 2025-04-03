@@ -486,7 +486,7 @@ export default function MyQuizzesContent({
                         onClick={() => {
                           setSearchTerm("");
                           setDifficultyFilter("all");
-                          updateUrlParams("", "all", sortBy);
+                          updateUrlParams("", "all", "");
                         }}>
                         Clear filters
                       </Button>

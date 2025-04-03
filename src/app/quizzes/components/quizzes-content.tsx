@@ -416,7 +416,7 @@ export default function QuizzesContent({ quizzes }: { quizzes: PublicQuiz[] }) {
                       onClick={() => {
                         setSearchTerm("");
                         setDifficultyFilter("all");
-                        updateUrlParams("", "all", sortBy);
+                        updateUrlParams("", "all", "");
                       }}>
                       Clear filters
                     </Button>
