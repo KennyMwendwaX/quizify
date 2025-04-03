@@ -35,6 +35,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { RiTwitterXLine } from "react-icons/ri";
+import { Session } from "@/lib/auth";
 
 const profileFormSchema = z.object({
   name: z
@@ -62,23 +63,13 @@ const profileFormSchema = z.object({
 
 type ProfileFormValues = z.infer<typeof profileFormSchema>;
 
-const defaultValues: Partial<ProfileFormValues> = {
-  name: "",
-  email: "",
-  urls: {
-    x: "",
-    instagram: "",
-  },
-};
-
-export default function ProfileSettings() {
+export default function ProfileSettings({ session }: { session: Session }) {
   const [isLoading, setIsLoading] = useState(false);
 
   const [profileImage, setProfileImage] = useState<string>(
     "/api/placeholder/200/200"
   );
-  const [userName] = useState<string>("John Doe");
-  const [userEmail] = useState<string>("johnny@gmail.com");
+
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Define the click handler with proper return type
@@ -108,7 +99,10 @@ export default function ProfileSettings() {
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
-    defaultValues,
+    defaultValues: {
+      email: session.user.email,
+      name: session.user.name,
+    },
     mode: "onChange",
   });
 
@@ -154,8 +148,10 @@ export default function ProfileSettings() {
                   />
                 </div>
                 <div className="text-center space-y-1">
-                  <h3 className="font-semibold text-lg">{userName}</h3>
-                  <p className="text-sm text-muted-foreground">{userEmail}</p>
+                  <h3 className="font-semibold text-lg">{session.user.name}</h3>
+                  <p className="text-sm text-muted-foreground">
+                    {session.user.email}
+                  </p>
                 </div>
                 <Badge variant="outline" className="px-3 py-1">
                   Premium Member

@@ -1,6 +1,16 @@
+import { auth } from "@/lib/auth";
 import SettingsForm from "./components/settings-form";
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 
-export default function SettingsPage() {
+export default async function SettingsPage() {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  if (!session?.user) {
+    redirect("/sign-in");
+  }
   return (
     <div className="container max-w-4xl py-6 lg:py-10">
       <div className="flex flex-col gap-4">
@@ -10,7 +20,7 @@ export default function SettingsPage() {
         </p>
       </div>
       <div className="grid gap-10 pt-6">
-        <SettingsForm />
+        <SettingsForm session={session} />
       </div>
     </div>
   );
