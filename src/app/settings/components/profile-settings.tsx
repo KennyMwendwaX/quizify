@@ -235,6 +235,7 @@ export default function ProfileSettings({ session }: { session: Session }) {
                                 placeholder="Your email"
                                 className="pl-9"
                                 {...field}
+                                disabled
                               />
                             </div>
                           </FormControl>
