@@ -15,7 +15,7 @@ export default async function EditQuizPage({ params }: Props) {
     headers: await headers(),
   });
 
-  if (!session?.user) {
+  if (!session) {
     redirect("/sign-in");
   }
 

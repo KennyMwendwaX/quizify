@@ -8,7 +8,7 @@ export default async function CreateQuizPage() {
     headers: await headers(),
   });
 
-  if (!session?.user) {
+  if (!session) {
     redirect("/sign-in");
   }
 

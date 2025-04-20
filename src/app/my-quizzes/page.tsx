@@ -9,7 +9,7 @@ export default async function QuizzesPage() {
     headers: await headers(),
   });
 
-  if (!session?.user) {
+  if (!session) {
     redirect("/sign-in");
   }
 

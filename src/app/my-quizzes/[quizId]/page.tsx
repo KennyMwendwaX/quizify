@@ -15,7 +15,7 @@ export default async function QuizPreviewPage({ params }: Props) {
     headers: await headers(),
   });
 
-  if (!session?.user) {
+  if (!session) {
     redirect("/sign-in");
   }
 

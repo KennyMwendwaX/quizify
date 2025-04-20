@@ -8,9 +8,10 @@ export default async function SettingsPage() {
     headers: await headers(),
   });
 
-  if (!session?.user) {
+  if (!session) {
     redirect("/sign-in");
   }
+
   return (
     <div className="container max-w-4xl py-6 lg:py-10">
       <div className="flex flex-col gap-4">

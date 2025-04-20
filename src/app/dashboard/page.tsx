@@ -12,7 +12,7 @@ export default async function DashboardPage() {
     headers: await headers(),
   });
 
-  if (!session?.user) {
+  if (!session) {
     redirect("/sign-in");
   }
 
