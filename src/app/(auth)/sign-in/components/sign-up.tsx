@@ -62,10 +62,15 @@ export default function SignUp() {
           setIsLoading(true);
         },
         onError: (ctx) => {
+          console.log(ctx.error);
           toast.error(ctx.error.message);
         },
         onSuccess: async () => {
+          toast.success("Account created successfully");
+        },
+        onComplete: () => {
           router.push("/dashboard");
+          setIsLoading(false);
         },
       },
     });

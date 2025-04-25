@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
 import { signIn } from "@/lib/auth-client";
 import { Eye, EyeOff } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 const signInSchema = z.object({
   email: z.string().email({ message: "Invalid email address" }),
@@ -29,6 +30,7 @@ const signInSchema = z.object({
 type SignInFormValues = z.infer<typeof signInSchema>;
 
 export default function SignIn() {
+  const router = useRouter();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [showPassword, setShowPassword] = useState<boolean>(false);
 
@@ -52,6 +54,14 @@ export default function SignIn() {
         },
         onError: (ctx) => {
           toast.error(ctx.error.message);
+        },
+        onSuccess: () => {
+          toast.success("Sign in successful");
+          signInForm.reset();
+        },
+        onComplete: () => {
+          router.push("/dashboard");
+          setIsLoading(false);
         },
       }
     );
