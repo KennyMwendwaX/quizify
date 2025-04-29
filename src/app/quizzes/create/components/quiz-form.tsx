@@ -158,7 +158,7 @@ export default function QuizForm({ session }: Props) {
         <div className="text-center max-w-xl mx-auto py-4">
           <div className="relative inline-flex items-center justify-center mb-5">
             <div className="absolute -inset-1 bg-primary/10 rounded-2xl blur-sm"></div>
-            <div className="relative w-12 h-12 bg-white/80 rounded-xl flex items-center justify-center">
+            <div className="relative w-12 h-12 rounded-xl flex items-center justify-center">
               <PencilLine className="w-6 h-6 text-primary" />
             </div>
           </div>
@@ -173,7 +173,7 @@ export default function QuizForm({ session }: Props) {
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-            <Card className="shadow-lg bg-white/50 backdrop-blur-xl">
+            <Card className="shadow-lg backdrop-blur-xl">
               <CardHeader>
                 <div className="flex items-center gap-3">
                   <Settings2 className="w-6 h-6 text-primary" />
@@ -378,25 +378,29 @@ export default function QuizForm({ session }: Props) {
                   <AccordionItem
                     key={question.id}
                     value={`question-${qIndex}`}
-                    className="border bg-white/50 backdrop-blur-xl rounded-xl shadow-sm overflow-hidden group">
+                    className="border backdrop-blur-xl rounded-xl shadow-sm overflow-hidden group">
                     <AccordionTrigger className="px-6 hover:no-underline">
-                      <div className="w-full flex justify-between items-center">
-                        <div className="flex items-center gap-4">
-                          <GripVertical className="w-5 h-5 text-muted-foreground/40 group-hover:text-muted-foreground/60" />
-                          <div className="w-8 h-8 bg-primary/10 text-primary rounded-lg flex items-center justify-center text-sm font-medium">
+                      <div className="w-full flex justify-between items-start">
+                        <div className="flex items-start gap-4 flex-grow overflow-hidden">
+                          <div className="flex-shrink-0 mt-1">
+                            <GripVertical className="w-5 h-5 text-muted-foreground/40 group-hover:text-muted-foreground/60" />
+                          </div>
+                          <div className="w-8 h-8 flex-shrink-0 bg-primary/10 text-primary rounded-lg flex items-center justify-center text-sm font-medium">
                             {qIndex + 1}
                           </div>
-                          <span className="text-base font-medium">
+                          <span className="text-base font-medium break-words">
                             {question.title || `Question ${qIndex + 1}`}
                           </span>
                         </div>
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => remove(qIndex)}
-                          className="text-destructive hover:text-destructive/90 hover:bg-red-50 text-sm">
-                          <Trash2 className="w-4 h-4 mr-1" />
-                          Remove Question
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            remove(qIndex);
+                          }}
+                          className="flex-shrink-0 ml-4 text-destructive hover:text-destructive/90 text-sm">
+                          <Trash2 className="w-4 h-4" />
                         </Button>
                       </div>
                     </AccordionTrigger>
@@ -511,7 +515,7 @@ export default function QuizForm({ session }: Props) {
             </div>
 
             <div className="sticky bottom-6 pt-6">
-              <Card className="shadow-xl bg-white/80 backdrop-blur-xl">
+              <Card className="shadow-xl backdrop-blur-xl">
                 <CardContent className="p-4">
                   <div className="flex justify-between items-center">
                     {form.formState.isSubmitted && fields.length === 0 ? (

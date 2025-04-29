@@ -250,7 +250,13 @@ export default function QuizQuestion({ quiz, session }: QuizQuestionProps) {
                     )}
                     onClick={() => handleAnswerSelect(index)}>
                     <div className="flex items-center gap-2 sm:gap-4 w-full">
-                      <span className="flex-shrink-0 w-5 h-5 sm:w-6 sm:h-6 rounded-full border-2 flex items-center justify-center text-xs">
+                      <span
+                        className={cn(
+                          "flex-shrink-0 w-5 h-5 sm:w-6 sm:h-6 rounded-full border-2 flex items-center justify-center text-xs",
+                          currentAnswer === index
+                            ? "border-primary"
+                            : "border-muted-foreground"
+                        )}>
                         {String.fromCharCode(65 + index)}
                       </span>
                       <span className="flex-grow text-left break-words whitespace-normal overflow-wrap-break-word">
