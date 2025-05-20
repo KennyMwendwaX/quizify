@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import QuizPreviewContent from "./components/preview-content";
 import { getAdminQuiz } from "@/server/quiz/get";
+import { tryCatch } from "@/lib/try-catch";
 
 type Props = {
   params: Promise<{
@@ -21,10 +22,12 @@ export default async function QuizPreviewPage({ params }: Props) {
 
   const { quizId } = await params;
 
-  const result = await getAdminQuiz(parseInt(quizId, 10), session.user.id);
-  if (!result.quiz || result.error) {
-    throw new Error(result.error || "Quiz not found");
+  const { data: quiz, error: quizError } = await tryCatch(
+    getAdminQuiz(parseInt(quizId), session.user.id)
+  );
+  if (quizError) {
+    throw new Error(quizError.message);
   }
 
-  return <QuizPreviewContent quiz={result.quiz} />;
+  return <QuizPreviewContent quiz={quiz} />;
 }
