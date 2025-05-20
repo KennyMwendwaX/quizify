@@ -132,3 +132,43 @@ export async function addQuizBookmark(quizId: string) {
     );
   }
 }
+
+export async function removeQuizBookmark(quizId: string) {
+  try {
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    if (!session) {
+      throw new UserActionError(
+        "UNAUTHORIZED",
+        "No active session found",
+        "removeQuizBookmark"
+      );
+    }
+
+    const userId = session.user.id;
+    const quizIdNum = parseInt(quizId, 10);
+    const userIdNum = parseInt(userId, 10);
+
+    await db
+      .delete(quizBookmarks)
+      .where(
+        and(
+          eq(quizBookmarks.quizId, quizIdNum),
+          eq(quizBookmarks.userId, userIdNum)
+        )
+      );
+
+    return { success: true };
+  } catch (error) {
+    if (error instanceof UserActionError) {
+      throw error;
+    }
+    throw new UserActionError(
+      "DATABASE_ERROR",
+      "Failed to remove quiz bookmark",
+      "removeQuizBookmark"
+    );
+  }
+}
