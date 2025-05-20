@@ -66,6 +66,7 @@ import {
   flattenCategories,
   getCategoryNameFromPath,
 } from "@/lib/quiz-categories";
+import { tryCatch } from "@/lib/try-catch";
 
 type Props = {
   session: Session;
@@ -131,20 +132,22 @@ export default function QuizForm({ session }: Props) {
 
   function onSubmit(data: QuizFormValues) {
     startTransition(async () => {
-      const result = await createQuiz(
-        {
-          ...data,
-          timeLimit: data.isTimeLimited ? (data.timeLimit ?? 0) * 60 : 0,
-        },
-        session.user.id
+      const { data: quizId, error: createQuizError } = await tryCatch(
+        createQuiz(
+          {
+            ...data,
+            timeLimit: data.isTimeLimited ? (data.timeLimit ?? 0) * 60 : 0,
+          },
+          session.user.id
+        )
       );
 
-      if (result.error) {
-        toast.error(result.error);
+      if (createQuizError) {
+        toast.error(createQuizError.message);
         return;
       }
 
-      if (result.quizId) {
+      if (quizId) {
         form.reset();
         toast.success("Quiz created successfully!");
         router.replace("/my-quizzes");
