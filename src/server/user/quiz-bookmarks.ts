@@ -1,11 +1,11 @@
 "use server";
 
 import db from "@/database/db";
-import { quizBookmarks } from "@/database/schema";
+import { quizBookmarks, quizzes } from "@/database/schema";
 import { auth } from "@/lib/auth";
 import { UserActionError } from "@/lib/error";
 import { QuizBookmark } from "@/lib/types";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { headers } from "next/headers";
 
 export async function getUserQuizBookmarks(
@@ -67,6 +67,68 @@ export async function getUserQuizBookmarks(
       "DATABASE_ERROR",
       "Failed to fetch user quiz bookmarks",
       "getUserQuizBookmarks"
+    );
+  }
+}
+
+export async function addQuizBookmark(quizId: string) {
+  try {
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    if (!session) {
+      throw new UserActionError(
+        "UNAUTHORIZED",
+        "No active session found",
+        "addQuizBookmark"
+      );
+    }
+
+    const userId = session.user.id;
+    const quizIdNum = parseInt(quizId, 10);
+    const userIdNum = parseInt(userId, 10);
+
+    const quizExists = await db.query.quizzes.findFirst({
+      where: eq(quizzes.id, quizIdNum),
+    });
+
+    if (!quizExists) {
+      throw new UserActionError(
+        "NOT_FOUND",
+        "Quiz not found",
+        "addQuizBookmark"
+      );
+    }
+
+    const existingBookmark = await db.query.quizBookmarks.findFirst({
+      where: and(
+        eq(quizBookmarks.quizId, quizIdNum),
+        eq(quizBookmarks.userId, userIdNum)
+      ),
+    });
+
+    if (existingBookmark) {
+      return existingBookmark;
+    }
+
+    await db
+      .insert(quizBookmarks)
+      .values({
+        quizId: quizIdNum,
+        userId: userIdNum,
+      })
+      .returning();
+
+    return { success: true };
+  } catch (error) {
+    if (error instanceof UserActionError) {
+      throw error;
+    }
+    throw new UserActionError(
+      "DATABASE_ERROR",
+      "Failed to add quiz bookmark",
+      "addQuizBookmark"
     );
   }
 }
