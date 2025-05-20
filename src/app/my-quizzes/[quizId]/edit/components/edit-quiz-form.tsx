@@ -67,6 +67,7 @@ import {
   flattenCategories,
   getCategoryNameFromPath,
 } from "@/lib/quiz-categories";
+import { tryCatch } from "@/lib/try-catch";
 
 type Props = {
   quizId: string;
@@ -140,21 +141,23 @@ export default function EditQuizForm({ quizId, quiz, session }: Props) {
 
   function onSubmit(data: QuizFormValues) {
     startTransition(async () => {
-      const result = await updateQuiz(
-        {
-          ...data,
-          timeLimit: data.isTimeLimited ? (data.timeLimit ?? 0) * 60 : 0,
-        },
-        parseInt(quizId),
-        session.user.id
+      const { data: updatedQuizId, error: quizError } = await tryCatch(
+        updateQuiz(
+          {
+            ...data,
+            timeLimit: data.isTimeLimited ? (data.timeLimit ?? 0) * 60 : 0,
+          },
+          parseInt(quizId),
+          session.user.id
+        )
       );
 
-      if (result.error) {
-        toast.error(result.error);
+      if (quizError) {
+        toast.error(quizError.message);
         return;
       }
 
-      if (result.quizId) {
+      if (updatedQuizId) {
         form.reset();
         toast.success("Quiz updated successfully!");
         router.replace("/my-quizzes");
