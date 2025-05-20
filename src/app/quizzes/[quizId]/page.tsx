@@ -6,6 +6,7 @@ import QuizDetails from "./components/quiz-details";
 import { getPublicQuiz } from "@/server/quiz/get";
 import { getUserQuizAttempts } from "@/server/user/quiz-attempts";
 import { getQuizLeaderboard } from "@/server/quiz/leaderboard";
+import { tryCatch } from "@/lib/try-catch";
 
 type Props = {
   params: Promise<{
@@ -24,29 +25,32 @@ export default async function QuizQuestionPage({ params }: Props) {
 
   const { quizId } = await params;
 
-  const quizResult = await getPublicQuiz(parseInt(quizId, 10), session.user.id);
-  if (!quizResult.quiz || quizResult.error) {
-    throw new Error(quizResult.error || "Quiz not found");
-  }
-
-  const userAttemptsResults = await getUserQuizAttempts(
-    session.user.id,
-    parseInt(quizId, 10)
+  const { data: quiz, error: quizError } = await tryCatch(
+    getPublicQuiz(parseInt(quizId), session.user.id)
   );
-  if (!userAttemptsResults.quizAttempts || userAttemptsResults.error) {
-    throw new Error(userAttemptsResults.error || "Quiz not found");
+  if (quizError) {
+    throw new Error(quizError.message);
   }
 
-  const leaderboardResult = await getQuizLeaderboard(parseInt(quizId, 10));
-  if (!leaderboardResult.leaderboard || leaderboardResult.error) {
-    throw new Error(leaderboardResult.error || "Leaderboard not found");
+  const { data: quizAttempts, error: userAttemptsError } = await tryCatch(
+    getUserQuizAttempts(session.user.id, parseInt(quizId))
+  );
+  if (userAttemptsError) {
+    throw new Error(userAttemptsError.message);
+  }
+
+  const { data: leaderboard, error: leaderboardError } = await tryCatch(
+    getQuizLeaderboard(parseInt(quizId))
+  );
+  if (leaderboardError) {
+    throw new Error(leaderboardError.message);
   }
 
   return (
     <QuizDetails
-      quiz={quizResult.quiz}
-      userAttempts={userAttemptsResults.quizAttempts}
-      leaderboard={leaderboardResult.leaderboard}
+      quiz={quiz}
+      userAttempts={quizAttempts}
+      leaderboard={leaderboard}
       session={session}
     />
   );
