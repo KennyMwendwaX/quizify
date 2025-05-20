@@ -6,6 +6,7 @@ import { getUserStats } from "@/server/user/stats";
 import { getRecentQuizzes } from "@/server/user/recent-quizzes";
 import { getCategoryPerformance } from "@/server/user/category-performance";
 import { getWeeklyProgress } from "@/server/user/weekly-progress";
+import { tryCatch } from "@/lib/try-catch";
 
 export default async function DashboardPage() {
   const session = await auth.api.getSession({
@@ -16,33 +17,38 @@ export default async function DashboardPage() {
     redirect("/sign-in");
   }
 
-  const statsResults = await getUserStats(session.user.id);
-  if (statsResults.error) {
-    throw new Error(statsResults.error);
-  }
-
-  const recentQuizzesResult = await getRecentQuizzes(session.user.id);
-  if (recentQuizzesResult.error) {
-    throw new Error(recentQuizzesResult.error);
-  }
-
-  const categoryPerformanceResult = await getCategoryPerformance(
-    session.user.id
+  const { data: userStats, error: userStatsError } = await tryCatch(
+    getUserStats(session.user.id)
   );
-  if (categoryPerformanceResult.error) {
-    throw new Error(categoryPerformanceResult.error);
+  if (userStatsError) {
+    throw new Error(userStatsError.message);
   }
 
-  const weeklyProgressResult = await getWeeklyProgress(session.user.id);
-  if (weeklyProgressResult.error) {
-    throw new Error(weeklyProgressResult.error);
+  const { data: recentQuizzes, error: recentQuizzesError } = await tryCatch(
+    getRecentQuizzes(session.user.id)
+  );
+  if (recentQuizzesError) {
+    throw new Error(recentQuizzesError.message);
+  }
+
+  const { data: categoryPerformance, error: categoryPerformanceError } =
+    await tryCatch(getCategoryPerformance(session.user.id));
+  if (categoryPerformanceError) {
+    throw new Error(categoryPerformanceError.message);
+  }
+
+  const { data: weeklyProgress, error: weeklyProgressError } = await tryCatch(
+    getWeeklyProgress(session.user.id)
+  );
+  if (weeklyProgressError) {
+    throw new Error(weeklyProgressError.message);
   }
 
   return (
     <DashboardContent
       session={session}
       stats={
-        statsResults.stats ?? {
+        userStats ?? {
           totalQuizzesTaken: 0,
           averageScore: 0,
           topCategory: "",
@@ -53,9 +59,9 @@ export default async function DashboardPage() {
           totalXP: 0,
         }
       }
-      recentQuizzes={recentQuizzesResult.quizzes ?? []}
-      categoryPerformance={categoryPerformanceResult.performances ?? []}
-      weeklyProgress={weeklyProgressResult.progress ?? []}
+      recentQuizzes={recentQuizzes ?? []}
+      categoryPerformance={categoryPerformance ?? []}
+      weeklyProgress={weeklyProgress ?? []}
     />
   );
 }
