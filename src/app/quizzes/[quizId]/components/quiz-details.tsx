@@ -344,11 +344,11 @@ export default function QuizDetailsPage({
                     <h3 className="text-sm font-medium text-muted-foreground mb-1">
                       Category
                     </h3>
-                    <p className="flex items-center">
+                    <div className="flex items-center">
                       <Badge variant="outline" className="mr-2">
                         {quiz.category}
                       </Badge>
-                    </p>
+                    </div>
                   </div>
                   <div>
                     <h3 className="text-sm font-medium text-muted-foreground mb-1">

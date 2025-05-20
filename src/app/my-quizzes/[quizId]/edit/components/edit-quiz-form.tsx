@@ -182,7 +182,7 @@ export default function EditQuizForm({ quizId, quiz, session }: Props) {
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-            <Card className="shadow-lg bg-white/50 backdrop-blur-xl">
+            <Card className="shadow-lg bg-primary-foreground backdrop-blur-xl">
               <CardHeader>
                 <div className="flex items-center gap-3">
                   <Settings2 className="w-6 h-6 text-primary" />
@@ -387,7 +387,7 @@ export default function EditQuizForm({ quizId, quiz, session }: Props) {
                   <AccordionItem
                     key={question.id}
                     value={`question-${qIndex}`}
-                    className="border bg-white/50 backdrop-blur-xl rounded-xl shadow-sm overflow-hidden group">
+                    className="border bg-primary-foreground backdrop-blur-xl rounded-xl shadow-sm overflow-hidden group">
                     <AccordionTrigger className="px-6 hover:no-underline">
                       <div className="w-full flex justify-between items-center">
                         <div className="flex items-center gap-4">
@@ -520,7 +520,7 @@ export default function EditQuizForm({ quizId, quiz, session }: Props) {
             </div>
 
             <div className="sticky bottom-6 pt-6">
-              <Card className="shadow-xl bg-white/80 backdrop-blur-xl">
+              <Card className="shadow-xl bg-primary-foreground/50 backdrop-blur-xl">
                 <CardContent className="p-4">
                   <div className="flex justify-between items-center">
                     {form.formState.isSubmitted && fields.length === 0 ? (

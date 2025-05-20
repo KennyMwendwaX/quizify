@@ -81,7 +81,7 @@ export default function QuizPreviewContent({ quiz }: Props) {
           </div>
 
           {/* Quiz Info Card */}
-          <Card className="bg-white/50 backdrop-blur-xl shadow-lg">
+          <Card className="bg-primary-foreground backdrop-blur-xl shadow-lg">
             <CardHeader>
               <div className="flex items-center justify-between mb-4">
                 <Badge className={getDifficultyColor(quiz.difficulty)}>
@@ -120,7 +120,7 @@ export default function QuizPreviewContent({ quiz }: Props) {
           </Card>
 
           {/* Question Card */}
-          <Card className="bg-white/50 backdrop-blur-xl shadow-lg">
+          <Card className="bg-primary-foreground backdrop-blur-xl shadow-lg">
             <CardHeader className="border-b border-border/40">
               <div className="flex justify-between items-center mb-2">
                 <span className="text-sm text-muted-foreground">
