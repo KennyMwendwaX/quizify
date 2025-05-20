@@ -4,6 +4,7 @@ import { headers } from "next/headers";
 import { getQuizWithAnswers } from "@/server/quiz/get";
 import { getUserQuizAttempt } from "@/server/user/quiz-attempts";
 import QuizReview from "./components/quiz-review";
+import { tryCatch } from "@/lib/try-catch";
 
 type Props = {
   params: Promise<{
@@ -22,26 +23,19 @@ export default async function QuizPreviewPage({ params }: Props) {
 
   const { quizId } = await params;
 
-  const quizResult = await getQuizWithAnswers(
-    parseInt(quizId),
-    session.user.id
+  const { data: quiz, error: quizError } = await tryCatch(
+    getQuizWithAnswers(parseInt(quizId), session.user.id)
   );
-  if (!quizResult.quiz || quizResult.error) {
-    throw new Error(quizResult.error || "Quiz not found");
+  if (quizError) {
+    throw new Error(quizError.message);
   }
 
-  const userAttemptResult = await getUserQuizAttempt(
-    session.user.id,
-    parseInt(quizId)
+  const { data: quizAttempt, error: quizAttemptError } = await tryCatch(
+    getUserQuizAttempt(session.user.id, parseInt(quizId))
   );
-  if (!userAttemptResult.quizAttempt || userAttemptResult.error) {
-    throw new Error(userAttemptResult.error || "Quiz not found");
+  if (quizAttemptError) {
+    throw new Error(quizAttemptError.message);
   }
 
-  return (
-    <QuizReview
-      quiz={quizResult.quiz}
-      quizAttempt={userAttemptResult.quizAttempt}
-    />
-  );
+  return <QuizReview quiz={quiz} quizAttempt={quizAttempt} />;
 }
