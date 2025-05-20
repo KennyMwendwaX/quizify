@@ -23,6 +23,7 @@ import { submitQuizAttempt } from "@/server/quiz/submit";
 import { toast } from "sonner";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
 import { Session } from "@/lib/auth";
+import { tryCatch } from "@/lib/try-catch";
 
 interface QuizState {
   currentQuestion: number;
@@ -110,15 +111,17 @@ export default function QuizQuestion({ quiz, session }: QuizQuestionProps) {
     );
 
     startTransition(async () => {
-      const result = await submitQuizAttempt(
-        quiz.id,
-        validAnswers,
-        state.timeLeft,
-        session.user.id
+      const { data: result, error: submitQuizError } = await tryCatch(
+        submitQuizAttempt(
+          quiz.id,
+          validAnswers,
+          state.timeLeft,
+          session.user.id
+        )
       );
 
-      if (result.error) {
-        toast.error(result.error);
+      if (submitQuizError) {
+        toast.error(submitQuizError.message);
         return;
       }
 
