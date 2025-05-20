@@ -7,31 +7,35 @@ import { QuizFormValues } from "@/lib/quiz-form-schema";
 import { eq, and } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
-import { CreateQuizResponse, QuizActionError } from "./types";
 import { updateUserStreak } from "../user/streak";
+import { QuizActionError } from "@/lib/error";
+import { tryCatch } from "@/lib/try-catch";
 
 export const updateQuiz = async (
   quiz: QuizFormValues,
   quizId: number,
   userId?: string
-): Promise<CreateQuizResponse> => {
+): Promise<{ quizId: number }> => {
   try {
     const session = await auth.api.getSession({
       headers: await headers(),
     });
 
-    if (!session?.user) {
-      throw new QuizActionError("No active session found", 401, "updateQuiz");
-    }
-
-    if (!userId || userId !== session.user.id) {
+    if (!session) {
       throw new QuizActionError(
-        "User ID mismatch or missing",
-        401,
+        "UNAUTHORIZED",
+        "No active session found",
         "updateQuiz"
       );
     }
 
+    if (!userId || userId !== session.user.id) {
+      throw new QuizActionError(
+        "UNAUTHORIZED",
+        "User ID mismatch or missing",
+        "updateQuiz"
+      );
+    }
     const { questions: quizQuestions, ...quizData } = quiz;
 
     const result = await db.transaction(async (tx) => {
@@ -45,8 +49,8 @@ export const updateQuiz = async (
 
       if (!existingQuiz || existingQuiz.length === 0) {
         throw new QuizActionError(
+          "NOT_FOUND",
           "Quiz not found or unauthorized",
-          404,
           "updateQuiz"
         );
       }
@@ -67,7 +71,11 @@ export const updateQuiz = async (
         });
 
       if (!updatedQuiz) {
-        throw new QuizActionError("Failed to update quiz", 500, "updateQuiz");
+        throw new QuizActionError(
+          "DATABASE_ERROR",
+          "Failed to update quiz",
+          "updateQuiz"
+        );
       }
 
       await tx.delete(questions).where(eq(questions.quizId, quizId));
@@ -81,11 +89,13 @@ export const updateQuiz = async (
         }))
       );
 
-      const userStreakResult = await updateUserStreak(parseInt(userId));
-      if (userStreakResult.error) {
+      const { error: userStreakError } = await tryCatch(
+        updateUserStreak(parseInt(userId))
+      );
+      if (userStreakError) {
         throw new QuizActionError(
-          userStreakResult.error,
-          userStreakResult.statusCode || 500,
+          "DATABASE_ERROR",
+          userStreakError.message,
           "updateQuiz"
         );
       }
@@ -105,15 +115,13 @@ export const updateQuiz = async (
     console.error("Error in updateQuiz:", error);
 
     if (error instanceof QuizActionError) {
-      return {
-        error: error.message,
-        statusCode: error.statusCode,
-      };
+      throw error;
     }
 
-    return {
-      error: "Failed to update quiz. Please try again later.",
-      statusCode: 500,
-    };
+    throw new QuizActionError(
+      "DATABASE_ERROR",
+      "Failed to update quiz. Please try again later.",
+      "updateQuiz"
+    );
   }
 };

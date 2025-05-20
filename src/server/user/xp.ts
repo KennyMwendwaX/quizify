@@ -3,12 +3,12 @@
 import db from "@/database/db";
 import { users } from "@/database/schema";
 import { eq } from "drizzle-orm";
-import { UpdateUserXPResponse, UserActionError } from "./types";
+import { UserActionError } from "@/lib/error";
 
 export async function updateUserXP(
   userId: number,
   xpEarned: number
-): Promise<UpdateUserXPResponse> {
+): Promise<number> {
   try {
     const user = await db.query.users.findFirst({
       where: eq(users.id, userId),
@@ -18,7 +18,7 @@ export async function updateUserXP(
     });
 
     if (!user) {
-      throw new UserActionError("User not found", 404, "updateUserXP");
+      throw new UserActionError("NOT_FOUND", "User not found", "updateUserXP");
     }
 
     const newTotalXp = user.totalXp + xpEarned;
@@ -30,23 +30,18 @@ export async function updateUserXP(
       })
       .where(eq(users.id, userId));
 
-    return {
-      success: true,
-      newTotalXp,
-    };
+    return newTotalXp;
   } catch (error) {
     console.error("Error in updateUserXP:", error);
 
     if (error instanceof UserActionError) {
-      return {
-        error: error.message,
-        statusCode: error.statusCode,
-      };
+      throw error;
     }
 
-    return {
-      error: "Failed to update user XP. Please try again later.",
-      statusCode: 500,
-    };
+    throw new UserActionError(
+      "DATABASE_ERROR",
+      "Failed to update user XP. Please try again later.",
+      "updateUserXP"
+    );
   }
 }

@@ -2,42 +2,42 @@
 
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
-import {
-  GetUserQuizAttemptResponse,
-  GetUserQuizAttemptsResponse,
-  UserActionError,
-} from "./types";
 import db from "@/database/db";
 import { and, desc, eq } from "drizzle-orm";
-import { quizAttempts } from "@/database/schema";
+import { QuizAttempt, quizAttempts } from "@/database/schema";
+import { UserActionError } from "@/lib/error";
 
 export const getUserQuizAttempt = async (
   userId?: string,
   quizId?: number
-): Promise<GetUserQuizAttemptResponse> => {
+): Promise<QuizAttempt> => {
   try {
     const session = await auth.api.getSession({
       headers: await headers(),
     });
 
-    if (!session?.user) {
+    if (!session) {
       throw new UserActionError(
+        "UNAUTHORIZED",
         "No active session found",
-        401,
         "getUserQuizAttempt"
       );
     }
 
     if (!userId || userId !== session.user.id) {
       throw new UserActionError(
+        "UNAUTHORIZED",
         "User ID mismatch or missing",
-        401,
         "getUserQuizAttempt"
       );
     }
 
     if (!quizId) {
-      throw new UserActionError("Quiz ID missing", 401, "getUserQuizAttempt");
+      throw new UserActionError(
+        "UNAUTHORIZED",
+        "Quiz ID missing",
+        "getUserQuizAttempt"
+      );
     }
 
     const attempt = await db.query.quizAttempts.findFirst({
@@ -48,45 +48,59 @@ export const getUserQuizAttempt = async (
       orderBy: desc(quizAttempts.createdAt),
     });
 
-    return {
-      quizAttempt: attempt,
-    };
+    if (!attempt) {
+      throw new UserActionError(
+        "NOT_FOUND",
+        "Quiz attempt not found",
+        "getUserQuizAttempt"
+      );
+    }
+
+    return attempt;
   } catch (error) {
     console.error("Error in getUserQuizAttempt:", error);
-    return {
-      error: "Failed to fetch quizzes. Please try again later.",
-      statusCode: 500,
-    };
+    if (error instanceof UserActionError) {
+      throw error;
+    }
+    throw new UserActionError(
+      "DATABASE_ERROR",
+      "Failed to fetch quiz attempt",
+      "getUserQuizAttempt"
+    );
   }
 };
 
 export const getUserQuizAttempts = async (
   userId?: string,
   quizId?: number
-): Promise<GetUserQuizAttemptsResponse> => {
+): Promise<QuizAttempt[]> => {
   try {
     const session = await auth.api.getSession({
       headers: await headers(),
     });
 
-    if (!session?.user) {
+    if (!session) {
       throw new UserActionError(
+        "UNAUTHORIZED",
         "No active session found",
-        401,
         "getUserQuizAttempts"
       );
     }
 
     if (!userId || userId !== session.user.id) {
       throw new UserActionError(
+        "UNAUTHORIZED",
         "User ID mismatch or missing",
-        401,
         "getUserQuizAttempts"
       );
     }
 
     if (!quizId) {
-      throw new UserActionError("Quiz ID missing", 401, "getUserQuizAttempts");
+      throw new UserActionError(
+        "UNAUTHORIZED",
+        "Quiz ID missing",
+        "getUserQuizAttempts"
+      );
     }
 
     const attempts = await db.query.quizAttempts.findMany({
@@ -97,14 +111,16 @@ export const getUserQuizAttempts = async (
       orderBy: desc(quizAttempts.score),
     });
 
-    return {
-      quizAttempts: attempts,
-    };
+    return attempts;
   } catch (error) {
     console.error("Error in getUserQuizAttempts:", error);
-    return {
-      error: "Failed to fetch quizzes. Please try again later.",
-      statusCode: 500,
-    };
+    if (error instanceof UserActionError) {
+      throw error;
+    }
+    throw new UserActionError(
+      "DATABASE_ERROR",
+      "Failed to fetch quiz attempts",
+      "getUserQuizAttempts"
+    );
   }
 };

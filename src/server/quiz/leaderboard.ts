@@ -2,29 +2,33 @@
 
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
-import { GetQuizLeaderboardResponse, QuizActionError } from "./types";
 import db from "@/database/db";
 import { eq, desc } from "drizzle-orm";
-import { quizAttempts } from "@/database/schema";
+import { quizAttempts, QuizLeaderboard } from "@/database/schema";
+import { QuizActionError } from "@/lib/error";
 
 export const getQuizLeaderboard = async (
   quizId: number
-): Promise<GetQuizLeaderboardResponse> => {
+): Promise<QuizLeaderboard> => {
   try {
     const session = await auth.api.getSession({
       headers: await headers(),
     });
 
-    if (!session?.user) {
+    if (!session) {
       throw new QuizActionError(
+        "UNAUTHORIZED",
         "No active session found",
-        401,
         "getQuizLeaderboard"
       );
     }
 
     if (!quizId) {
-      throw new QuizActionError("Quiz ID missing", 400, "getQuizLeaderboard");
+      throw new QuizActionError(
+        "NOT_FOUND",
+        "Quiz ID missing",
+        "getQuizLeaderboard"
+      );
     }
 
     const leaderboardData = await db.query.quizAttempts.findMany({
@@ -46,12 +50,16 @@ export const getQuizLeaderboard = async (
       rank: index + 1,
     }));
 
-    return { leaderboard };
+    return leaderboard;
   } catch (error) {
     console.error("Error in getQuizLeaderboard:", error);
-    return {
-      error: "Failed to fetch leaderboard stats. Please try again later.",
-      statusCode: 500,
-    };
+    if (error instanceof QuizActionError) {
+      throw error;
+    }
+    throw new QuizActionError(
+      "DATABASE_ERROR",
+      "Failed to fetch leaderboard",
+      "getQuizLeaderboard"
+    );
   }
 };

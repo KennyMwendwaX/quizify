@@ -3,31 +3,31 @@
 import db from "@/database/db";
 import { quizAttempts } from "@/database/schema";
 import { auth } from "@/lib/auth";
+import { UserActionError } from "@/lib/error";
 import { WeeklyProgress } from "@/lib/types";
-import { UserActionError, WeeklyProgressResponse } from "@/server/user/types";
 import { and, eq, gte } from "drizzle-orm";
 import { headers } from "next/headers";
 
 export async function getWeeklyProgress(
   userId?: string
-): Promise<WeeklyProgressResponse> {
+): Promise<WeeklyProgress[]> {
   try {
     const session = await auth.api.getSession({
       headers: await headers(),
     });
 
-    if (!session?.user) {
+    if (!session) {
       throw new UserActionError(
+        "UNAUTHORIZED",
         "No active session found",
-        401,
         "getWeeklyProgress"
       );
     }
 
     if (!userId || userId !== session.user.id) {
       throw new UserActionError(
+        "UNAUTHORIZED",
         "User ID mismatch or missing",
-        401,
         "getWeeklyProgress"
       );
     }
@@ -120,23 +120,17 @@ export async function getWeeklyProgress(
       };
     });
 
-    return {
-      progress: weeklyProgress,
-    };
+    return weeklyProgress;
   } catch (error) {
     console.error("Error in getWeeklyProgress:", error);
 
     if (error instanceof UserActionError) {
-      return {
-        progress: [],
-        error: error.message,
-        statusCode: error.statusCode,
-      };
+      throw error;
     }
-    return {
-      progress: [],
-      error: "Failed to fetch weekly progress",
-      statusCode: 500,
-    };
+    throw new UserActionError(
+      "DATABASE_ERROR",
+      "Failed to fetch weekly progress",
+      "getWeeklyProgress"
+    );
   }
 }

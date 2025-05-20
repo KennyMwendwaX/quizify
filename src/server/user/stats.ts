@@ -2,26 +2,31 @@
 
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
-import { UserActionError } from "./types";
 import db from "@/database/db";
 import { eq, count, desc, sql } from "drizzle-orm";
 import { users, quizAttempts, quizzes } from "@/database/schema";
 import { resetStreak } from "./streak";
+import { UserActionError } from "@/lib/error";
+import { UserStats } from "@/lib/types";
 
-export async function getUserStats(userId?: string) {
+export async function getUserStats(userId?: string): Promise<UserStats> {
   try {
     const session = await auth.api.getSession({
       headers: await headers(),
     });
 
-    if (!session?.user) {
-      throw new UserActionError("No active session found", 401, "getUserStats");
+    if (!session) {
+      throw new UserActionError(
+        "UNAUTHORIZED",
+        "No active session found",
+        "getUserStats"
+      );
     }
 
     if (!userId || userId !== session.user.id) {
       throw new UserActionError(
+        "UNAUTHORIZED",
         "User ID mismatch or missing",
-        401,
         "getUserStats"
       );
     }
@@ -40,7 +45,7 @@ export async function getUserStats(userId?: string) {
     });
 
     if (!user) {
-      throw new UserActionError("User not found", 404, "getUserStats");
+      throw new UserActionError("NOT_FOUND", "User not found", "getUserStats");
     }
 
     const attemptsStats = await db.query.quizAttempts.findMany({
@@ -101,20 +106,16 @@ export async function getUserStats(userId?: string) {
       totalXP: user.totalXp,
     };
 
-    return {
-      stats,
-    };
+    return stats;
   } catch (error) {
     console.error(error);
     if (error instanceof UserActionError) {
-      return {
-        error: error.message,
-        statusCode: error.statusCode,
-      };
+      throw error;
     }
-    return {
-      error: "Failed to fetch user statistics",
-      statusCode: 500,
-    };
+    throw new UserActionError(
+      "DATABASE_ERROR",
+      "Failed to fetch user statistics",
+      "getUserStats"
+    );
   }
 }

@@ -5,34 +5,35 @@ import { quizAttempts, quizzes, users } from "@/database/schema";
 import { eq } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
-import { QuizActionError, QuizSubmissionResponse } from "./types";
 import { calculateXP } from "@/lib/xp-utils";
 import { updateUserXP } from "../user/xp";
 import { updateUserStreak } from "../user/streak";
+import { QuizActionError } from "@/lib/error";
+import { tryCatch } from "@/lib/try-catch";
 
 export const submitQuizAttempt = async (
   quizId: number,
   answers: number[],
   timeLeft: number,
   userId?: string
-): Promise<QuizSubmissionResponse> => {
+): Promise<{ success: boolean }> => {
   try {
     const session = await auth.api.getSession({
       headers: await headers(),
     });
 
-    if (!session?.user) {
+    if (!session) {
       throw new QuizActionError(
+        "UNAUTHORIZED",
         "No active session found",
-        401,
         "submitQuizAttempt"
       );
     }
 
     if (!userId || userId !== session.user.id) {
       throw new QuizActionError(
+        "UNAUTHORIZED",
         "User ID mismatch or missing",
-        401,
         "submitQuizAttempt"
       );
     }
@@ -45,7 +46,11 @@ export const submitQuizAttempt = async (
     });
 
     if (!user) {
-      throw new QuizActionError("User not found", 404, "submitQuizAttempt");
+      throw new QuizActionError(
+        "NOT_FOUND",
+        "User not found",
+        "submitQuizAttempt"
+      );
     }
 
     const quiz = await db.query.quizzes.findFirst({
@@ -63,7 +68,11 @@ export const submitQuizAttempt = async (
     });
 
     if (!quiz) {
-      throw new QuizActionError("Quiz not found", 404, "submitQuizAttempt");
+      throw new QuizActionError(
+        "NOT_FOUND",
+        "Quiz not found",
+        "submitQuizAttempt"
+      );
     }
 
     const score = quiz.questions.reduce((total, question, index) => {
@@ -102,20 +111,24 @@ export const submitQuizAttempt = async (
       xpEarned: xpEarnedPoints,
     });
 
-    const xpResult = await updateUserXP(parseInt(userId), xpEarnedPoints);
-    if (xpResult.error) {
+    const { error: xpError } = await tryCatch(
+      updateUserXP(parseInt(userId), xpEarnedPoints)
+    );
+    if (xpError) {
       throw new QuizActionError(
-        xpResult.error,
-        xpResult.statusCode || 500,
+        "DATABASE_ERROR",
+        xpError.message,
         "submitQuizAttempt"
       );
     }
 
-    const userStreakResult = await updateUserStreak(parseInt(userId));
-    if (userStreakResult.error) {
+    const { error: userStreakError } = await tryCatch(
+      updateUserStreak(parseInt(userId))
+    );
+    if (userStreakError) {
       throw new QuizActionError(
-        userStreakResult.error,
-        userStreakResult.statusCode || 500,
+        "DATABASE_ERROR",
+        userStreakError.message,
         "submitQuizAttempt"
       );
     }
@@ -130,16 +143,13 @@ export const submitQuizAttempt = async (
     console.error("Error in submitQuizAttempt:", error);
 
     if (error instanceof QuizActionError) {
-      return {
-        error: error.message,
-        statusCode: error.statusCode,
-      };
+      throw error;
     }
 
-    return {
-      error:
-        "Failed to validate quiz submission attempt. Please try again later.",
-      statusCode: 500,
-    };
+    throw new QuizActionError(
+      "DATABASE_ERROR",
+      "Failed to validate quiz submission attempt. Please try again later.",
+      "submitQuizAttempt"
+    );
   }
 };

@@ -34,3 +34,10 @@ export type WeeklyProgress = {
   score: number;
   xp: number;
 };
+
+export type UpdatedAchievement = {
+  id: number;
+  progress: number;
+  isCompleted: boolean;
+  completedAt?: Date | null;
+}[];

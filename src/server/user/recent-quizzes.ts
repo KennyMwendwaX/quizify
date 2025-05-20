@@ -2,31 +2,30 @@
 
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
-import { RecentQuizzesResponse, UserActionError } from "./types";
 import db from "@/database/db";
 import { eq, desc } from "drizzle-orm";
 import { quizAttempts } from "@/database/schema";
+import { UserActionError } from "@/lib/error";
+import { RecentQuiz } from "@/lib/types";
 
-export async function getRecentQuizzes(
-  userId?: string
-): Promise<RecentQuizzesResponse> {
+export async function getRecentQuizzes(userId?: string): Promise<RecentQuiz[]> {
   try {
     const session = await auth.api.getSession({
       headers: await headers(),
     });
 
-    if (!session?.user) {
+    if (!session) {
       throw new UserActionError(
+        "UNAUTHORIZED",
         "No active session found",
-        401,
         "getRecentQuizzes"
       );
     }
 
     if (!userId || userId !== session.user.id) {
       throw new UserActionError(
+        "UNAUTHORIZED",
         "User ID mismatch or missing",
-        401,
         "getRecentQuizzes"
       );
     }
@@ -48,32 +47,28 @@ export async function getRecentQuizzes(
       },
     });
 
-    return {
-      quizzes: recentAttempts.map((attempt) => ({
-        id: attempt.id,
-        title: attempt.quiz.title,
-        category: attempt.quiz.category,
-        dateTaken: attempt.createdAt.toLocaleDateString("en-US", {
-          month: "short",
-          day: "numeric",
-          year: "numeric",
-        }),
-        percentage: attempt.percentage,
-        timeTaken: attempt.timeTaken,
-        difficulty: attempt.quiz.difficulty,
-      })),
-    };
+    return recentAttempts.map((attempt) => ({
+      id: attempt.id,
+      title: attempt.quiz.title,
+      category: attempt.quiz.category,
+      dateTaken: attempt.createdAt.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      }),
+      percentage: attempt.percentage,
+      timeTaken: attempt.timeTaken,
+      difficulty: attempt.quiz.difficulty,
+    }));
   } catch (error) {
     console.error("Error in getRecentQuizzes:", error);
     if (error instanceof UserActionError) {
-      return {
-        error: error.message,
-        statusCode: error.statusCode,
-      };
+      throw error;
     }
-    return {
-      error: "Failed to fetch recent quizzes",
-      statusCode: 500,
-    };
+    throw new UserActionError(
+      "DATABASE_ERROR",
+      "Failed to fetch recent quizzes",
+      "getRecentQuizzes"
+    );
   }
 }

@@ -3,7 +3,12 @@
 import db from "@/database/db";
 import { users } from "@/database/schema";
 import { eq } from "drizzle-orm";
-import { UpdateUserStreakResponse, UserActionError } from "./types";
+import { UserActionError } from "@/lib/error";
+
+type UpdateUserStreakResponse = {
+  currentStreak?: number;
+  bestStreak?: number;
+};
 
 export async function updateUserStreak(
   userId: number
@@ -14,7 +19,11 @@ export async function updateUserStreak(
     });
 
     if (!user) {
-      throw new UserActionError("User not found", 404, "updateUserStreak");
+      throw new UserActionError(
+        "NOT_FOUND",
+        "User not found",
+        "updateUserStreak"
+      );
     }
 
     const now = new Date();
@@ -32,7 +41,6 @@ export async function updateUserStreak(
         .where(eq(users.id, userId));
 
       return {
-        success: true,
         currentStreak: 1,
         bestStreak: 1,
       };
@@ -62,7 +70,6 @@ export async function updateUserStreak(
         .where(eq(users.id, userId));
 
       return {
-        success: true,
         currentStreak: newCurrentStreak,
         bestStreak: newBestStreak,
       };
@@ -91,7 +98,6 @@ export async function updateUserStreak(
       .where(eq(users.id, userId));
 
     return {
-      success: true,
       currentStreak: newCurrentStreak,
       bestStreak: newBestStreak,
     };
@@ -99,22 +105,18 @@ export async function updateUserStreak(
     console.error("Error in updateUserStreak:", error);
 
     if (error instanceof UserActionError) {
-      return {
-        error: error.message,
-        statusCode: error.statusCode,
-      };
+      throw error;
     }
 
-    return {
-      error: "Failed to update user streak. Please try again later.",
-      statusCode: 500,
-    };
+    throw new UserActionError(
+      "DATABASE_ERROR",
+      "Failed to update user streak. Please try again later.",
+      "updateUserStreak"
+    );
   }
 }
 
 type ResetStreakResponse = {
-  success?: boolean;
-  error?: string;
   statusCode?: number;
   wasReset?: boolean;
   currentStreak: number;
@@ -133,13 +135,12 @@ export async function resetStreak(
     });
 
     if (!user) {
-      throw new UserActionError("User not found", 404, "resetStreak");
+      throw new UserActionError("NOT_FOUND", "User not found", "resetStreak");
     }
 
     // If no streak or no last activity, nothing to reset
     if (!user.lastActivityDate || user.currentStreak === 0) {
       return {
-        success: true,
         wasReset: false,
         currentStreak: user.currentStreak,
       };
@@ -169,7 +170,6 @@ export async function resetStreak(
         .where(eq(users.id, userId));
 
       return {
-        success: true,
         wasReset: true,
         currentStreak: 0,
       };
@@ -177,7 +177,6 @@ export async function resetStreak(
 
     // No reset needed
     return {
-      success: true,
       wasReset: false,
       currentStreak: user.currentStreak,
     };
@@ -185,17 +184,13 @@ export async function resetStreak(
     console.error("Error in resetStreak:", error);
 
     if (error instanceof UserActionError) {
-      return {
-        error: error.message,
-        statusCode: error.statusCode,
-        currentStreak: 0,
-      };
+      throw error;
     }
 
-    return {
-      error: "Failed to reset user streak",
-      statusCode: 500,
-      currentStreak: 0,
-    };
+    throw new UserActionError(
+      "DATABASE_ERROR",
+      "Failed to reset user streak",
+      "resetStreak"
+    );
   }
 }

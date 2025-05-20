@@ -274,3 +274,10 @@ export type PublicQuiz = Quiz & {
 export type AdminQuiz = Quiz & { questions: AdminQuestion[] };
 export type QuizAttempt = typeof quizAttempts.$inferSelect;
 export type QuizDifficulty = typeof quizzes.$inferSelect.difficulty;
+export type QuizLeaderboard = (QuizAttempt & {
+  user: {
+    name: string;
+    image: string | null;
+  };
+  rank: number;
+})[];

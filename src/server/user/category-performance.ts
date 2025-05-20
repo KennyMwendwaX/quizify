@@ -1,32 +1,33 @@
 "use server";
 
-import { CategoryPerformanceResponse, UserActionError } from "./types";
 import db from "@/database/db";
 import { eq } from "drizzle-orm";
 import { quizAttempts } from "@/database/schema";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
+import { UserActionError } from "@/lib/error";
+import { CategoryPerformance } from "@/lib/types";
 
 export async function getCategoryPerformance(
   userId?: string
-): Promise<CategoryPerformanceResponse> {
+): Promise<CategoryPerformance[]> {
   try {
     const session = await auth.api.getSession({
       headers: await headers(),
     });
 
-    if (!session?.user) {
+    if (!session) {
       throw new UserActionError(
+        "UNAUTHORIZED",
         "No active session found",
-        401,
         "getCategoryPerformance"
       );
     }
 
     if (!userId || userId !== session.user.id) {
       throw new UserActionError(
+        "UNAUTHORIZED",
         "User ID mismatch or missing",
-        401,
         "getCategoryPerformance"
       );
     }
@@ -70,18 +71,16 @@ export async function getCategoryPerformance(
       })
     );
 
-    return { performances: categoryPerformances };
+    return categoryPerformances;
   } catch (error) {
     console.error("Error in getCategoryPerformance:", error);
     if (error instanceof UserActionError) {
-      return {
-        error: error.message,
-        statusCode: error.statusCode,
-      };
+      throw error;
     }
-    return {
-      error: "Failed to fetch category performance",
-      statusCode: 500,
-    };
+    throw new UserActionError(
+      "DATABASE_ERROR",
+      "Failed to fetch category performance",
+      "getCategoryPerformance"
+    );
   }
 }

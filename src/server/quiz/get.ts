@@ -1,38 +1,32 @@
 "use server";
 
 import db from "@/database/db";
-import { quizzes } from "@/database/schema";
+import { AdminQuiz, PublicQuiz, quizzes } from "@/database/schema";
 import { and, desc, eq } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
-import {
-  GetAdminQuizResponse,
-  GetAdminQuizzesResponse,
-  GetPublicQuizResponse,
-  GetPublicQuizzesResponse,
-  QuizActionError,
-} from "./types";
+import { QuizActionError } from "@/lib/error";
 
 export const getAdminQuizzes = async (
   userId?: string
-): Promise<GetAdminQuizzesResponse> => {
+): Promise<AdminQuiz[]> => {
   try {
     const session = await auth.api.getSession({
       headers: await headers(),
     });
 
-    if (!session?.user) {
+    if (!session) {
       throw new QuizActionError(
+        "UNAUTHORIZED",
         "No active session found",
-        401,
         "getAdminQuizzes"
       );
     }
 
     if (!userId || userId !== session.user.id) {
       throw new QuizActionError(
+        "UNAUTHORIZED",
         "User ID mismatch or missing",
-        401,
         "getAdminQuizzes"
       );
     }
@@ -52,38 +46,41 @@ export const getAdminQuizzes = async (
       orderBy: [desc(quizzes.createdAt)],
     });
 
-    return {
-      quizzes: quizResults,
-    };
+    return quizResults;
   } catch (error) {
     console.error("Error in getAdminQuizzes:", error);
-    return {
-      error: "Failed to fetch quizzes. Please try again later.",
-      statusCode: 500,
-    };
+    if (error instanceof QuizActionError) {
+      throw error;
+    }
+
+    throw new QuizActionError(
+      "DATABASE_ERROR",
+      "Failed to fetch quizzes",
+      "getAdminQuizzes"
+    );
   }
 };
 
 export const getPublicQuizzes = async (
   userId?: string
-): Promise<GetPublicQuizzesResponse> => {
+): Promise<PublicQuiz[]> => {
   try {
     const session = await auth.api.getSession({
       headers: await headers(),
     });
 
-    if (!session?.user) {
+    if (!session) {
       throw new QuizActionError(
+        "UNAUTHORIZED",
         "No active session found",
-        401,
         "getPublicQuizzes"
       );
     }
 
     if (!userId || userId !== session.user.id) {
       throw new QuizActionError(
+        "UNAUTHORIZED",
         "User ID mismatch or missing",
-        401,
         "getPublicQuizzes"
       );
     }
@@ -107,41 +104,51 @@ export const getPublicQuizzes = async (
       orderBy: [desc(quizzes.createdAt)],
     });
 
-    return {
-      quizzes: quizResults,
-    };
+    return quizResults;
   } catch (error) {
     console.error("Error in getPublicQuizzes:", error);
-    return {
-      error: "Failed to fetch quizzes. Please try again later.",
-      statusCode: 500,
-    };
+    if (error instanceof QuizActionError) {
+      throw error;
+    }
+    throw new QuizActionError(
+      "DATABASE_ERROR",
+      "Failed to fetch quizzes",
+      "getPublicQuizzes"
+    );
   }
 };
 
 export const getAdminQuiz = async (
   quizId: number,
   userId?: string
-): Promise<GetAdminQuizResponse> => {
+): Promise<AdminQuiz> => {
   try {
     const session = await auth.api.getSession({
       headers: await headers(),
     });
 
-    if (!session?.user) {
-      throw new QuizActionError("No active session found", 401, "getAdminQuiz");
+    if (!session) {
+      throw new QuizActionError(
+        "UNAUTHORIZED",
+        "No active session found",
+        "getAdminQuiz"
+      );
     }
 
     if (!userId || userId !== session.user.id) {
       throw new QuizActionError(
+        "UNAUTHORIZED",
         "User ID mismatch or missing",
-        401,
         "getAdminQuiz"
       );
     }
 
     if (!quizId || isNaN(quizId)) {
-      throw new QuizActionError("Invalid quiz ID", 400, "getAdminQuiz");
+      throw new QuizActionError(
+        "UNAUTHORIZED",
+        "Invalid quiz ID",
+        "getAdminQuiz"
+      );
     }
 
     const quiz = await db.query.quizzes.findFirst({
@@ -159,56 +166,56 @@ export const getAdminQuiz = async (
     });
 
     if (!quiz) {
-      throw new QuizActionError("Quiz not found", 404, "getAdminQuiz");
+      throw new QuizActionError("NOT_FOUND", "Quiz not found", "getAdminQuiz");
     }
 
-    return {
-      quiz: quiz,
-    };
+    return quiz;
   } catch (error) {
     console.error("Error in getAdminQuiz:", error);
 
     if (error instanceof QuizActionError) {
-      return {
-        error: error.message,
-        statusCode: error.statusCode,
-      };
+      throw error;
     }
 
-    return {
-      error: "Failed to fetch quiz. Please try again later.",
-      statusCode: 500,
-    };
+    throw new QuizActionError(
+      "DATABASE_ERROR",
+      "Failed to fetch quiz",
+      "getAdminQuiz"
+    );
   }
 };
 
 export async function getPublicQuiz(
   quizId: number,
   userId?: string
-): Promise<GetPublicQuizResponse> {
+): Promise<PublicQuiz> {
   try {
     const session = await auth.api.getSession({
       headers: await headers(),
     });
 
-    if (!session?.user) {
+    if (!session) {
       throw new QuizActionError(
+        "UNAUTHORIZED",
         "No active session found",
-        401,
         "getPublicQuiz"
       );
     }
 
     if (!userId || userId !== session.user.id) {
       throw new QuizActionError(
+        "UNAUTHORIZED",
         "User ID mismatch or missing",
-        401,
         "getPublicQuiz"
       );
     }
 
     if (!quizId || isNaN(quizId)) {
-      throw new QuizActionError("Invalid quiz ID", 400, "getPublicQuiz");
+      throw new QuizActionError(
+        "UNAUTHORIZED",
+        "Invalid quiz ID",
+        "getPublicQuiz"
+      );
     }
 
     const quiz = await db.query.quizzes.findFirst({
@@ -231,56 +238,56 @@ export async function getPublicQuiz(
     });
 
     if (!quiz) {
-      throw new QuizActionError("Quiz not found", 404, "getPublicQuiz");
+      throw new QuizActionError("NOT_FOUND", "Quiz not found", "getPublicQuiz");
     }
 
-    return {
-      quiz: quiz,
-    };
+    return quiz;
   } catch (error) {
     console.error("Error in getPublicQuiz:", error);
 
     if (error instanceof QuizActionError) {
-      return {
-        error: error.message,
-        statusCode: error.statusCode,
-      };
+      throw error;
     }
 
-    return {
-      error: "Failed to fetch quiz. Please try again later.",
-      statusCode: 500,
-    };
+    throw new QuizActionError(
+      "DATABASE_ERROR",
+      "Failed to fetch quiz",
+      "getPublicQuiz"
+    );
   }
 }
 
 export const getQuizWithAnswers = async (
   quizId: number,
   userId?: string
-): Promise<GetAdminQuizResponse> => {
+): Promise<AdminQuiz> => {
   try {
     const session = await auth.api.getSession({
       headers: await headers(),
     });
 
-    if (!session?.user) {
+    if (!session) {
       throw new QuizActionError(
+        "UNAUTHORIZED",
         "No active session found",
-        401,
         "getQuizWithAnswers"
       );
     }
 
     if (!userId || userId !== session.user.id) {
       throw new QuizActionError(
+        "UNAUTHORIZED",
         "User ID mismatch or missing",
-        401,
         "getQuizWithAnswers"
       );
     }
 
     if (!quizId || isNaN(quizId)) {
-      throw new QuizActionError("Invalid quiz ID", 400, "getQuizWithAnswers");
+      throw new QuizActionError(
+        "UNAUTHORIZED",
+        "Invalid quiz ID",
+        "getQuizWithAnswers"
+      );
     }
 
     const quiz = await db.query.quizzes.findFirst({
@@ -298,25 +305,25 @@ export const getQuizWithAnswers = async (
     });
 
     if (!quiz) {
-      throw new QuizActionError("Quiz not found", 404, "getQuizWithAnswers");
+      throw new QuizActionError(
+        "NOT_FOUND",
+        "Quiz not found",
+        "getQuizWithAnswers"
+      );
     }
 
-    return {
-      quiz: quiz,
-    };
+    return quiz;
   } catch (error) {
     console.error("Error in getQuizWithAnswers:", error);
 
     if (error instanceof QuizActionError) {
-      return {
-        error: error.message,
-        statusCode: error.statusCode,
-      };
+      throw error;
     }
 
-    return {
-      error: "Failed to fetch quiz. Please try again later.",
-      statusCode: 500,
-    };
+    throw new QuizActionError(
+      "DATABASE_ERROR",
+      "Failed to fetch quiz",
+      "getQuizWithAnswers"
+    );
   }
 };

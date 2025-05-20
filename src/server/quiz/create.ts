@@ -6,26 +6,31 @@ import { questions, quizzes } from "@/database/schema";
 import { QuizFormValues } from "@/lib/quiz-form-schema";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
-import { CreateQuizResponse, QuizActionError } from "./types";
 import { updateUserStreak } from "../user/streak";
+import { QuizActionError } from "@/lib/error";
+import { tryCatch } from "@/lib/try-catch";
 
 export const createQuiz = async (
   quiz: QuizFormValues,
   userId?: string
-): Promise<CreateQuizResponse> => {
+): Promise<{ quizId: number }> => {
   try {
     const session = await auth.api.getSession({
       headers: await headers(),
     });
 
-    if (!session?.user) {
-      throw new QuizActionError("No active session found", 401, "createQuiz");
+    if (!session) {
+      throw new QuizActionError(
+        "UNAUTHORIZED",
+        "No active session found",
+        "createQuiz"
+      );
     }
 
     if (!userId || userId !== session.user.id) {
       throw new QuizActionError(
+        "UNAUTHORIZED",
         "User ID mismatch or missing",
-        401,
         "createQuiz"
       );
     }
@@ -49,7 +54,11 @@ export const createQuiz = async (
         });
 
       if (!createdQuiz) {
-        throw new QuizActionError("Failed to create quiz", 500, "createQuiz");
+        throw new QuizActionError(
+          "DATABASE_ERROR",
+          "Failed to create quiz",
+          "createQuiz"
+        );
       }
 
       // Create questions
@@ -62,11 +71,11 @@ export const createQuiz = async (
         }))
       );
 
-      const userStreakResult = await updateUserStreak(parseInt(userId));
-      if (userStreakResult.error) {
+      const { error } = await tryCatch(updateUserStreak(parseInt(userId)));
+      if (error) {
         throw new QuizActionError(
-          userStreakResult.error,
-          userStreakResult.statusCode || 500,
+          "DATABASE_ERROR",
+          error.message,
           "createQuiz"
         );
       }
@@ -83,17 +92,14 @@ export const createQuiz = async (
     };
   } catch (error) {
     console.error("Error in createQuiz:", error);
-
     if (error instanceof QuizActionError) {
-      return {
-        error: error.message,
-        statusCode: error.statusCode,
-      };
+      throw error;
     }
 
-    return {
-      error: "Failed to create quiz. Please try again later.",
-      statusCode: 500,
-    };
+    throw new QuizActionError(
+      "DATABASE_ERROR",
+      "Failed to create quiz. Please try again later.",
+      "createQuiz"
+    );
   }
 };

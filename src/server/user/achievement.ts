@@ -2,13 +2,14 @@
 
 import db from "@/database/db";
 import { quizAttempts, userAchievements } from "@/database/schema";
+import { UserActionError } from "@/lib/error";
+import { UpdatedAchievement } from "@/lib/types";
 import { XP_CONFIG } from "@/lib/xp-utils";
 import { eq } from "drizzle-orm";
-import { UpdateAchievementsResponse, UserActionError } from "./types";
 
 export async function checkAndUpdateAchievements(
   userId: number
-): Promise<UpdateAchievementsResponse> {
+): Promise<UpdatedAchievement> {
   try {
     const userStats = await db.query.quizAttempts.findMany({
       where: eq(quizAttempts.userId, userId),
@@ -80,28 +81,23 @@ export async function checkAndUpdateAchievements(
       }
     }
 
-    return {
-      success: true,
-      updatedAchievements: updatedAchievements.map((achievement) => ({
-        id: achievement.achievementId,
-        progress: achievement.progress,
-        isCompleted: achievement.isCompleted,
-        completedAt: achievement.completedAt,
-      })),
-    };
+    return updatedAchievements.map((achievement) => ({
+      id: achievement.achievementId,
+      progress: achievement.progress,
+      isCompleted: achievement.isCompleted,
+      completedAt: achievement.completedAt,
+    }));
   } catch (error) {
     console.error("Error in checkAndUpdateAchievements:", error);
 
     if (error instanceof UserActionError) {
-      return {
-        error: error.message,
-        statusCode: error.statusCode,
-      };
+      throw error;
     }
 
-    return {
-      error: "Failed to update user achievements. Please try again later.",
-      statusCode: 500,
-    };
+    throw new UserActionError(
+      "DATABASE_ERROR",
+      "Failed to update user achievements. Please try again later.",
+      "checkAndUpdateAchievements"
+    );
   }
 }
