@@ -3,6 +3,7 @@ import QuizzesContent from "./components/quizzes-content";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { getPublicQuizzes } from "@/server/quiz/get";
+import { tryCatch } from "@/lib/try-catch";
 
 export default async function QuizzesPage() {
   const session = await auth.api.getSession({
@@ -13,12 +14,12 @@ export default async function QuizzesPage() {
     redirect("/sign-in");
   }
 
-  const result = await getPublicQuizzes(session.user.id);
-  if (result.error) {
-    throw new Error(result.error);
+  const { data: quizzes, error: quizzesError } = await tryCatch(
+    getPublicQuizzes(session.user.id)
+  );
+  if (quizzesError) {
+    throw new Error(quizzesError.message);
   }
 
-  const quizzes = result.quizzes ?? [];
-
-  return <QuizzesContent quizzes={quizzes} />;
+  return <QuizzesContent quizzes={quizzes ?? []} />;
 }
