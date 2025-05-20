@@ -1,27 +1,9 @@
 "use client";
 
 import { useMemo, useState, useCallback, useEffect } from "react";
-import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import {
-  Search,
-  Clock,
-  ArrowRight,
-  ArrowUpDown,
-  Users,
-  BookOpen,
-  Trophy,
-  Filter,
-  Sparkles,
-} from "lucide-react";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
+import { Search, ArrowUpDown, Filter, BookOpen } from "lucide-react";
+import { Card } from "@/components/ui/card";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -31,11 +13,10 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 import type { PublicQuiz, QuizDifficulty } from "@/database/schema";
 import { motion } from "motion/react";
-import { formatSecondsToMinutes } from "@/lib/format-time";
+import QuizCard from "./quiz-card";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const difficultyIcons = {
   BEGINNER: "🌱",
@@ -81,7 +62,7 @@ export default function QuizzesContent({ quizzes }: { quizzes: PublicQuiz[] }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [difficultyFilter, setDifficultyFilter] = useState("all");
   const [sortBy, setSortBy] = useState("date_desc");
-  const [hoveredCard, setHoveredCard] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState("all");
 
   // Initialize state from URL params when component mounts
   useEffect(() => {
@@ -142,6 +123,10 @@ export default function QuizzesContent({ quizzes }: { quizzes: PublicQuiz[] }) {
     [setSortBy, updateUrlParams, searchTerm, difficultyFilter]
   );
 
+  const handleTabChange = useCallback((value: string) => {
+    setActiveTab(value);
+  }, []);
+
   const filteredAndSortedQuizzes = useMemo(() => {
     return quizzes
       .filter((quiz) => {
@@ -174,40 +159,43 @@ export default function QuizzesContent({ quizzes }: { quizzes: PublicQuiz[] }) {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-background/90 py-4">
-      <div className="container mx-auto px-4 py-6">
-        <div className="flex flex-col space-y-6">
-          <div className="flex flex-col space-y-4">
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4 }}
-              className="flex flex-col items-center text-center gap-2">
-              <div className="flex flex-col items-center">
-                <h1 className="text-xl sm:text-2xl font-bold text-foreground flex items-center gap-2">
-                  <Sparkles className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
-                  Challenge Yourself
+      <div className="container mx-auto px-4 py-4">
+        <div className="flex flex-col space-y-4">
+          <div className="flex flex-col space-y-3">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+              <div className="flex items-center gap-3">
+                <h1 className="text-xl font-bold tracking-tight">
+                  Explore Quizzes
                 </h1>
-                <p className="text-xs sm:text-sm text-muted-foreground mt-1 max-w-2xl px-2">
-                  Discover and master new topics through our curated collection
-                  of quizzes
-                </p>
+                <div className="flex items-center gap-1.5 px-2 py-1 bg-muted/40 rounded-md text-xs">
+                  <BookOpen className="h-3.5 w-3.5 text-primary/70" />
+                  <span>{filteredAndSortedQuizzes.length}</span>
+                </div>
               </div>
-              <Badge variant="outline" className="px-2 py-0 h-6 text-xs">
-                {quizzes.length} quizzes available
-              </Badge>
-            </motion.div>
+
+              <Tabs
+                value={activeTab}
+                onValueChange={handleTabChange}
+                className="w-full sm:w-auto">
+                <TabsList className="grid grid-cols-3 w-full sm:w-auto">
+                  <TabsTrigger value="all">All</TabsTrigger>
+                  <TabsTrigger value="new">Bookmarks</TabsTrigger>
+                  <TabsTrigger value="popular">Popular</TabsTrigger>
+                </TabsList>
+              </Tabs>
+            </div>
 
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, delay: 0.1 }}
-              className="bg-background/80 shadow-sm border rounded-lg p-2 sm:p-3">
-              <div className="flex flex-col sm:flex-row gap-2">
-                <div className="relative flex-1">
+              className="bg-background/80 shadow-sm border rounded-lg p-3">
+              <div className="flex flex-col sm:flex-row gap-2 items-start sm:items-center">
+                <div className="relative flex-1 w-full">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground h-4 w-4" />
                   <Input
                     type="text"
-                    placeholder="Search by title or topic..."
+                    placeholder="Search your quizzes..."
                     className="pl-9 h-9 text-sm w-full"
                     value={searchTerm}
                     onChange={(e) => {
@@ -223,11 +211,9 @@ export default function QuizzesContent({ quizzes }: { quizzes: PublicQuiz[] }) {
                       <Button
                         variant="outline"
                         size="sm"
-                        className="h-9 px-2 sm:px-3 text-xs sm:text-sm flex-1 sm:flex-initial">
-                        <Filter className="mr-1 sm:mr-1.5 h-3 w-3 sm:h-3.5 sm:w-3.5" />
-                        {difficultyFilter === "all"
-                          ? "All Levels"
-                          : difficultyFilter}
+                        className="h-9 px-3 text-sm flex-1 sm:flex-none">
+                        <Filter className="mr-1.5 h-3.5 w-3.5" />
+                        {difficultyFilter === "all" ? "All" : difficultyFilter}
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="w-40">
@@ -256,9 +242,12 @@ export default function QuizzesContent({ quizzes }: { quizzes: PublicQuiz[] }) {
                       <Button
                         variant="outline"
                         size="sm"
-                        className="h-9 px-2 sm:px-3 text-xs sm:text-sm flex-1 sm:flex-initial">
-                        <ArrowUpDown className="mr-1 sm:mr-1.5 h-3 w-3 sm:h-3.5 sm:w-3.5" />
-                        Sort
+                        className="h-9 px-3 text-sm flex-1 sm:flex-none">
+                        <ArrowUpDown className="mr-1.5 h-3.5 w-3.5" />
+                        <span className="hidden sm:inline">Sort: </span>
+                        {sortBy
+                          .replace("_", " ")
+                          .replace(/\b\w/g, (c) => c.toUpperCase())}
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="w-40">
@@ -299,93 +288,7 @@ export default function QuizzesContent({ quizzes }: { quizzes: PublicQuiz[] }) {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.4, delay: 0.1 + index * 0.05 }}
                   key={quiz.id}>
-                  <Card
-                    className="group h-full flex flex-col transition-all duration-300 hover:shadow-md hover:border-primary/20 overflow-hidden"
-                    onMouseEnter={() => setHoveredCard(quiz.id.toString())}
-                    onMouseLeave={() => setHoveredCard(null)}>
-                    <CardHeader className="pb-3 space-y-2">
-                      <div className="flex justify-between items-start">
-                        <Badge
-                          variant="secondary"
-                          className={`${diffConfig.color} ${diffConfig.bgColor} px-2 py-0.5 text-xs font-medium`}>
-                          {diffConfig.icon} {quiz.difficulty}
-                        </Badge>
-                        {/* <div className="flex items-center gap-1 text-muted-foreground">
-                          <Trophy className="h-3.5 w-3.5" />
-                          <span className="text-xs">Top 10%</span>
-                        </div> */}
-                        <Badge variant="secondary">{quiz.category}</Badge>
-                      </div>
-                      <CardTitle className="text-xl leading-tight line-clamp-2 font-bold">
-                        {quiz.title}
-                      </CardTitle>
-                      <CardDescription className="line-clamp-2 text-sm">
-                        {quiz.description}
-                      </CardDescription>
-                    </CardHeader>
-
-                    <CardContent className="pb-3 pt-0 space-y-4 flex-grow">
-                      <Separator className="opacity-50" />
-                      <div className="grid grid-cols-2 gap-2">
-                        <div className="flex items-center gap-2.5 p-2 rounded-lg bg-muted/40 hover:bg-muted/60 transition-colors">
-                          <Clock className="h-4 w-4 text-primary/70" />
-                          <div>
-                            <p className="text-sm font-medium">
-                              {formatSecondsToMinutes(quiz.timeLimit ?? 0)}
-                            </p>
-                            <p className="text-xs text-muted-foreground">
-                              Time limit
-                            </p>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2.5 p-2 rounded-lg bg-muted/40 hover:bg-muted/60 transition-colors">
-                          <BookOpen className="h-4 w-4 text-primary/70" />
-                          <div>
-                            <p className="text-sm font-medium">
-                              {quiz.questions.length}
-                            </p>
-                            <p className="text-xs text-muted-foreground">
-                              Questions
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="flex justify-between items-center text-xs text-muted-foreground pt-1">
-                        <div className="flex items-center gap-1">
-                          <Users className="h-3.5 w-3.5" />
-                          <span>150 attempts</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Trophy className="h-3.5 w-3.5" />
-                          <span>85% avg. score</span>
-                        </div>
-                      </div>
-                    </CardContent>
-
-                    <CardFooter className="pt-0">
-                      <Button
-                        className="w-full h-9 text-sm group-hover:bg-primary group-hover:text-primary-foreground transition-colors"
-                        variant={
-                          hoveredCard === quiz.id.toString()
-                            ? "default"
-                            : "secondary"
-                        }
-                        asChild>
-                        <Link
-                          href={`/quizzes/${quiz.id}`}
-                          className="flex items-center justify-center">
-                          Start Quiz
-                          <ArrowRight
-                            className={`ml-1.5 h-3.5 w-3.5 transition-all duration-300 ${
-                              hoveredCard === quiz.id.toString()
-                                ? "translate-x-1"
-                                : ""
-                            }`}
-                          />
-                        </Link>
-                      </Button>
-                    </CardFooter>
-                  </Card>
+                  <QuizCard quiz={quiz} diffConfig={diffConfig} />
                 </motion.div>
               );
             })}

@@ -1,0 +1,151 @@
+"use client";
+
+import { useState } from "react";
+import Link from "next/link";
+import {
+  Clock,
+  ArrowRight,
+  Users,
+  Settings,
+  MoreVertical,
+  BookOpen,
+  Trophy,
+} from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { formatSecondsToMinutes } from "@/lib/format-time";
+import { AdminQuiz } from "@/database/schema";
+
+type QuizCardProps = {
+  quiz: AdminQuiz;
+  diffConfig: {
+    color: string;
+    icon: string;
+    bgColor: string;
+  };
+};
+
+export default function QuizCard({ quiz, diffConfig }: QuizCardProps) {
+  const [hoveredCard, setHoveredCard] = useState<string | null>(null);
+
+  return (
+    <Card
+      className="group h-full flex flex-col transition-all duration-300 hover:shadow-md hover:border-primary/20 overflow-hidden"
+      onMouseEnter={() => setHoveredCard(quiz.id.toString())}
+      onMouseLeave={() => setHoveredCard(null)}>
+      <CardHeader className="pb-3 space-y-2">
+        <div className="flex justify-between items-start">
+          <Badge
+            variant="secondary"
+            className={`${diffConfig.color} ${diffConfig.bgColor} px-2 py-0.5 text-xs font-medium`}>
+            {diffConfig.icon} {quiz.difficulty}
+          </Badge>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-7 w-7 p-0 rounded-full">
+                <MoreVertical className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-40">
+              <DropdownMenuItem>
+                <span className="text-sm">Duplicate</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+                <span className="text-sm">Archive</span>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem className="text-red-600">
+                <span className="text-sm">Delete</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+        <CardTitle className="text-xl leading-tight line-clamp-2 font-bold">
+          {quiz.title}
+        </CardTitle>
+        <CardDescription className="line-clamp-2 text-sm">
+          {quiz.description}
+        </CardDescription>
+      </CardHeader>
+
+      <CardContent className="pb-3 pt-0 space-y-4 flex-grow">
+        <Separator className="opacity-50" />
+        <div className="grid grid-cols-2 gap-2">
+          <div className="flex items-center gap-2.5 p-2 rounded-lg bg-muted/40 hover:bg-muted/60 transition-colors">
+            <Clock className="h-4 w-4 text-primary/70" />
+            <div>
+              <p className="text-sm font-medium">
+                {formatSecondsToMinutes(quiz.timeLimit ?? 0)}
+              </p>
+              <p className="text-xs text-muted-foreground">Time limit</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2.5 p-2 rounded-lg bg-muted/40 hover:bg-muted/60 transition-colors">
+            <BookOpen className="h-4 w-4 text-primary/70" />
+            <div>
+              <p className="text-sm font-medium">{quiz.questions.length}</p>
+              <p className="text-xs text-muted-foreground">Questions</p>
+            </div>
+          </div>
+        </div>
+        <div className="flex justify-between items-center text-xs text-muted-foreground pt-1">
+          <div className="flex items-center gap-1">
+            <Users className="h-3.5 w-3.5" />
+            <span>150 attempts</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <Trophy className="h-3.5 w-3.5" />
+            <span>85% avg. score</span>
+          </div>
+        </div>
+      </CardContent>
+
+      <CardFooter className="pt-0 gap-2 grid grid-cols-2">
+        <Button
+          variant="outline"
+          size="sm"
+          className="w-full h-9 text-sm"
+          asChild>
+          <Link href={`/my-quizzes/${quiz.id}/edit`}>
+            <Settings className="mr-1.5 h-3.5 w-3.5" />
+            Edit
+          </Link>
+        </Button>
+        <Button
+          className="w-full h-9 text-sm group-hover:bg-primary group-hover:text-primary-foreground transition-colors"
+          variant={hoveredCard === quiz.id.toString() ? "default" : "secondary"}
+          asChild>
+          <Link
+            href={`/my-quizzes/${quiz.id}`}
+            className="flex items-center justify-center">
+            Preview
+            <ArrowRight
+              className={`ml-1.5 h-3.5 w-3.5 transition-all duration-300 ${
+                hoveredCard === quiz.id.toString() ? "translate-x-1" : ""
+              }`}
+            />
+          </Link>
+        </Button>
+      </CardFooter>
+    </Card>
+  );
+}

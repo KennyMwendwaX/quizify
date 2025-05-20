@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import ThemeLogo from "../theme-logo";
 import ThemeToggle from "../theme-toggle";
-import { BookOpen, Menu } from "lucide-react";
+import { Menu } from "lucide-react";
 import { PersonIcon } from "@radix-ui/react-icons";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
@@ -28,7 +28,6 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { signOut } from "@/lib/auth-client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { IoSettingsOutline } from "react-icons/io5";
 import { MdLogout } from "react-icons/md";
 
 type Props = {
@@ -124,24 +123,6 @@ export default function Navbar({ session }: Props) {
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="justify-start text-base"
-                      onClick={() => router.push("/dashboard")}>
-                      <BookOpen className="mr-2 h-4 w-4" /> Dashboard
-                    </Button>
-                  </SheetClose>
-                  <SheetClose asChild>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="justify-start text-base"
-                      onClick={() => router.push("/settings")}>
-                      <IoSettingsOutline className="mr-2 h-4 w-4" /> Settings
-                    </Button>
-                  </SheetClose>
-                  <SheetClose asChild>
-                    <Button
-                      variant="ghost"
-                      size="sm"
                       className="justify-start text-base text-red-500"
                       onClick={() => {
                         signOut({
@@ -200,17 +181,6 @@ export default function Navbar({ session }: Props) {
                   </p>
                 </div>
               </DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                onClick={() => router.push("/dashboard")}
-                className="flex items-center">
-                <BookOpen className="mr-2 w-4 h-4" /> Dashboard
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => router.push("/settings")}
-                className="flex items-center">
-                <IoSettingsOutline className="mr-2 w-4 h-4" /> Settings
-              </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 onClick={() => {
