@@ -21,6 +21,27 @@ export type RecentQuiz = {
   difficulty: QuizDifficulty;
 };
 
+export type QuizBookmark = {
+  id: number;
+  quizId: number;
+  userId: number;
+  createdAt: Date;
+  updatedAt: Date;
+  quiz: {
+    id: number;
+    title: string;
+    description: string;
+    category: string;
+    difficulty: "BEGINNER" | "INTERMEDIATE" | "ADVANCED";
+    rating: number;
+    createdAt: Date;
+    user: {
+      name: string;
+      image: string | null;
+    };
+  };
+};
+
 export type CategoryPerformance = {
   name: string;
   score: number;
