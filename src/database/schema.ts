@@ -270,6 +270,7 @@ export type PublicQuiz = Quiz & {
     name: string;
     image: string | null;
   };
+  isBookmarked: boolean;
 };
 export type AdminQuiz = Quiz & { questions: AdminQuestion[] };
 export type QuizAttempt = typeof quizAttempts.$inferSelect;

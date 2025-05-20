@@ -1,7 +1,12 @@
 "use server";
 
 import db from "@/database/db";
-import { AdminQuiz, PublicQuiz, quizzes } from "@/database/schema";
+import {
+  AdminQuiz,
+  PublicQuiz,
+  quizBookmarks,
+  quizzes,
+} from "@/database/schema";
 import { and, desc, eq } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
@@ -85,6 +90,8 @@ export const getPublicQuizzes = async (
       );
     }
 
+    const userIdNum = parseInt(userId, 10);
+
     const quizResults = await db.query.quizzes.findMany({
       with: {
         questions: {
@@ -104,7 +111,21 @@ export const getPublicQuizzes = async (
       orderBy: [desc(quizzes.createdAt)],
     });
 
-    return quizResults;
+    const userBookmarks = await db.query.quizBookmarks.findMany({
+      where: eq(quizBookmarks.userId, userIdNum),
+    });
+
+    // Create a Set of bookmarked quiz IDs for efficient lookup
+    const bookmarkedQuizIds = new Set(
+      userBookmarks.map((bookmark) => bookmark.quizId)
+    );
+
+    const quizzesWithBookmarkStatus = quizResults.map((quiz) => ({
+      ...quiz,
+      isBookmarked: bookmarkedQuizIds.has(quiz.id),
+    }));
+
+    return quizzesWithBookmarkStatus;
   } catch (error) {
     console.error("Error in getPublicQuizzes:", error);
     if (error instanceof QuizActionError) {
@@ -117,7 +138,6 @@ export const getPublicQuizzes = async (
     );
   }
 };
-
 export const getAdminQuiz = async (
   quizId: number,
   userId?: string
@@ -188,7 +208,7 @@ export const getAdminQuiz = async (
 export async function getPublicQuiz(
   quizId: number,
   userId?: string
-): Promise<PublicQuiz> {
+): Promise<PublicQuiz & { isBookmarked: boolean }> {
   try {
     const session = await auth.api.getSession({
       headers: await headers(),
@@ -241,7 +261,18 @@ export async function getPublicQuiz(
       throw new QuizActionError("NOT_FOUND", "Quiz not found", "getPublicQuiz");
     }
 
-    return quiz;
+    // Check if the quiz is bookmarked by the user
+    const bookmark = await db.query.quizBookmarks.findFirst({
+      where: and(
+        eq(quizBookmarks.quizId, quizId),
+        eq(quizBookmarks.userId, parseInt(userId))
+      ),
+    });
+
+    return {
+      ...quiz,
+      isBookmarked: !!bookmark,
+    };
   } catch (error) {
     console.error("Error in getPublicQuiz:", error);
 
