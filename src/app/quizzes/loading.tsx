@@ -1,5 +1,11 @@
 import { Skeleton } from "@/components/ui/skeleton";
-import { Card } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+} from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 
 export default function QuizzesLoading() {
   return (
@@ -36,38 +42,71 @@ export default function QuizzesLoading() {
             {[1, 2, 3, 4, 5, 6].map((item) => (
               <Card
                 key={item}
-                className="h-full flex flex-col transition-all duration-300 overflow-hidden">
-                <div className="p-4 space-y-3">
-                  {/* Card Header */}
-                  <div className="flex justify-between items-start pb-1">
-                    <Skeleton className="h-5 w-24 rounded-full" />
-                    <div className="flex items-center gap-2">
-                      <Skeleton className="h-5 w-20 rounded-full" />
-                      <Skeleton className="h-7 w-7 rounded-full" />
+                className="h-full flex flex-col transition-all duration-300 overflow-hidden bg-gradient-to-br from-card to-card/80">
+                <CardHeader className="pb-4 space-y-3">
+                  {/* Top row with difficulty, category, and bookmark */}
+                  <div className="flex justify-between items-start gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <Skeleton className="h-6 w-20 rounded-full" />
+                      <Skeleton className="h-6 w-16 rounded-full" />
+                    </div>
+                    <Skeleton className="h-8 w-8 rounded-full" />
+                  </div>
+
+                  {/* Title and description */}
+                  <div className="space-y-2">
+                    <Skeleton className="h-5 w-full" />
+                    <Skeleton className="h-5 w-4/5" />
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-4 w-3/4" />
+                  </div>
+
+                  {/* Rating display */}
+                  <div className="flex items-center gap-2 pt-1">
+                    <div className="flex items-center gap-1">
+                      {Array.from({ length: 5 }, (_, i) => (
+                        <Skeleton key={i} className="h-3.5 w-3.5 rounded-sm" />
+                      ))}
+                    </div>
+                    <Skeleton className="h-4 w-8" />
+                    <Skeleton className="h-3 w-16" />
+                  </div>
+                </CardHeader>
+
+                <CardContent className="pb-4 pt-0 space-y-4 flex-grow">
+                  <Separator className="opacity-30" />
+
+                  {/* Quiz stats grid */}
+                  <div className="grid grid-cols-3 gap-3">
+                    <div className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-gradient-to-br from-muted/30 to-muted/50 border border-border/50">
+                      <Skeleton className="h-4 w-4" />
+                      <div className="text-center space-y-1">
+                        <Skeleton className="h-4 w-8" />
+                        <Skeleton className="h-3 w-10" />
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-gradient-to-br from-muted/30 to-muted/50 border border-border/50">
+                      <Skeleton className="h-4 w-4" />
+                      <div className="text-center space-y-1">
+                        <Skeleton className="h-4 w-6" />
+                        <Skeleton className="h-3 w-12" />
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-gradient-to-br from-muted/30 to-muted/50 border border-border/50">
+                      <Skeleton className="h-4 w-4" />
+                      <div className="text-center space-y-1">
+                        <Skeleton className="h-4 w-8" />
+                        <Skeleton className="h-3 w-14" />
+                      </div>
                     </div>
                   </div>
+                </CardContent>
 
-                  <Skeleton className="h-6 w-full" />
-                  <Skeleton className="h-4 w-5/6" />
-
-                  {/* Card Content */}
-                  <Skeleton className="h-px w-full my-3" />
-
-                  <div className="grid grid-cols-2 gap-2">
-                    <Skeleton className="h-16 rounded-lg" />
-                    <Skeleton className="h-16 rounded-lg" />
-                  </div>
-
-                  <div className="flex justify-between pt-1">
-                    <Skeleton className="h-4 w-24" />
-                    <Skeleton className="h-4 w-24" />
-                  </div>
-
-                  {/* Card Footer */}
-                  <div className="pt-2">
-                    <Skeleton className="h-9 w-full" />
-                  </div>
-                </div>
+                <CardFooter className="pt-0 pb-4">
+                  <Skeleton className="w-full h-10 rounded-md" />
+                </CardFooter>
               </Card>
             ))}
           </div>

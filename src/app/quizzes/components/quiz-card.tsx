@@ -7,8 +7,9 @@ import {
   ArrowRight,
   Users,
   BookOpen,
-  Trophy,
+  Star,
   Bookmark,
+  Play,
 } from "lucide-react";
 import {
   Card,
@@ -65,92 +66,159 @@ export default function QuizCard({ quiz, diffConfig }: QuizCardProps) {
     });
   };
 
+  const renderStars = (rating: number) => {
+    return Array.from({ length: 5 }, (_, i) => (
+      <Star
+        key={i}
+        className={`h-3.5 w-3.5 ${
+          i < Math.floor(rating)
+            ? "fill-yellow-400 text-yellow-400"
+            : i < rating
+            ? "fill-yellow-400/50 text-yellow-400"
+            : "text-gray-300"
+        }`}
+      />
+    ));
+  };
+
+  const isHovered = hoveredCard === quiz.id.toString();
+
   return (
     <Card
-      className="group h-full flex flex-col transition-all duration-300 hover:shadow-md hover:border-primary/20 overflow-hidden"
+      className="group h-full flex flex-col transition-all duration-300 hover:shadow-lg hover:shadow-primary/5 hover:border-primary/30 overflow-hidden bg-gradient-to-br from-card to-card/80"
       onMouseEnter={() => setHoveredCard(quiz.id.toString())}
       onMouseLeave={() => setHoveredCard(null)}>
-      <CardHeader className="pb-3 space-y-2">
-        <div className="flex justify-between items-start">
-          <Badge
-            variant="secondary"
-            className={`${diffConfig.color} ${diffConfig.bgColor} px-2 py-0.5 text-xs font-medium`}>
-            {diffConfig.icon} {quiz.difficulty}
-          </Badge>
-          <div className="flex items-center gap-2">
-            <Badge variant="secondary">{quiz.category}</Badge>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-7 w-7 p-0 hover:bg-muted rounded-full"
-              onClick={toggleBookmark}
-              title={isBookmarked ? "Remove bookmark" : "Add bookmark"}
-              disabled={isPending}>
-              <Bookmark
-                className={`h-4 w-4 ${
-                  isBookmarked
-                    ? "fill-primary text-primary"
-                    : "text-muted-foreground"
-                }`}
-              />
-              <span className="sr-only">
-                {isBookmarked ? "Remove bookmark" : "Add bookmark"}
-              </span>
-            </Button>
+      <CardHeader className="pb-4 space-y-3">
+        {/* Top row with difficulty, category, and bookmark */}
+        <div className="flex justify-between items-start gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
+            <Badge
+              variant="secondary"
+              className={`${diffConfig.color} ${diffConfig.bgColor} px-2.5 py-1 text-xs font-semibold border-0 shadow-sm`}>
+              {diffConfig.icon} {quiz.difficulty}
+            </Badge>
+            <Badge
+              variant="outline"
+              className="text-xs font-medium bg-background/50 backdrop-blur-sm">
+              {quiz.category}
+            </Badge>
           </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            className={`h-8 w-8 p-0 rounded-full transition-all duration-200 ${
+              isBookmarked
+                ? "bg-primary/10 hover:bg-primary/20"
+                : "hover:bg-muted"
+            } ${isPending ? "opacity-50 cursor-not-allowed" : ""}`}
+            onClick={toggleBookmark}
+            title={isBookmarked ? "Remove bookmark" : "Add bookmark"}
+            disabled={isPending}>
+            <Bookmark
+              className={`h-4 w-4 transition-all duration-200 ${
+                isBookmarked
+                  ? "fill-primary text-primary scale-110"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            />
+            <span className="sr-only">
+              {isBookmarked ? "Remove bookmark" : "Add bookmark"}
+            </span>
+          </Button>
         </div>
-        <CardTitle className="text-xl leading-tight line-clamp-2 font-bold">
-          {quiz.title}
-        </CardTitle>
-        <CardDescription className="line-clamp-2 text-sm">
-          {quiz.description}
-        </CardDescription>
+
+        {/* Title and description */}
+        <div className="space-y-2">
+          <CardTitle className="text-lg leading-tight line-clamp-2 font-bold text-foreground group-hover:text-primary transition-colors">
+            {quiz.title}
+          </CardTitle>
+          <CardDescription className="line-clamp-2 text-sm text-muted-foreground leading-relaxed">
+            {quiz.description}
+          </CardDescription>
+        </div>
+
+        {/* Rating display */}
+        <div className="flex items-center gap-2 pt-1">
+          <div className="flex items-center gap-1">
+            {renderStars(quiz.rating)}
+          </div>
+          <span className="text-sm font-medium text-foreground">
+            {quiz.rating.toFixed(1)}
+          </span>
+          <span className="text-xs text-muted-foreground">
+            ({Math.floor(Math.random() * 500 + 50)} reviews)
+          </span>
+        </div>
       </CardHeader>
 
-      <CardContent className="pb-3 pt-0 space-y-4 flex-grow">
-        <Separator className="opacity-50" />
-        <div className="grid grid-cols-2 gap-2">
-          <div className="flex items-center gap-2.5 p-2 rounded-lg bg-muted/40 hover:bg-muted/60 transition-colors">
-            <Clock className="h-4 w-4 text-primary/70" />
-            <div>
-              <p className="text-sm font-medium">
-                {formatSecondsToMinutes(quiz.timeLimit ?? 0)}
+      <CardContent className="pb-4 pt-0 space-y-4 flex-grow">
+        <Separator className="opacity-30" />
+
+        {/* Quiz stats grid */}
+        <div className="grid grid-cols-3 gap-3">
+          <div className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-gradient-to-br from-muted/30 to-muted/50 border border-border/50 hover:from-muted/40 hover:to-muted/60 transition-all duration-200">
+            <Clock className="h-4 w-4 text-primary" />
+            <div className="text-center">
+              <p className="text-sm font-semibold text-foreground">
+                {quiz.timeLimit ? formatSecondsToMinutes(quiz.timeLimit) : "∞"}
               </p>
-              <p className="text-xs text-muted-foreground">Time limit</p>
+              <p className="text-xs text-muted-foreground">Time</p>
             </div>
           </div>
-          <div className="flex items-center gap-2.5 p-2 rounded-lg bg-muted/40 hover:bg-muted/60 transition-colors">
-            <BookOpen className="h-4 w-4 text-primary/70" />
-            <div>
-              <p className="text-sm font-medium">{quiz.questions.length}</p>
+
+          <div className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-gradient-to-br from-muted/30 to-muted/50 border border-border/50 hover:from-muted/40 hover:to-muted/60 transition-all duration-200">
+            <BookOpen className="h-4 w-4 text-primary" />
+            <div className="text-center">
+              <p className="text-sm font-semibold text-foreground">
+                {quiz.questions.length}
+              </p>
               <p className="text-xs text-muted-foreground">Questions</p>
             </div>
           </div>
-        </div>
-        <div className="flex justify-between items-center text-xs text-muted-foreground pt-1">
-          <div className="flex items-center gap-1">
-            <Users className="h-3.5 w-3.5" />
-            <span>150 attempts</span>
+
+          <div className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-gradient-to-br from-muted/30 to-muted/50 border border-border/50 hover:from-muted/40 hover:to-muted/60 transition-all duration-200">
+            <Users className="h-4 w-4 text-primary" />
+            <div className="text-center">
+              <p className="text-sm font-semibold text-foreground">
+                {Math.floor(Math.random() * 300 + 50)}
+              </p>
+              <p className="text-xs text-muted-foreground">Attempts</p>
+            </div>
           </div>
-          <div className="flex items-center gap-1">
-            <Trophy className="h-3.5 w-3.5" />
-            <span>85% avg. score</span>
-          </div>
         </div>
+
+        {/* Creator info */}
+        {/* <div className="flex items-center gap-2 pt-2">
+          <div className="h-6 w-6 rounded-full bg-gradient-to-br from-primary/20 to-primary/30 flex items-center justify-center">
+            <span className="text-xs font-semibold text-primary">
+              {quiz.user?.name?.charAt(0)?.toUpperCase() || "U"}
+            </span>
+          </div>
+          <span className="text-xs text-muted-foreground">
+            by{" "}
+            <span className="font-medium text-foreground">
+              {quiz.user?.name || "Anonymous"}
+            </span>
+          </span>
+        </div> */}
       </CardContent>
 
-      <CardFooter className="pt-0">
+      <CardFooter className="pt-0 pb-4">
         <Button
-          className="w-full h-9 text-sm group-hover:bg-primary group-hover:text-primary-foreground transition-colors"
-          variant={hoveredCard === quiz.id.toString() ? "default" : "secondary"}
+          className={`w-full h-10 text-sm font-semibold transition-all duration-300 shadow-sm ${
+            isHovered
+              ? "bg-primary text-primary-foreground shadow-md shadow-primary/20 scale-[1.02]"
+              : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
+          }`}
           asChild>
           <Link
             href={`/quizzes/${quiz.id}`}
-            className="flex items-center justify-center">
+            className="flex items-center justify-center gap-2">
+            <Play className="h-4 w-4" />
             Start Quiz
             <ArrowRight
-              className={`ml-1.5 h-3.5 w-3.5 transition-all duration-300 ${
-                hoveredCard === quiz.id.toString() ? "translate-x-1" : ""
+              className={`h-4 w-4 transition-all duration-300 ${
+                isHovered ? "translate-x-1" : ""
               }`}
             />
           </Link>
