@@ -71,6 +71,72 @@ export async function getUserQuizBookmarks(
   }
 }
 
+export async function toggleQuizBookmark(
+  quizId: number
+): Promise<{ isBookmarked: boolean }> {
+  try {
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    if (!session) {
+      throw new UserActionError(
+        "UNAUTHORIZED",
+        "No active session found",
+        "toggleQuizBookmark"
+      );
+    }
+
+    const userId = session.user.id;
+    const userIdNum = parseInt(userId, 10);
+
+    // Check if bookmark already exists
+    const existingBookmark = await db.query.quizBookmarks.findFirst({
+      where: and(
+        eq(quizBookmarks.quizId, quizId),
+        eq(quizBookmarks.userId, userIdNum)
+      ),
+    });
+
+    // If bookmark exists, remove it
+    if (existingBookmark) {
+      await db
+        .delete(quizBookmarks)
+        .where(
+          and(
+            eq(quizBookmarks.quizId, quizId),
+            eq(quizBookmarks.userId, userIdNum)
+          )
+        );
+
+      return {
+        isBookmarked: false,
+      };
+    }
+
+    // If bookmark doesn't exist, create it
+    await db.insert(quizBookmarks).values({
+      quizId: quizId,
+      userId: userIdNum,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+
+    return {
+      isBookmarked: true,
+    };
+  } catch (error) {
+    if (error instanceof UserActionError) {
+      throw error;
+    }
+    throw new UserActionError(
+      "DATABASE_ERROR",
+      "Failed to toggle quiz bookmark",
+      "toggleQuizBookmark"
+    );
+  }
+}
+
 export async function addQuizBookmark(quizId: string) {
   try {
     const session = await auth.api.getSession({

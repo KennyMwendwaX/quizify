@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import Link from "next/link";
 import {
   Clock,
@@ -23,6 +23,9 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import type { PublicQuiz } from "@/database/schema";
 import { formatSecondsToMinutes } from "@/lib/format-time";
+import { toast } from "sonner";
+import { tryCatch } from "@/lib/try-catch";
+import { toggleQuizBookmark } from "@/server/user/quiz-bookmarks";
 
 type QuizCardProps = {
   quiz: PublicQuiz;
@@ -35,12 +38,31 @@ type QuizCardProps = {
 
 export default function QuizCard({ quiz, diffConfig }: QuizCardProps) {
   const [hoveredCard, setHoveredCard] = useState<string | null>(null);
-  const [isBookmarked, setIsBookmarked] = useState(false);
+  const [isBookmarked, setIsBookmarked] = useState(quiz.isBookmarked);
+  const [isPending, startTransition] = useTransition();
 
-  const toggleBookmark = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
+  const toggleBookmark = () => {
+    // Optimistic update
     setIsBookmarked(!isBookmarked);
+
+    startTransition(async () => {
+      const { data: result, error } = await tryCatch(
+        toggleQuizBookmark(quiz.id)
+      );
+
+      if (error) {
+        // Revert optimistic update
+        setIsBookmarked(isBookmarked);
+        toast.error("Failed to toggle bookmark");
+        return;
+      }
+
+      // Sync with server state (in case of conflicts)
+      setIsBookmarked(result.isBookmarked);
+      toast.success(
+        result.isBookmarked ? "Quiz bookmarked" : "Bookmark removed"
+      );
+    });
   };
 
   return (
@@ -62,7 +84,8 @@ export default function QuizCard({ quiz, diffConfig }: QuizCardProps) {
               size="sm"
               className="h-7 w-7 p-0 hover:bg-muted rounded-full"
               onClick={toggleBookmark}
-              title={isBookmarked ? "Remove bookmark" : "Add bookmark"}>
+              title={isBookmarked ? "Remove bookmark" : "Add bookmark"}
+              disabled={isPending}>
               <Bookmark
                 className={`h-4 w-4 ${
                   isBookmarked
