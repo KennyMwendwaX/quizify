@@ -146,7 +146,8 @@ export default function QuizCard({ quiz, diffConfig }: QuizCardProps) {
             {quiz.avgRating?.toFixed(1)}
           </span>
           <span className="text-xs text-muted-foreground">
-            {quiz.ratingCount || 0} ratings
+            {quiz.ratingCount || 0}{" "}
+            {quiz.ratingCount === 1 ? "rating" : "ratings"}
           </span>
         </div>
       </CardHeader>

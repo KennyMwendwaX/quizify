@@ -2,7 +2,7 @@
 
 import type React from "react";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardTitle } from "@/components/ui/card";
 import type { AdminQuiz, QuizAttempt } from "@/database/schema";
@@ -25,6 +25,8 @@ import {
 import { useRouter } from "next/navigation";
 import { StarRating } from "./star-rating";
 import { toast } from "sonner";
+import { tryCatch } from "@/lib/try-catch";
+import { submitQuizRating } from "@/server/quiz/rating";
 
 interface StatCardProps {
   icon: React.ReactNode;
@@ -65,11 +67,12 @@ interface QuizResultsProps {
 export default function QuizResultsCard({
   quiz,
   quizAttempt,
+  userId,
 }: QuizResultsProps) {
   const router = useRouter();
+  const [isPending, startTransition] = useTransition();
   const [userRating, setUserRating] = useState<number>(0);
-  const [isSubmittingRating, setIsSubmittingRating] = useState(false);
-  const [hasRated] = useState(false);
+  const [hasRated, setHasRated] = useState(false);
 
   const percentage = quizAttempt.percentage;
   const score = quizAttempt.score;
@@ -123,15 +126,22 @@ export default function QuizResultsCard({
   const performanceData = getPerformanceData();
 
   const handleRatingSubmit = async (rating: number) => {
-    setIsSubmittingRating(true);
-    try {
-      toast.success(rating);
-    } catch (error) {
-      console.error("Failed to submit rating:", error);
-      // You could show an error toast here
-    } finally {
-      setIsSubmittingRating(false);
-    }
+    startTransition(async () => {
+      const { data: result, error } = await tryCatch(
+        submitQuizRating(quiz.id, rating, userId)
+      );
+
+      if (error) {
+        toast.error("Failed to submit rating");
+        return;
+      }
+
+      if (result.success) {
+        toast.success("Rating submitted successfully");
+        setUserRating(rating);
+        setHasRated(true);
+      }
+    });
   };
 
   return (
@@ -303,17 +313,17 @@ export default function QuizResultsCard({
                 <StarRating
                   initialRating={userRating}
                   onRatingChange={setUserRating}
-                  disabled={isSubmittingRating}
+                  disabled={isPending}
                   size="lg"
                 />
               </div>
               {userRating > 0 && (
                 <Button
                   onClick={() => handleRatingSubmit(userRating)}
-                  disabled={isSubmittingRating}
+                  disabled={isPending}
                   size="sm"
                   className="bg-pink-500 hover:bg-pink-600 text-white">
-                  {isSubmittingRating ? "Submitting..." : "Submit Rating"}
+                  {isPending ? "Submitting..." : "Submit Rating"}
                 </Button>
               )}
             </div>
