@@ -92,6 +92,7 @@ export const getPublicQuizzes = async (
 
     const userIdNum = parseInt(userId, 10);
 
+    // Fetch all quizzes with their questions and user info
     const quizResults = await db.query.quizzes.findMany({
       with: {
         questions: {
@@ -107,10 +108,12 @@ export const getPublicQuizzes = async (
             image: true,
           },
         },
+        quizRatings: true, // Include all ratings for each quiz
       },
       orderBy: [desc(quizzes.createdAt)],
     });
 
+    // Fetch user bookmarks
     const userBookmarks = await db.query.quizBookmarks.findMany({
       where: eq(quizBookmarks.userId, userIdNum),
     });
@@ -120,12 +123,27 @@ export const getPublicQuizzes = async (
       userBookmarks.map((bookmark) => bookmark.quizId)
     );
 
-    const quizzesWithBookmarkStatus = quizResults.map((quiz) => ({
-      ...quiz,
-      isBookmarked: bookmarkedQuizIds.has(quiz.id),
-    }));
+    // Process each quiz to add bookmark status and calculate ratings
+    const quizzesWithMetadata = quizResults.map((quiz) => {
+      // Calculate average rating and count
+      const ratings = quiz.quizRatings || [];
+      const ratingCount = ratings.length > 0 ? ratings.length : null;
+      const avgRating =
+        ratings.length > 0
+          ? ratings.reduce((sum, rating) => sum + rating.rating, 0) /
+            ratings.length
+          : null;
 
-    return quizzesWithBookmarkStatus;
+      // Return a new object with all the data we need
+      return {
+        ...quiz,
+        isBookmarked: bookmarkedQuizIds.has(quiz.id),
+        avgRating,
+        ratingCount,
+      };
+    });
+
+    return quizzesWithMetadata;
   } catch (error) {
     console.error("Error in getPublicQuizzes:", error);
     if (error instanceof QuizActionError) {
@@ -138,6 +156,7 @@ export const getPublicQuizzes = async (
     );
   }
 };
+
 export const getAdminQuiz = async (
   quizId: number,
   userId?: string
@@ -208,7 +227,7 @@ export const getAdminQuiz = async (
 export async function getPublicQuiz(
   quizId: number,
   userId?: string
-): Promise<PublicQuiz & { isBookmarked: boolean }> {
+): Promise<PublicQuiz> {
   try {
     const session = await auth.api.getSession({
       headers: await headers(),
@@ -254,6 +273,7 @@ export async function getPublicQuiz(
             image: true,
           },
         },
+        quizRatings: true,
       },
     });
 
@@ -261,7 +281,15 @@ export async function getPublicQuiz(
       throw new QuizActionError("NOT_FOUND", "Quiz not found", "getPublicQuiz");
     }
 
-    // Check if the quiz is bookmarked by the user
+    // Compute ratings
+    const ratings = quiz.quizRatings || [];
+    const ratingCount = ratings.length > 0 ? ratings.length : null;
+    const avgRating =
+      ratings.length > 0
+        ? ratings.reduce((sum, r) => sum + r.rating, 0) / ratings.length
+        : null;
+
+    // Check bookmark
     const bookmark = await db.query.quizBookmarks.findFirst({
       where: and(
         eq(quizBookmarks.quizId, quizId),
@@ -272,6 +300,8 @@ export async function getPublicQuiz(
     return {
       ...quiz,
       isBookmarked: !!bookmark,
+      avgRating,
+      ratingCount,
     };
   } catch (error) {
     console.error("Error in getPublicQuiz:", error);

@@ -1,5 +1,5 @@
 {
-  "id": "6a27aae4-ff03-40ce-b215-a112d750680b",
+  "id": "e24e795f-391f-4956-9292-5d8d18638101",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -422,6 +422,92 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
+    "public.quiz_rating": {
+      "name": "quiz_rating",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "quiz_id": {
+          "name": "quiz_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "rating": {
+          "name": "rating",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp (3)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp (3)",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "quiz_rating_quiz_id_quiz_id_fk": {
+          "name": "quiz_rating_quiz_id_quiz_id_fk",
+          "tableFrom": "quiz_rating",
+          "tableTo": "quiz",
+          "columnsFrom": [
+            "quiz_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "cascade"
+        },
+        "quiz_rating_user_id_user_id_fk": {
+          "name": "quiz_rating_user_id_user_id_fk",
+          "tableFrom": "quiz_rating",
+          "tableTo": "user",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "cascade"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "quiz_rating_user_id_quiz_id_unique": {
+          "name": "quiz_rating_user_id_quiz_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "user_id",
+            "quiz_id"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
     "public.quiz": {
       "name": "quiz",
       "schema": "",
@@ -461,13 +547,6 @@
           "type": "text",
           "primaryKey": false,
           "notNull": true
-        },
-        "rating": {
-          "name": "rating",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 0
         },
         "is_time_limited": {
           "name": "is_time_limited",

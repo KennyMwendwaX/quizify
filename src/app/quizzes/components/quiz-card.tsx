@@ -140,13 +140,13 @@ export default function QuizCard({ quiz, diffConfig }: QuizCardProps) {
         {/* Rating display */}
         <div className="flex items-center gap-2 pt-1">
           <div className="flex items-center gap-1">
-            {renderStars(quiz.rating)}
+            {renderStars(quiz.avgRating || 0)}
           </div>
           <span className="text-sm font-medium text-foreground">
-            {quiz.rating.toFixed(1)}
+            {quiz.avgRating?.toFixed(1)}
           </span>
           <span className="text-xs text-muted-foreground">
-            ({Math.floor(Math.random() * 500 + 50)} reviews)
+            {quiz.ratingCount || 0} ratings
           </span>
         </div>
       </CardHeader>

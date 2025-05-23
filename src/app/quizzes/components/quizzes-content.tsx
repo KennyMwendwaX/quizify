@@ -177,10 +177,9 @@ export default function QuizzesContent({ quizzes }: { quizzes: PublicQuiz[] }) {
                 value={activeTab}
                 onValueChange={handleTabChange}
                 className="w-full sm:w-auto">
-                <TabsList className="grid grid-cols-3 w-full sm:w-auto">
+                <TabsList className="grid grid-cols-2 w-full sm:w-auto">
                   <TabsTrigger value="all">All</TabsTrigger>
-                  <TabsTrigger value="new">Bookmarks</TabsTrigger>
-                  <TabsTrigger value="popular">Popular</TabsTrigger>
+                  <TabsTrigger value="bookmarked">Bookmarked</TabsTrigger>
                 </TabsList>
               </Tabs>
             </div>

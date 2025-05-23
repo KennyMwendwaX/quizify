@@ -78,7 +78,6 @@ export const quizzes = pgTable("quiz", {
   difficulty: text("difficulty", {
     enum: ["BEGINNER", "INTERMEDIATE", "ADVANCED"],
   }).notNull(),
-  rating: integer("rating").notNull().default(0),
   isTimeLimited: boolean("is_time_limited").notNull(),
   timeLimit: integer("time_limit"),
   createdAt: timestamp("created_at", { mode: "date", precision: 3 })
@@ -152,6 +151,32 @@ export const quizBookmarks = pgTable(
   })
 );
 
+export const quizRatings = pgTable(
+  "quiz_rating",
+  {
+    id: serial("id").primaryKey(),
+    quizId: integer("quiz_id")
+      .notNull()
+      .references(() => quizzes.id, {
+        onDelete: "cascade",
+        onUpdate: "cascade",
+      }),
+    userId: integer("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade", onUpdate: "cascade" }),
+    rating: integer("rating").notNull(),
+    createdAt: timestamp("created_at", { mode: "date", precision: 3 })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { mode: "date", precision: 3 })
+      .$onUpdate(() => new Date())
+      .notNull(),
+  },
+  (table) => ({
+    pk: unique().on(table.userId, table.quizId),
+  })
+);
+
 export const achievements = pgTable("achievement", {
   id: serial("id").primaryKey(),
   title: text("title").notNull(),
@@ -193,11 +218,14 @@ export const userAchievements = pgTable(
   })
 );
 
+// Relations
+
 export const usersRelations = relations(users, ({ many }) => ({
   quizzes: many(quizzes),
   quizAttempts: many(quizAttempts),
   userAchievements: many(userAchievements),
   quizBookmarks: many(quizBookmarks),
+  quizRatings: many(quizRatings), // Added relation to ratings
 }));
 
 export const quizzesRelations = relations(quizzes, ({ one, many }) => ({
@@ -208,6 +236,7 @@ export const quizzesRelations = relations(quizzes, ({ one, many }) => ({
   questions: many(questions),
   quizAttempts: many(quizAttempts),
   quizBookmarks: many(quizBookmarks),
+  quizRatings: many(quizRatings), // Added relation to ratings
 }));
 
 export const questionsRelations = relations(questions, ({ one }) => ({
@@ -239,6 +268,17 @@ export const quizBookmarksRelations = relations(quizBookmarks, ({ one }) => ({
   }),
 }));
 
+export const quizRatingsRelations = relations(quizRatings, ({ one }) => ({
+  user: one(users, {
+    fields: [quizRatings.userId],
+    references: [users.id],
+  }),
+  quiz: one(quizzes, {
+    fields: [quizRatings.quizId],
+    references: [quizzes.id],
+  }),
+}));
+
 export const achievementsRelations = relations(achievements, ({ many }) => ({
   userAchievements: many(userAchievements),
 }));
@@ -257,6 +297,8 @@ export const userAchievementsRelations = relations(
   })
 );
 
+// Type exports
+
 export type Quiz = typeof quizzes.$inferSelect;
 export type Question = typeof questions.$inferSelect;
 export type PublicQuestion = Pick<Question, "id" | "title" | "choices">;
@@ -271,6 +313,8 @@ export type PublicQuiz = Quiz & {
     image: string | null;
   };
   isBookmarked: boolean;
+  avgRating: number | null;
+  ratingCount: number | null;
 };
 export type AdminQuiz = Quiz & { questions: AdminQuestion[] };
 export type QuizAttempt = typeof quizAttempts.$inferSelect;
@@ -282,3 +326,4 @@ export type QuizLeaderboard = (QuizAttempt & {
   };
   rank: number;
 })[];
+export type QuizRating = typeof quizRatings.$inferSelect; // Added QuizRating type
