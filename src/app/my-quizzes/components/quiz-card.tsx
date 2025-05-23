@@ -94,13 +94,6 @@ export default function QuizCard({ quiz, diffConfig }: QuizCardProps) {
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
-        <CardTitle className="text-xl leading-tight line-clamp-2 font-bold">
-          {quiz.title}
-        </CardTitle>
-        <CardDescription className="line-clamp-2 text-sm">
-          {quiz.description}
-        </CardDescription>
-
         {/* Title and description */}
         <div className="space-y-2">
           <CardTitle className="text-lg leading-tight line-clamp-2 font-bold text-foreground group-hover:text-primary transition-colors">

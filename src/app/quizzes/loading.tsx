@@ -56,9 +56,7 @@ export default function QuizzesLoading() {
                   {/* Title and description */}
                   <div className="space-y-2">
                     <Skeleton className="h-5 w-full" />
-                    <Skeleton className="h-5 w-4/5" />
                     <Skeleton className="h-4 w-full" />
-                    <Skeleton className="h-4 w-3/4" />
                   </div>
 
                   {/* Rating display */}

@@ -52,11 +52,9 @@ export default function MyQuizzesLoading() {
 
                   {/* Title */}
                   <Skeleton className="h-6 w-full" />
-                  <Skeleton className="h-6 w-3/4" />
 
                   {/* Description */}
                   <Skeleton className="h-4 w-full" />
-                  <Skeleton className="h-4 w-2/3" />
 
                   {/* Rating section */}
                   <div className="flex items-center gap-2 pt-1">
