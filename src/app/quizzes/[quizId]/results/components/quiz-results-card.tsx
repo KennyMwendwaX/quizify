@@ -1,8 +1,11 @@
 "use client";
 
+import type React from "react";
+
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardTitle } from "@/components/ui/card";
-import { AdminQuiz, QuizAttempt } from "@/database/schema";
+import type { AdminQuiz, QuizAttempt } from "@/database/schema";
 import { cn } from "@/lib/utils";
 import {
   Award,
@@ -16,8 +19,11 @@ import {
   Target,
   Timer,
   Trophy,
+  Heart,
+  MessageSquare,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { StarRating } from "./star-rating";
 
 interface StatCardProps {
   icon: React.ReactNode;
@@ -35,15 +41,9 @@ const StatCard: React.FC<StatCardProps> = ({
   tooltip,
 }) => (
   <div
-    className="flex items-center gap-2 sm:gap-4 p-2 sm:p-4 border rounded-lg hover:shadow-md transition-shadow"
+    className="flex items-center gap-2 sm:gap-4 p-2 sm:p-4 border rounded-lg hover:shadow-sm transition-shadow"
     title={tooltip}>
-    <div
-      className={cn(
-        "p-2 sm:p-3 rounded-full",
-        color.replace("text-", "bg-").replace("600", "100")
-      )}>
-      {icon}
-    </div>
+    <div className={cn("p-2 sm:p-3 rounded-full")}>{icon}</div>
     <div>
       <span className={cn("text-base sm:text-xl font-bold", color)}>
         {value}
@@ -58,13 +58,18 @@ const StatCard: React.FC<StatCardProps> = ({
 interface QuizResultsProps {
   quiz: AdminQuiz;
   quizAttempt: QuizAttempt;
+  userId: string;
 }
 
 export default function QuizResultsCard({
   quiz,
   quizAttempt,
+  userId,
 }: QuizResultsProps) {
   const router = useRouter();
+  const [userRating, setUserRating] = useState<number>(0);
+  const [isSubmittingRating, setIsSubmittingRating] = useState(false);
+  const [hasRated, setHasRated] = useState(false);
 
   const percentage = quizAttempt.percentage;
   const score = quizAttempt.score;
@@ -116,6 +121,34 @@ export default function QuizResultsCard({
   };
 
   const performanceData = getPerformanceData();
+
+  const handleRatingSubmit = async (rating: number) => {
+    setIsSubmittingRating(true);
+    try {
+      // TODO: Replace with your actual server action
+      const response = await fetch("/api/rate-quiz", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          quizId: quiz.id,
+          userId: Number.parseInt(userId),
+          rating,
+        }),
+      });
+
+      if (response.ok) {
+        setHasRated(true);
+        // You could show a success toast here
+      }
+    } catch (error) {
+      console.error("Failed to submit rating:", error);
+      // You could show an error toast here
+    } finally {
+      setIsSubmittingRating(false);
+    }
+  };
 
   return (
     <Card
@@ -242,7 +275,7 @@ export default function QuizResultsCard({
         </div>
 
         {/* Secondary Stats */}
-        <div className="grid grid-cols-3 gap-2 sm:gap-3">
+        <div className="grid grid-cols-3 gap-2 sm:gap-3 mb-4">
           <StatCard
             icon={<Clock className="w-4 h-4 sm:w-5 sm:h-5" />}
             value={formatTime(quizAttempt.timeTaken)}
@@ -267,12 +300,64 @@ export default function QuizResultsCard({
             tooltip="Average XP earned per question"
           />
         </div>
+
+        {/* Rating Section */}
+        <div className="border-t pt-4">
+          <div className="flex items-center justify-center gap-2 mb-3">
+            <Heart className="w-5 h-5 text-pink-500" />
+            <h3 className="text-lg font-semibold text-center">
+              Rate this Quiz
+            </h3>
+          </div>
+
+          {!hasRated ? (
+            <div className="text-center">
+              <p className="text-sm text-muted-foreground mb-3">
+                How would you rate your experience with this quiz?
+              </p>
+              <div className="flex justify-center mb-3">
+                <StarRating
+                  initialRating={userRating}
+                  onRatingChange={setUserRating}
+                  disabled={isSubmittingRating}
+                  size="lg"
+                />
+              </div>
+              {userRating > 0 && (
+                <Button
+                  onClick={() => handleRatingSubmit(userRating)}
+                  disabled={isSubmittingRating}
+                  size="sm"
+                  className="bg-pink-500 hover:bg-pink-600 text-white">
+                  {isSubmittingRating ? "Submitting..." : "Submit Rating"}
+                </Button>
+              )}
+            </div>
+          ) : (
+            <div className="text-center">
+              <div className="flex items-center justify-center gap-2 text-green-600 mb-2">
+                <MessageSquare className="w-4 h-4" />
+                <span className="text-sm font-medium">
+                  Thank you for your feedback!
+                </span>
+              </div>
+              <div className="flex justify-center">
+                <StarRating
+                  initialRating={userRating}
+                  onRatingChange={() => {}}
+                  disabled={true}
+                  size="md"
+                />
+              </div>
+            </div>
+          )}
+        </div>
       </CardContent>
 
       <CardFooter className="flex flex-col sm:flex-row gap-3 pt-2 pb-6">
         <Button
           onClick={() => router.push("/dashboard")}
-          className="w-full sm:flex-1 bg-background hover:bg-slate-100 text-foreground border border-input mb-2 sm:mb-0"
+          className="w-full sm:flex-1 bg-background text-foreground border border-input mb-2 sm:mb-0"
           variant="outline">
           <LayoutDashboard className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
           Dashboard
@@ -280,7 +365,7 @@ export default function QuizResultsCard({
 
         <Button
           onClick={() => router.push(`/quizzes/${quiz.id}/review`)}
-          className="w-full sm:flex-1 bg-background hover:bg-slate-100 text-foreground border border-input mb-2 sm:mb-0"
+          className="w-full sm:flex-1 bg-background text-foreground border border-input mb-2 sm:mb-0"
           variant="outline">
           <FileText className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
           Review
