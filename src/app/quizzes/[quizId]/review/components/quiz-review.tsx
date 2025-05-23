@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import {
   Clock,
   Users,
@@ -26,7 +26,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import Link from "next/link";
 import { formatSecondsToMinutes } from "@/lib/format-time";
-import { QuizDifficulty } from "@/database/schema";
+import type { QuizDifficulty } from "@/database/schema";
 
 type AdminQuestion = {
   title: string;
@@ -80,13 +80,13 @@ export default function QuizReview({ quiz, quizAttempt }: QuizReviewProps) {
   const getDifficultyColor = (difficulty: QuizDifficulty) => {
     switch (difficulty) {
       case "BEGINNER":
-        return "bg-green-100 text-green-700";
+        return "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400";
       case "INTERMEDIATE":
-        return "bg-yellow-100 text-yellow-700";
+        return "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400";
       case "ADVANCED":
-        return "bg-red-100 text-red-700";
+        return "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400";
       default:
-        return "bg-gray-100 text-gray-700";
+        return "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300";
     }
   };
 
@@ -109,7 +109,7 @@ export default function QuizReview({ quiz, quizAttempt }: QuizReviewProps) {
           </div>
 
           {/* Quiz Info Card */}
-          <Card className="bg-white/50 backdrop-blur-xl shadow-lg">
+          <Card className="bg-background backdrop-blur-xl shadow-lg">
             <CardHeader>
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-4">
                 <div className="flex items-center gap-4">
@@ -131,19 +131,19 @@ export default function QuizReview({ quiz, quizAttempt }: QuizReviewProps) {
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-4 text-xs sm:text-sm">
-                <div className="flex items-center gap-2 bg-primary/5 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg">
+                <div className="flex items-center gap-2 bg-primary/5 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-foreground">
                   <Clock className="w-3 h-3 sm:w-4 sm:h-4" />
                   {formatSecondsToMinutes(quiz.timeLimit ?? 0)} allotted
                 </div>
-                <div className="flex items-center gap-2 bg-primary/5 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg">
+                <div className="flex items-center gap-2 bg-primary/5 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-foreground">
                   <Clock className="w-3 h-3 sm:w-4 sm:h-4" />
                   {formatSecondsToMinutes(quizAttempt.timeTaken)} taken
                 </div>
-                <div className="flex items-center gap-2 bg-primary/5 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg">
+                <div className="flex items-center gap-2 bg-primary/5 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-foreground">
                   <Users className="w-3 h-3 sm:w-4 sm:h-4" />
                   {quiz.questions.length} questions
                 </div>
-                <div className="flex items-center gap-2 bg-green-100 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-green-700">
+                <div className="flex items-center gap-2 bg-green-100 dark:bg-green-900/30 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-green-700 dark:text-green-400">
                   <CheckCircle className="w-3 h-3 sm:w-4 sm:h-4" />
                   {quizAttempt.score}/{quiz.questions.length} (
                   {quizAttempt.percentage}%)
@@ -153,7 +153,7 @@ export default function QuizReview({ quiz, quizAttempt }: QuizReviewProps) {
           </Card>
 
           {/* Question Card */}
-          <Card className="bg-white/50 backdrop-blur-xl shadow-lg">
+          <Card className="bg-background backdrop-blur-xl shadow-lg">
             <CardHeader className="border-b border-border/40">
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-2 gap-2">
                 <span className="text-xs sm:text-sm text-muted-foreground">
@@ -168,7 +168,9 @@ export default function QuizReview({ quiz, quizAttempt }: QuizReviewProps) {
                       : "secondary"
                   }
                   className={`text-xs sm:text-sm ${
-                    isCorrect ? "bg-green-100 text-green-700" : ""
+                    isCorrect
+                      ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+                      : ""
                   }`}>
                   {isCorrect
                     ? "Correct"
@@ -186,7 +188,7 @@ export default function QuizReview({ quiz, quizAttempt }: QuizReviewProps) {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.3 }}
                 className="space-y-6">
-                <h3 className="text-lg sm:text-xl font-semibold mb-6">
+                <h3 className="text-lg sm:text-xl font-semibold mb-6 text-foreground">
                   {currentQuestion.title}
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2 sm:gap-4">
@@ -194,34 +196,38 @@ export default function QuizReview({ quiz, quizAttempt }: QuizReviewProps) {
                     const isUserAnswer = userAnswer === index;
                     const isCorrectAnswer = correctAnswer === index;
 
-                    let buttonClass =
-                      "h-auto min-h-[3rem] sm:min-h-[3.5rem] p-2 sm:p-4 justify-start gap-2 sm:gap-4 relative text-xs sm:text-sm ";
+                    const buttonClass =
+                      "h-auto min-h-[3rem] sm:min-h-[3.5rem] p-2 sm:p-4 justify-start gap-2 sm:gap-4 relative text-xs sm:text-sm text-foreground";
+                    let bgClass = "";
                     let iconComponent = null;
 
                     if (isUserAnswer && isCorrectAnswer) {
-                      buttonClass += "border-green-500 bg-green-50";
+                      bgClass =
+                        "border-green-500 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400";
                       iconComponent = (
-                        <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-green-500" />
+                        <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-green-500 dark:text-green-400" />
                       );
                     } else if (isUserAnswer && !isCorrectAnswer) {
-                      buttonClass += "border-red-500 bg-red-50";
+                      bgClass =
+                        "border-red-500 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400";
                       iconComponent = (
-                        <XCircle className="w-4 h-4 sm:w-5 sm:h-5 text-red-500" />
+                        <XCircle className="w-4 h-4 sm:w-5 sm:h-5 text-red-500 dark:text-red-400" />
                       );
                     } else if (!isUserAnswer && isCorrectAnswer) {
-                      buttonClass += "border-green-500 bg-green-50";
+                      bgClass =
+                        "border-green-500 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400";
                       iconComponent = (
-                        <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-green-500" />
+                        <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-green-500 dark:text-green-400" />
                       );
                     } else {
-                      buttonClass += "border-border hover:border-primary/30";
+                      bgClass = "border-border hover:border-primary/30";
                     }
 
                     return (
                       <Button
                         key={index}
                         variant="outline"
-                        className={buttonClass}
+                        className={`${buttonClass} ${bgClass}`}
                         disabled>
                         <div className="flex items-center gap-2 sm:gap-4 w-full">
                           <span className="flex-shrink-0 w-5 h-5 sm:w-6 sm:h-6 rounded-full border-2 flex items-center justify-center text-xs">
@@ -254,14 +260,14 @@ export default function QuizReview({ quiz, quizAttempt }: QuizReviewProps) {
 
                 <div className="flex flex-col sm:flex-row items-center gap-2 w-full sm:w-auto">
                   {!isAnswered ? (
-                    <div className="flex items-center gap-2 px-4 py-2 bg-yellow-50 text-yellow-700 rounded-lg w-full sm:w-auto">
+                    <div className="flex items-center gap-2 px-4 py-2 bg-yellow-50 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 rounded-lg w-full sm:w-auto">
                       <HelpCircle className="w-4 h-4" />
                       <span className="text-xs sm:text-sm font-medium">
                         You did not answer this question
                       </span>
                     </div>
                   ) : !isCorrect ? (
-                    <div className="flex items-center gap-2 px-4 py-2 bg-red-50 text-red-700 rounded-lg w-full sm:w-auto">
+                    <div className="flex items-center gap-2 px-4 py-2 bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-lg w-full sm:w-auto">
                       <AlertCircle className="w-4 h-4" />
                       <span className="text-xs sm:text-sm font-medium">
                         Your answer: {String.fromCharCode(65 + userAnswer)}
@@ -270,7 +276,7 @@ export default function QuizReview({ quiz, quizAttempt }: QuizReviewProps) {
                   ) : null}
 
                   {(!isAnswered || !isCorrect) && (
-                    <div className="flex items-center gap-2 px-4 py-2 bg-green-50 text-green-700 rounded-lg w-full sm:w-auto">
+                    <div className="flex items-center gap-2 px-4 py-2 bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-lg w-full sm:w-auto">
                       <CheckCircle className="w-4 h-4" />
                       <span className="text-xs sm:text-sm font-medium">
                         Correct: {String.fromCharCode(65 + correctAnswer)}
