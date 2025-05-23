@@ -12,7 +12,7 @@ import {
   Clock,
   FileText,
   Flame,
-  LayoutDashboard,
+  Compass,
   Zap,
   Medal,
   Rocket,
@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { StarRating } from "./star-rating";
+import { toast } from "sonner";
 
 interface StatCardProps {
   icon: React.ReactNode;
@@ -64,12 +65,11 @@ interface QuizResultsProps {
 export default function QuizResultsCard({
   quiz,
   quizAttempt,
-  userId,
 }: QuizResultsProps) {
   const router = useRouter();
   const [userRating, setUserRating] = useState<number>(0);
   const [isSubmittingRating, setIsSubmittingRating] = useState(false);
-  const [hasRated, setHasRated] = useState(false);
+  const [hasRated] = useState(false);
 
   const percentage = quizAttempt.percentage;
   const score = quizAttempt.score;
@@ -125,23 +125,7 @@ export default function QuizResultsCard({
   const handleRatingSubmit = async (rating: number) => {
     setIsSubmittingRating(true);
     try {
-      // TODO: Replace with your actual server action
-      const response = await fetch("/api/rate-quiz", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          quizId: quiz.id,
-          userId: Number.parseInt(userId),
-          rating,
-        }),
-      });
-
-      if (response.ok) {
-        setHasRated(true);
-        // You could show a success toast here
-      }
+      toast.success(rating);
     } catch (error) {
       console.error("Failed to submit rating:", error);
       // You could show an error toast here
@@ -356,11 +340,11 @@ export default function QuizResultsCard({
 
       <CardFooter className="flex flex-col sm:flex-row gap-3 pt-2 pb-6">
         <Button
-          onClick={() => router.push("/dashboard")}
+          onClick={() => router.push("/explore")}
           className="w-full sm:flex-1 bg-background text-foreground border border-input mb-2 sm:mb-0"
           variant="outline">
-          <LayoutDashboard className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
-          Dashboard
+          <Compass className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
+          Explore Quizzes
         </Button>
 
         <Button

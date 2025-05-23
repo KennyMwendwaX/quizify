@@ -39,7 +39,11 @@ export default async function QuizResultsPage({ params }: Props) {
 
   return (
     <div className="min-h-[calc(100vh-150px)] flex items-center justify-center bg-gradient-to-br from-background via-background/95 to-background/90 pt-4">
-      <QuizResultsCard quiz={quiz} quizAttempt={quizAttempt} />
+      <QuizResultsCard
+        quiz={quiz}
+        quizAttempt={quizAttempt}
+        userId={session.user.id}
+      />
     </div>
   );
 }

@@ -5,6 +5,7 @@ type UserError =
 
 type QuizError =
   | { type: "UNAUTHORIZED"; message: string }
+  | { type: "VALIDATION_ERROR"; message: string }
   | { type: "DATABASE_ERROR"; message: string }
   | { type: "NOT_FOUND"; message: string };
 

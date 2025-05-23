@@ -186,21 +186,6 @@ export default function QuizCard({ quiz, diffConfig }: QuizCardProps) {
             </div>
           </div>
         </div>
-
-        {/* Creator info */}
-        {/* <div className="flex items-center gap-2 pt-2">
-          <div className="h-6 w-6 rounded-full bg-gradient-to-br from-primary/20 to-primary/30 flex items-center justify-center">
-            <span className="text-xs font-semibold text-primary">
-              {quiz.user?.name?.charAt(0)?.toUpperCase() || "U"}
-            </span>
-          </div>
-          <span className="text-xs text-muted-foreground">
-            by{" "}
-            <span className="font-medium text-foreground">
-              {quiz.user?.name || "Anonymous"}
-            </span>
-          </span>
-        </div> */}
       </CardContent>
 
       <CardFooter className="pt-0 pb-4">
