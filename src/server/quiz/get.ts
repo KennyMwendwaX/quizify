@@ -5,6 +5,7 @@ import {
   AdminQuiz,
   PublicQuiz,
   quizBookmarks,
+  QuizWithAnswers,
   quizzes,
 } from "@/database/schema";
 import { and, desc, eq } from "drizzle-orm";
@@ -47,11 +48,28 @@ export const getAdminQuizzes = async (
             correctAnswer: true,
           },
         },
+        quizRatings: true,
       },
       orderBy: [desc(quizzes.createdAt)],
     });
 
-    return quizResults;
+    const quizzesWithMetadata = quizResults.map((quiz) => {
+      // Calculate average rating and count
+      const ratings = quiz.quizRatings || [];
+      const ratingCount = ratings.length > 0 ? ratings.length : null;
+      const avgRating =
+        ratings.length > 0
+          ? ratings.reduce((sum, rating) => sum + rating.rating, 0) /
+            ratings.length
+          : null;
+      return {
+        ...quiz,
+        avgRating,
+        ratingCount,
+      };
+    });
+
+    return quizzesWithMetadata;
   } catch (error) {
     console.error("Error in getAdminQuizzes:", error);
     if (error instanceof QuizActionError) {
@@ -134,7 +152,6 @@ export const getPublicQuizzes = async (
             ratings.length
           : null;
 
-      // Return a new object with all the data we need
       return {
         ...quiz,
         isBookmarked: bookmarkedQuizIds.has(quiz.id),
@@ -201,6 +218,7 @@ export const getAdminQuiz = async (
             correctAnswer: true,
           },
         },
+        quizRatings: true,
       },
     });
 
@@ -208,7 +226,20 @@ export const getAdminQuiz = async (
       throw new QuizActionError("NOT_FOUND", "Quiz not found", "getAdminQuiz");
     }
 
-    return quiz;
+    // Calculate average rating and count
+    const ratings = quiz.quizRatings || [];
+    const ratingCount = ratings.length > 0 ? ratings.length : null;
+    const avgRating =
+      ratings.length > 0
+        ? ratings.reduce((sum, rating) => sum + rating.rating, 0) /
+          ratings.length
+        : null;
+
+    return {
+      ...quiz,
+      avgRating,
+      ratingCount,
+    };
   } catch (error) {
     console.error("Error in getAdminQuiz:", error);
 
@@ -321,7 +352,7 @@ export async function getPublicQuiz(
 export const getQuizWithAnswers = async (
   quizId: number,
   userId?: string
-): Promise<AdminQuiz> => {
+): Promise<QuizWithAnswers> => {
   try {
     const session = await auth.api.getSession({
       headers: await headers(),

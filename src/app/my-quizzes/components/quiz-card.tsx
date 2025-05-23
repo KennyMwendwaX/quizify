@@ -9,7 +9,7 @@ import {
   Settings,
   MoreVertical,
   BookOpen,
-  Trophy,
+  Star,
 } from "lucide-react";
 import {
   Card,
@@ -43,6 +43,21 @@ type QuizCardProps = {
 
 export default function QuizCard({ quiz, diffConfig }: QuizCardProps) {
   const [hoveredCard, setHoveredCard] = useState<string | null>(null);
+
+  const renderStars = (rating: number) => {
+    return Array.from({ length: 5 }, (_, i) => (
+      <Star
+        key={i}
+        className={`h-3.5 w-3.5 ${
+          i < Math.floor(rating)
+            ? "fill-yellow-400 text-yellow-400"
+            : i < rating
+            ? "fill-yellow-400/50 text-yellow-400"
+            : "text-gray-300"
+        }`}
+      />
+    ));
+  };
 
   return (
     <Card
@@ -85,36 +100,64 @@ export default function QuizCard({ quiz, diffConfig }: QuizCardProps) {
         <CardDescription className="line-clamp-2 text-sm">
           {quiz.description}
         </CardDescription>
+
+        {/* Title and description */}
+        <div className="space-y-2">
+          <CardTitle className="text-lg leading-tight line-clamp-2 font-bold text-foreground group-hover:text-primary transition-colors">
+            {quiz.title}
+          </CardTitle>
+          <CardDescription className="line-clamp-2 text-sm text-muted-foreground leading-relaxed">
+            {quiz.description}
+          </CardDescription>
+        </div>
+
+        {/* Rating display */}
+        <div className="flex items-center gap-2 pt-1">
+          <div className="flex items-center gap-1">
+            {renderStars(quiz.avgRating || 0)}
+          </div>
+          <span className="text-sm font-medium text-foreground">
+            {quiz.avgRating?.toFixed(1)}
+          </span>
+          <span className="text-xs text-muted-foreground">
+            {quiz.ratingCount || 0}{" "}
+            {quiz.ratingCount === 1 ? "rating" : "ratings"}
+          </span>
+        </div>
       </CardHeader>
 
       <CardContent className="pb-3 pt-0 space-y-4 flex-grow">
         <Separator className="opacity-50" />
-        <div className="grid grid-cols-2 gap-2">
-          <div className="flex items-center gap-2.5 p-2 rounded-lg bg-muted/40 hover:bg-muted/60 transition-colors">
-            <Clock className="h-4 w-4 text-primary/70" />
-            <div>
-              <p className="text-sm font-medium">
-                {formatSecondsToMinutes(quiz.timeLimit ?? 0)}
+        {/* Quiz stats grid */}
+        <div className="grid grid-cols-3 gap-3">
+          <div className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-gradient-to-br from-muted/30 to-muted/50 border border-border/50 hover:from-muted/40 hover:to-muted/60 transition-all duration-200">
+            <Clock className="h-4 w-4 text-primary" />
+            <div className="text-center">
+              <p className="text-sm font-semibold text-foreground">
+                {quiz.timeLimit ? formatSecondsToMinutes(quiz.timeLimit) : "∞"}
               </p>
-              <p className="text-xs text-muted-foreground">Time limit</p>
+              <p className="text-xs text-muted-foreground">Time</p>
             </div>
           </div>
-          <div className="flex items-center gap-2.5 p-2 rounded-lg bg-muted/40 hover:bg-muted/60 transition-colors">
-            <BookOpen className="h-4 w-4 text-primary/70" />
-            <div>
-              <p className="text-sm font-medium">{quiz.questions.length}</p>
+
+          <div className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-gradient-to-br from-muted/30 to-muted/50 border border-border/50 hover:from-muted/40 hover:to-muted/60 transition-all duration-200">
+            <BookOpen className="h-4 w-4 text-primary" />
+            <div className="text-center">
+              <p className="text-sm font-semibold text-foreground">
+                {quiz.questions.length}
+              </p>
               <p className="text-xs text-muted-foreground">Questions</p>
             </div>
           </div>
-        </div>
-        <div className="flex justify-between items-center text-xs text-muted-foreground pt-1">
-          <div className="flex items-center gap-1">
-            <Users className="h-3.5 w-3.5" />
-            <span>150 attempts</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <Trophy className="h-3.5 w-3.5" />
-            <span>85% avg. score</span>
+
+          <div className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-gradient-to-br from-muted/30 to-muted/50 border border-border/50 hover:from-muted/40 hover:to-muted/60 transition-all duration-200">
+            <Users className="h-4 w-4 text-primary" />
+            <div className="text-center">
+              <p className="text-sm font-semibold text-foreground">
+                {Math.floor(Math.random() * 300 + 50)}
+              </p>
+              <p className="text-xs text-muted-foreground">Attempts</p>
+            </div>
           </div>
         </div>
       </CardContent>

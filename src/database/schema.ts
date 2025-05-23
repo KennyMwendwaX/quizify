@@ -316,7 +316,14 @@ export type PublicQuiz = Quiz & {
   avgRating: number | null;
   ratingCount: number | null;
 };
-export type AdminQuiz = Quiz & { questions: AdminQuestion[] };
+export type AdminQuiz = Quiz & {
+  questions: AdminQuestion[];
+  avgRating: number | null;
+  ratingCount: number | null;
+};
+export type QuizWithAnswers = Quiz & {
+  questions: AdminQuestion[];
+};
 export type QuizAttempt = typeof quizAttempts.$inferSelect;
 export type QuizDifficulty = typeof quizzes.$inferSelect.difficulty;
 export type QuizLeaderboard = (QuizAttempt & {
