@@ -333,4 +333,4 @@ export type QuizLeaderboard = (QuizAttempt & {
   };
   rank: number;
 })[];
-export type QuizRating = typeof quizRatings.$inferSelect; // Added QuizRating type
+export type QuizRating = typeof quizRatings.$inferSelect;
