@@ -315,11 +315,13 @@ export type PublicQuiz = Quiz & {
   isBookmarked: boolean;
   avgRating: number | null;
   ratingCount: number | null;
+  quizAttempts: number | null;
 };
 export type AdminQuiz = Quiz & {
   questions: AdminQuestion[];
   avgRating: number | null;
   ratingCount: number | null;
+  quizAttempts: number | null;
 };
 export type QuizWithAnswers = Quiz & {
   questions: AdminQuestion[];

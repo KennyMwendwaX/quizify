@@ -181,7 +181,7 @@ export default function QuizCard({ quiz, diffConfig }: QuizCardProps) {
             <Users className="h-4 w-4 text-primary" />
             <div className="text-center">
               <p className="text-sm font-semibold text-foreground">
-                {Math.floor(Math.random() * 300 + 50)}
+                {quiz.quizAttempts}
               </p>
               <p className="text-xs text-muted-foreground">Attempts</p>
             </div>
