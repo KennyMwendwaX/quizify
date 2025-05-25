@@ -7,12 +7,12 @@ import {
   TrendingUp,
   Medal,
   Book,
-  Target,
   Trophy,
   Clock,
   Flame,
   Zap,
   Brain,
+  Bookmark,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -152,8 +152,10 @@ export default function DashboardContent({
                     <ActionButton href="/my-quizzes" icon={Book}>
                       My Quizzes
                     </ActionButton>
-                    <ActionButton href="/goals" icon={Target}>
-                      Set Goals
+                    <ActionButton
+                      href="/quizzes/?tab=bookmarks"
+                      icon={Bookmark}>
+                      Bookmarked
                     </ActionButton>
                   </CardContent>
                 </Card>
