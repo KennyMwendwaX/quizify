@@ -3,7 +3,7 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import QuizResultsCard from "./components/quiz-results-card";
 import { getUserQuizAttempt } from "@/server/user/quiz-attempts";
-import { getQuizWithAnswers } from "@/server/quiz/get";
+import { getOwnerQuiz } from "@/server/quiz/get";
 import { tryCatch } from "@/lib/try-catch";
 
 type Props = {
@@ -24,7 +24,7 @@ export default async function QuizResultsPage({ params }: Props) {
   const { quizId } = await params;
 
   const { data: quiz, error: quizError } = await tryCatch(
-    getQuizWithAnswers(parseInt(quizId), session.user.id)
+    getOwnerQuiz(parseInt(quizId), session.user.id)
   );
   if (quizError) {
     throw new Error(quizError.message);

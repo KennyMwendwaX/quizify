@@ -15,7 +15,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import type { AdminQuiz, QuizDifficulty } from "@/database/schema";
+import type { OwnerQuizOverview, QuizDifficulty } from "@/database/schema";
 import { motion } from "motion/react";
 import QuizCard from "./quiz-card";
 
@@ -60,7 +60,7 @@ const getDifficultyConfig = (
 export default function MyQuizzesContent({
   quizzes,
 }: {
-  quizzes: AdminQuiz[];
+  quizzes: OwnerQuizOverview[];
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();

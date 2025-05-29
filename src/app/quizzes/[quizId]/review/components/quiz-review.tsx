@@ -26,44 +26,14 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import Link from "next/link";
 import { formatSecondsToMinutes } from "@/lib/format-time";
-import type { QuizDifficulty } from "@/database/schema";
-
-type AdminQuestion = {
-  title: string;
-  choices: string[];
-  correctAnswer: number;
-};
-
-type AdminQuiz = {
-  id: number;
-  createdAt: Date;
-  updatedAt: Date;
-  userId: number;
-  title: string;
-  description: string;
-  category: string;
-  difficulty: QuizDifficulty;
-  isTimeLimited: boolean;
-  timeLimit: number | null;
-  questions: AdminQuestion[];
-};
-
-type QuizAttempt = {
-  id: number;
-  createdAt: Date;
-  updatedAt: Date;
-  userId: number;
-  quizId: number;
-  answers: number[];
-  score: number;
-  percentage: number;
-  isCompleted: boolean;
-  timeTaken: number;
-  xpEarned: number;
-};
+import type {
+  OwnerQuizDetail,
+  QuizAttempt,
+  QuizDifficulty,
+} from "@/database/schema";
 
 interface QuizReviewProps {
-  quiz: AdminQuiz;
+  quiz: OwnerQuizDetail;
   quizAttempt: QuizAttempt;
 }
 

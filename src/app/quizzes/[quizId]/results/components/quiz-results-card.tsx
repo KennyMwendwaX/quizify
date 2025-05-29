@@ -5,7 +5,7 @@ import type React from "react";
 import { useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardTitle } from "@/components/ui/card";
-import type { AdminQuiz, QuizAttempt } from "@/database/schema";
+import type { OwnerQuizDetail, QuizAttempt } from "@/database/schema";
 import { cn } from "@/lib/utils";
 import {
   Award,
@@ -59,7 +59,7 @@ const StatCard: React.FC<StatCardProps> = ({
 );
 
 interface QuizResultsProps {
-  quiz: AdminQuiz;
+  quiz: OwnerQuizDetail;
   quizAttempt: QuizAttempt;
   userId: string;
 }

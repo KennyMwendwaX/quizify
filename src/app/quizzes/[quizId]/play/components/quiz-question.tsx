@@ -6,7 +6,7 @@ import React, {
   useReducer,
   useTransition,
 } from "react";
-import { PublicQuiz } from "@/database/schema";
+import { PublicQuizDetail } from "@/database/schema";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
@@ -87,7 +87,7 @@ const createQuizReducer =
   };
 
 interface QuizQuestionProps {
-  quiz: PublicQuiz;
+  quiz: PublicQuizDetail;
   session: Session;
 }
 

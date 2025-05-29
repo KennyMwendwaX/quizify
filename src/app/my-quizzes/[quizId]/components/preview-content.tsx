@@ -23,12 +23,12 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { AdminQuiz, QuizDifficulty } from "@/database/schema";
+import { OwnerQuizDetail, QuizDifficulty } from "@/database/schema";
 import Link from "next/link";
 import { formatSecondsToMinutes } from "@/lib/format-time";
 
 type Props = {
-  quiz: AdminQuiz;
+  quiz: OwnerQuizDetail;
 };
 
 export default function QuizPreviewContent({ quiz }: Props) {

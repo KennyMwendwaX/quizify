@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import EditQuizForm from "./components/edit-quiz-form";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
-import { getAdminQuiz } from "@/server/quiz/get";
+import { getOwnerQuiz } from "@/server/quiz/get";
 import { tryCatch } from "@/lib/try-catch";
 
 type Props = {
@@ -23,7 +23,7 @@ export default async function EditQuizPage({ params }: Props) {
   const { quizId } = await params;
 
   const { data: quiz, error: quizError } = await tryCatch(
-    getAdminQuiz(parseInt(quizId), session.user.id)
+    getOwnerQuiz(parseInt(quizId), session.user.id)
   );
   if (quizError) {
     throw new Error(quizError.message);

@@ -30,10 +30,10 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { formatSecondsToMinutes } from "@/lib/format-time";
-import { AdminQuiz } from "@/database/schema";
+import { OwnerQuizOverview } from "@/database/schema";
 
 type QuizCardProps = {
-  quiz: AdminQuiz;
+  quiz: OwnerQuizOverview;
   diffConfig: {
     color: string;
     icon: string;
@@ -110,8 +110,7 @@ export default function QuizCard({ quiz, diffConfig }: QuizCardProps) {
             {quiz.avgRating?.toFixed(1)}
           </span>
           <span className="text-xs text-muted-foreground">
-            {quiz.ratingCount || 0}{" "}
-            {quiz.ratingCount === 1 ? "rating" : "ratings"}
+            {quiz.ratings || 0} {quiz.ratings === 1 ? "rating" : "ratings"}
           </span>
         </div>
       </CardHeader>
@@ -134,7 +133,7 @@ export default function QuizCard({ quiz, diffConfig }: QuizCardProps) {
             <BookOpen className="h-4 w-4 text-primary" />
             <div className="text-center">
               <p className="text-sm font-semibold text-foreground">
-                {quiz.questions.length}
+                {quiz.questions}
               </p>
               <p className="text-xs text-muted-foreground">Questions</p>
             </div>
@@ -144,7 +143,7 @@ export default function QuizCard({ quiz, diffConfig }: QuizCardProps) {
             <Users className="h-4 w-4 text-primary" />
             <div className="text-center">
               <p className="text-sm font-semibold text-foreground">
-                {quiz.quizAttempts || 0}
+                {quiz.attempts || 0}
               </p>
               <p className="text-xs text-muted-foreground">Attempts</p>
             </div>

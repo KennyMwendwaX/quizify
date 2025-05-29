@@ -297,16 +297,38 @@ export const userAchievementsRelations = relations(
   })
 );
 
-// Type exports
-
+// Base types
 export type Quiz = typeof quizzes.$inferSelect;
 export type Question = typeof questions.$inferSelect;
+export type QuizAttempt = typeof quizAttempts.$inferSelect;
+export type QuizRating = typeof quizRatings.$inferSelect;
+export type QuizDifficulty = typeof quizzes.$inferSelect.difficulty;
+
+// Question types for different access levels
 export type PublicQuestion = Pick<Question, "id" | "title" | "choices">;
 export type AdminQuestion = Pick<
   Question,
   "id" | "title" | "choices" | "correctAnswer"
 >;
-export type PublicQuiz = Quiz & {
+
+// Base quiz overview type (metadata only, no full questions)
+export type QuizOverview = Quiz & {
+  questions: number;
+  attempts: number | null;
+  avgRating: number | null;
+  ratings: number | null;
+};
+
+// Public quiz types (for general users browsing/playing)
+export type PublicQuizOverview = QuizOverview & {
+  user: {
+    name: string;
+    image: string | null;
+  };
+  isBookmarked: boolean;
+};
+
+export type PublicQuizDetail = Quiz & {
   questions: PublicQuestion[];
   user: {
     name: string;
@@ -314,20 +336,21 @@ export type PublicQuiz = Quiz & {
   };
   isBookmarked: boolean;
   avgRating: number | null;
-  ratingCount: number | null;
-  quizAttempts: number | null;
+  ratings: number | null;
+  attempts: number | null;
 };
-export type AdminQuiz = Quiz & {
+
+// Owner quiz types (for quiz creators managing their quizzes)
+export type OwnerQuizOverview = QuizOverview;
+
+export type OwnerQuizDetail = Quiz & {
   questions: AdminQuestion[];
   avgRating: number | null;
-  ratingCount: number | null;
-  quizAttempts: number | null;
+  ratings: number | null;
+  attempts: number | null;
 };
-export type QuizWithAnswers = Quiz & {
-  questions: AdminQuestion[];
-};
-export type QuizAttempt = typeof quizAttempts.$inferSelect;
-export type QuizDifficulty = typeof quizzes.$inferSelect.difficulty;
+
+// Leaderboard type
 export type QuizLeaderboard = (QuizAttempt & {
   user: {
     name: string;
@@ -335,4 +358,3 @@ export type QuizLeaderboard = (QuizAttempt & {
   };
   rank: number;
 })[];
-export type QuizRating = typeof quizRatings.$inferSelect;

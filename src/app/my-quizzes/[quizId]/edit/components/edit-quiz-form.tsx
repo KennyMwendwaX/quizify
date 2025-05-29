@@ -47,7 +47,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Session } from "@/lib/auth";
-import { AdminQuiz } from "@/database/schema";
+import { OwnerQuizDetail } from "@/database/schema";
 import {
   Command,
   CommandEmpty,
@@ -71,7 +71,7 @@ import { tryCatch } from "@/lib/try-catch";
 
 type Props = {
   quizId: string;
-  quiz: AdminQuiz;
+  quiz: OwnerQuizDetail;
   session: Session;
 };
 

@@ -2,26 +2,25 @@
 
 import db from "@/database/db";
 import {
-  AdminQuestion,
-  AdminQuiz,
-  PublicQuestion,
-  PublicQuiz,
+  OwnerQuizDetail,
+  OwnerQuizOverview,
+  PublicQuizDetail,
+  PublicQuizOverview,
   questions,
   quizAttempts,
   quizBookmarks,
   quizRatings,
-  QuizWithAnswers,
   quizzes,
   users,
 } from "@/database/schema";
-import { and, avg, count, desc, eq, inArray } from "drizzle-orm";
+import { and, avg, countDistinct, desc, eq } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { QuizActionError } from "@/lib/error";
 
-export const getAdminQuizzes = async (
+export const getOwnerQuizzes = async (
   userId?: string
-): Promise<AdminQuiz[]> => {
+): Promise<OwnerQuizOverview[]> => {
   try {
     const session = await auth.api.getSession({
       headers: await headers(),
@@ -31,7 +30,7 @@ export const getAdminQuizzes = async (
       throw new QuizActionError(
         "UNAUTHORIZED",
         "No active session found",
-        "getAdminQuizzes"
+        "getOwnerQuizzes"
       );
     }
 
@@ -39,7 +38,7 @@ export const getAdminQuizzes = async (
       throw new QuizActionError(
         "UNAUTHORIZED",
         "User ID mismatch or missing",
-        "getAdminQuizzes"
+        "getOwnerQuizzes"
       );
     }
 
@@ -60,49 +59,21 @@ export const getAdminQuizzes = async (
         createdAt: quizzes.createdAt,
         updatedAt: quizzes.updatedAt,
         // Aggregated data
+        questions: countDistinct(questions.id),
+        attempts: countDistinct(quizAttempts.id),
         avgRating: avg(quizRatings.rating),
-        ratingCount: count(quizRatings.id),
-        quizAttempts: count(quizAttempts.id),
+        ratings: countDistinct(quizRatings.id),
       })
       .from(quizzes)
-      .leftJoin(quizRatings, eq(quizzes.id, quizRatings.quizId))
+      .leftJoin(questions, eq(quizzes.id, questions.quizId))
       .leftJoin(quizAttempts, eq(quizzes.id, quizAttempts.quizId))
+      .leftJoin(quizRatings, eq(quizzes.id, quizRatings.quizId))
       .where(eq(quizzes.userId, userIdInt))
       .groupBy(quizzes.id)
       .orderBy(desc(quizzes.createdAt));
 
-    // Fetch questions separately for better performance
-    const quizIds = quizzesResults.map((q) => q.id);
-    const questionsResult =
-      quizIds.length > 0
-        ? await db.query.questions.findMany({
-            where: inArray(questions.quizId, quizIds),
-            columns: {
-              id: true,
-              quizId: true,
-              title: true,
-              choices: true,
-              correctAnswer: true,
-            },
-          })
-        : [];
-
-    // Group questions by quiz ID
-    const questionsByQuizId = questionsResult.reduce((acc, question) => {
-      if (!acc[question.quizId]) {
-        acc[question.quizId] = [];
-      }
-      acc[question.quizId].push({
-        id: question.id,
-        title: question.title,
-        choices: question.choices,
-        correctAnswer: question.correctAnswer,
-      });
-      return acc;
-    }, {} as Record<number, AdminQuestion[]>);
-
     // Combine results
-    const adminQuizzes: AdminQuiz[] = quizzesResults.map((quiz) => ({
+    const ownerQuizzes: OwnerQuizOverview[] = quizzesResults.map((quiz) => ({
       id: quiz.id,
       userId: quiz.userId,
       title: quiz.title,
@@ -113,15 +84,16 @@ export const getAdminQuizzes = async (
       timeLimit: quiz.timeLimit,
       createdAt: quiz.createdAt,
       updatedAt: quiz.updatedAt,
-      questions: questionsByQuizId[quiz.id] || [],
+      // Aggregate data
+      questions: quiz.questions,
       avgRating: quiz.avgRating ? Number(quiz.avgRating) : null,
-      ratingCount: quiz.ratingCount > 0 ? quiz.ratingCount : null,
-      quizAttempts: quiz.quizAttempts > 0 ? quiz.quizAttempts : null,
+      ratings: quiz.ratings > 0 ? quiz.ratings : null,
+      attempts: quiz.attempts > 0 ? quiz.attempts : null,
     }));
 
-    return adminQuizzes;
+    return ownerQuizzes;
   } catch (error) {
-    console.error("Error in getAdminQuizzes:", error);
+    console.error("Error in getOwnerQuizzes:", error);
     if (error instanceof QuizActionError) {
       throw error;
     }
@@ -129,14 +101,14 @@ export const getAdminQuizzes = async (
     throw new QuizActionError(
       "DATABASE_ERROR",
       "Failed to fetch quizzes",
-      "getAdminQuizzes"
+      "getOwnerQuizzes"
     );
   }
 };
 
 export const getPublicQuizzes = async (
   userId?: string
-): Promise<PublicQuiz[]> => {
+): Promise<PublicQuizOverview[]> => {
   try {
     const session = await auth.api.getSession({
       headers: await headers(),
@@ -178,33 +150,22 @@ export const getPublicQuizzes = async (
         userName: users.name,
         userImage: users.image,
         // Aggregated data
+        questions: countDistinct(questions.id),
         avgRating: avg(quizRatings.rating),
-        ratingCount: count(quizRatings.id),
-        quizAttempts: count(quizAttempts.id),
+        ratings: countDistinct(quizRatings.id),
+        attempts: countDistinct(quizAttempts.id),
       })
       .from(quizzes)
       .innerJoin(users, eq(quizzes.userId, users.id))
-      .leftJoin(quizRatings, eq(quizzes.id, quizRatings.quizId))
+      .leftJoin(questions, eq(quizzes.id, questions.quizId))
       .leftJoin(quizAttempts, eq(quizzes.id, quizAttempts.quizId))
+      .leftJoin(quizRatings, eq(quizzes.id, quizRatings.quizId))
       .groupBy(quizzes.id, users.id)
       .orderBy(desc(quizzes.createdAt));
 
     if (quizResults.length === 0) {
       return [];
     }
-
-    const quizIds = quizResults.map((q) => q.id);
-
-    // Batch fetch questions (only public fields)
-    const questionsResult = await db.query.questions.findMany({
-      where: inArray(questions.quizId, quizIds),
-      columns: {
-        id: true,
-        quizId: true,
-        title: true,
-        choices: true,
-      },
-    });
 
     // Batch fetch user bookmarks
     const userBookmarks = await db.query.quizBookmarks.findMany({
@@ -214,25 +175,12 @@ export const getPublicQuizzes = async (
       },
     });
 
-    // Create efficient lookup structures
-    const questionsByQuizId = questionsResult.reduce((acc, question) => {
-      if (!acc[question.quizId]) {
-        acc[question.quizId] = [];
-      }
-      acc[question.quizId].push({
-        id: question.id,
-        title: question.title,
-        choices: question.choices,
-      });
-      return acc;
-    }, {} as Record<number, PublicQuestion[]>);
-
     const bookmarkedQuizIds = new Set(
       userBookmarks.map((bookmark) => bookmark.quizId)
     );
 
     // Combine all results
-    const publicQuizzes: PublicQuiz[] = quizResults.map((quiz) => ({
+    const publicQuizzes: PublicQuizOverview[] = quizResults.map((quiz) => ({
       id: quiz.id,
       userId: quiz.userId,
       title: quiz.title,
@@ -243,15 +191,16 @@ export const getPublicQuizzes = async (
       timeLimit: quiz.timeLimit,
       createdAt: quiz.createdAt,
       updatedAt: quiz.updatedAt,
-      questions: questionsByQuizId[quiz.id] || [],
       user: {
         name: quiz.userName,
         image: quiz.userImage,
       },
+      // Aggregated data
       isBookmarked: bookmarkedQuizIds.has(quiz.id),
+      questions: quiz.questions,
+      attempts: quiz.attempts > 0 ? quiz.attempts : null,
       avgRating: quiz.avgRating ? Number(quiz.avgRating) : null,
-      ratingCount: quiz.ratingCount > 0 ? quiz.ratingCount : null,
-      quizAttempts: quiz.quizAttempts > 0 ? quiz.quizAttempts : null,
+      ratings: quiz.ratings > 0 ? quiz.ratings : null,
     }));
 
     return publicQuizzes;
@@ -268,10 +217,10 @@ export const getPublicQuizzes = async (
   }
 };
 
-export const getAdminQuiz = async (
+export const getOwnerQuiz = async (
   quizId: number,
   userId?: string
-): Promise<AdminQuiz> => {
+): Promise<OwnerQuizDetail> => {
   try {
     const session = await auth.api.getSession({
       headers: await headers(),
@@ -281,7 +230,7 @@ export const getAdminQuiz = async (
       throw new QuizActionError(
         "UNAUTHORIZED",
         "No active session found",
-        "getAdminQuiz"
+        "getOwnerQuiz"
       );
     }
 
@@ -289,7 +238,7 @@ export const getAdminQuiz = async (
       throw new QuizActionError(
         "UNAUTHORIZED",
         "User ID mismatch or missing",
-        "getAdminQuiz"
+        "getOwnerQuiz"
       );
     }
 
@@ -297,7 +246,7 @@ export const getAdminQuiz = async (
       throw new QuizActionError(
         "VALIDATION_ERROR", // Better error type for invalid input
         "Invalid quiz ID",
-        "getAdminQuiz"
+        "getOwnerQuiz"
       );
     }
 
@@ -319,8 +268,8 @@ export const getAdminQuiz = async (
         updatedAt: quizzes.updatedAt,
         // Aggregated data
         avgRating: avg(quizRatings.rating),
-        ratingCount: count(quizRatings.id),
-        quizAttempts: count(quizAttempts.id),
+        ratings: countDistinct(quizRatings.id),
+        attempts: countDistinct(quizAttempts.id),
       })
       .from(quizzes)
       .leftJoin(quizRatings, eq(quizzes.id, quizRatings.quizId))
@@ -331,7 +280,7 @@ export const getAdminQuiz = async (
 
     // Check if quiz exists and belongs to user
     if (!quizResults || quizResults.length === 0) {
-      throw new QuizActionError("NOT_FOUND", "Quiz not found", "getAdminQuiz");
+      throw new QuizActionError("NOT_FOUND", "Quiz not found", "getOwnerQuiz");
     }
 
     const quiz = quizResults[0];
@@ -348,8 +297,8 @@ export const getAdminQuiz = async (
       orderBy: [questions.id], // Ensure consistent ordering
     });
 
-    // Construct the AdminQuiz object
-    const adminQuiz: AdminQuiz = {
+    // Construct the OwnerQuiz object
+    const OwnerQuiz: OwnerQuizDetail = {
       id: quiz.id,
       userId: quiz.userId,
       title: quiz.title,
@@ -366,14 +315,14 @@ export const getAdminQuiz = async (
         choices: q.choices,
         correctAnswer: q.correctAnswer,
       })),
+      attempts: quiz.attempts > 0 ? quiz.attempts : null,
       avgRating: quiz.avgRating ? Number(quiz.avgRating) : null,
-      ratingCount: quiz.ratingCount > 0 ? quiz.ratingCount : null,
-      quizAttempts: quiz.quizAttempts > 0 ? quiz.quizAttempts : null,
+      ratings: quiz.ratings > 0 ? quiz.ratings : null,
     };
 
-    return adminQuiz;
+    return OwnerQuiz;
   } catch (error) {
-    console.error("Error in getAdminQuiz:", error);
+    console.error("Error in getOwnerQuiz:", error);
 
     if (error instanceof QuizActionError) {
       throw error;
@@ -382,7 +331,7 @@ export const getAdminQuiz = async (
     throw new QuizActionError(
       "DATABASE_ERROR",
       "Failed to fetch quiz",
-      "getAdminQuiz"
+      "getOwnerQuiz"
     );
   }
 };
@@ -390,7 +339,7 @@ export const getAdminQuiz = async (
 export async function getPublicQuiz(
   quizId: number,
   userId?: string
-): Promise<PublicQuiz> {
+): Promise<PublicQuizDetail> {
   try {
     const session = await auth.api.getSession({
       headers: await headers(),
@@ -440,11 +389,11 @@ export async function getPublicQuiz(
         userName: users.name,
         userImage: users.image,
         // Aggregated data
+        attempts: countDistinct(quizAttempts.id),
         avgRating: avg(quizRatings.rating),
-        ratingCount: count(quizRatings.id),
-        quizAttempts: count(quizAttempts.id),
+        ratings: countDistinct(quizRatings.id),
         // Bookmark check
-        isBookmarked: count(quizBookmarks.id),
+        isBookmarked: countDistinct(quizBookmarks.id),
       })
       .from(quizzes)
       .innerJoin(users, eq(quizzes.userId, users.id))
@@ -479,7 +428,7 @@ export async function getPublicQuiz(
     });
 
     // Construct the PublicQuiz object
-    const publicQuiz: PublicQuiz = {
+    const publicQuiz: PublicQuizDetail = {
       id: quiz.id,
       userId: quiz.userId,
       title: quiz.title,
@@ -501,8 +450,8 @@ export async function getPublicQuiz(
       },
       isBookmarked: quiz.isBookmarked > 0,
       avgRating: quiz.avgRating ? Number(quiz.avgRating) : null,
-      ratingCount: quiz.ratingCount > 0 ? quiz.ratingCount : null,
-      quizAttempts: quiz.quizAttempts > 0 ? quiz.quizAttempts : null,
+      ratings: quiz.ratings > 0 ? quiz.ratings : null,
+      attempts: quiz.attempts > 0 ? quiz.attempts : null,
     };
 
     return publicQuiz;
@@ -520,74 +469,3 @@ export async function getPublicQuiz(
     );
   }
 }
-
-export const getQuizWithAnswers = async (
-  quizId: number,
-  userId?: string
-): Promise<QuizWithAnswers> => {
-  try {
-    const session = await auth.api.getSession({
-      headers: await headers(),
-    });
-
-    if (!session) {
-      throw new QuizActionError(
-        "UNAUTHORIZED",
-        "No active session found",
-        "getQuizWithAnswers"
-      );
-    }
-
-    if (!userId || userId !== session.user.id) {
-      throw new QuizActionError(
-        "UNAUTHORIZED",
-        "User ID mismatch or missing",
-        "getQuizWithAnswers"
-      );
-    }
-
-    if (!quizId || isNaN(quizId)) {
-      throw new QuizActionError(
-        "UNAUTHORIZED",
-        "Invalid quiz ID",
-        "getQuizWithAnswers"
-      );
-    }
-
-    const quiz = await db.query.quizzes.findFirst({
-      where: eq(quizzes.id, quizId),
-      with: {
-        questions: {
-          columns: {
-            id: true,
-            title: true,
-            choices: true,
-            correctAnswer: true,
-          },
-        },
-      },
-    });
-
-    if (!quiz) {
-      throw new QuizActionError(
-        "NOT_FOUND",
-        "Quiz not found",
-        "getQuizWithAnswers"
-      );
-    }
-
-    return quiz;
-  } catch (error) {
-    console.error("Error in getQuizWithAnswers:", error);
-
-    if (error instanceof QuizActionError) {
-      throw error;
-    }
-
-    throw new QuizActionError(
-      "DATABASE_ERROR",
-      "Failed to fetch quiz",
-      "getQuizWithAnswers"
-    );
-  }
-};
