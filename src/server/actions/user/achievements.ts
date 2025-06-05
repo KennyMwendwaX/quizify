@@ -1,10 +1,10 @@
 "use server";
 
-import db from "@/database/db";
-import { quizAttempts, userAchievements } from "@/database/schema";
-import { UserActionError } from "@/lib/error";
+import db from "@/server/database";
+import { quizAttempts, userAchievements } from "@/server/database/schema";
+import { UserActionError } from "@/server/utils/error";
 import { UpdatedAchievement } from "@/lib/types";
-import { XP_CONFIG } from "@/lib/xp-utils";
+import { XP_CONFIG } from "@/server/utils/xp";
 import { eq } from "drizzle-orm";
 
 export async function checkAndUpdateAchievements(

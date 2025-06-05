@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
-import { getOwnerQuiz } from "@/server/quiz/get";
+import { getOwnerQuiz } from "@/server/actions/quiz/read";
 import { getUserQuizAttempt } from "@/server/user/quiz-attempts";
 import QuizReview from "./components/quiz-review";
 import { tryCatch } from "@/lib/try-catch";

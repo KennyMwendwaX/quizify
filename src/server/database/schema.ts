@@ -298,6 +298,7 @@ export const userAchievementsRelations = relations(
 );
 
 // Base types
+export type User = typeof users.$inferSelect;
 export type Quiz = typeof quizzes.$inferSelect;
 export type Question = typeof questions.$inferSelect;
 export type QuizAttempt = typeof quizAttempts.$inferSelect;

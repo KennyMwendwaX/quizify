@@ -1,9 +1,8 @@
 "use server";
 
-import db from "@/database/db";
-import { users } from "@/database/schema";
-import { eq } from "drizzle-orm";
-import { UserActionError } from "@/lib/error";
+import { UserActionError } from "@/server/utils/error";
+import { selectUserById } from "@/server/database/queries/user/select";
+import { updateUserStreakData } from "@/server/database/queries/user/update";
 
 type UpdateUserStreakResponse = {
   currentStreak?: number;
@@ -14,9 +13,7 @@ export async function updateUserStreak(
   userId: number
 ): Promise<UpdateUserStreakResponse> {
   try {
-    const user = await db.query.users.findFirst({
-      where: eq(users.id, userId),
-    });
+    const user = await selectUserById(userId);
 
     if (!user) {
       throw new UserActionError(
@@ -31,14 +28,11 @@ export async function updateUserStreak(
 
     // If this is the first activity
     if (!user.lastActivityDate) {
-      await db
-        .update(users)
-        .set({
-          lastActivityDate: today,
-          currentStreak: 1,
-          bestStreak: 1,
-        })
-        .where(eq(users.id, userId));
+      await updateUserStreakData(userId, {
+        lastActivityDate: today,
+        currentStreak: 1,
+        bestStreak: 1,
+      });
 
       return {
         currentStreak: 1,
@@ -64,10 +58,9 @@ export async function updateUserStreak(
 
     // If activity is on the same day, no streak update needed
     if (diffInDays === 0) {
-      await db
-        .update(users)
-        .set({ lastActivityDate: today })
-        .where(eq(users.id, userId));
+      await updateUserStreakData(userId, {
+        lastActivityDate: today,
+      });
 
       return {
         currentStreak: newCurrentStreak,
@@ -88,14 +81,11 @@ export async function updateUserStreak(
     }
 
     // Update user streak data
-    await db
-      .update(users)
-      .set({
-        lastActivityDate: today,
-        currentStreak: newCurrentStreak,
-        bestStreak: newBestStreak,
-      })
-      .where(eq(users.id, userId));
+    await updateUserStreakData(userId, {
+      lastActivityDate: today,
+      currentStreak: newCurrentStreak,
+      bestStreak: newBestStreak,
+    });
 
     return {
       currentStreak: newCurrentStreak,
@@ -126,13 +116,7 @@ export async function resetStreak(
   userId: number
 ): Promise<ResetStreakResponse> {
   try {
-    const user = await db.query.users.findFirst({
-      where: eq(users.id, userId),
-      columns: {
-        currentStreak: true,
-        lastActivityDate: true,
-      },
-    });
+    const user = await selectUserById(userId);
 
     if (!user) {
       throw new UserActionError("NOT_FOUND", "User not found", "resetStreak");
@@ -164,10 +148,10 @@ export async function resetStreak(
 
     // Reset streak only if more than 1 day has passed
     if (diffInDays > 1) {
-      await db
-        .update(users)
-        .set({ currentStreak: 0 })
-        .where(eq(users.id, userId));
+      await updateUserStreakData(userId, {
+        lastActivityDate: today,
+        currentStreak: 0,
+      });
 
       return {
         wasReset: true,

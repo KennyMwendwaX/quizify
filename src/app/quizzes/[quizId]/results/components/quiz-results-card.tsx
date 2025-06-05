@@ -5,7 +5,7 @@ import type React from "react";
 import { useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardTitle } from "@/components/ui/card";
-import type { OwnerQuizDetail, QuizAttempt } from "@/database/schema";
+import type { OwnerQuizDetail, QuizAttempt } from "@/server/database/schema";
 import { cn } from "@/lib/utils";
 import {
   Award,
@@ -26,7 +26,7 @@ import { useRouter } from "next/navigation";
 import { StarRating } from "./star-rating";
 import { toast } from "sonner";
 import { tryCatch } from "@/lib/try-catch";
-import { submitQuizRating } from "@/server/quiz/rating";
+import { submitQuizRating } from "@/server/actions/quiz/rating";
 
 interface StatCardProps {
   icon: React.ReactNode;

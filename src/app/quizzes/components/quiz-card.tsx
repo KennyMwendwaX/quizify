@@ -22,11 +22,11 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import type { PublicQuizOverview } from "@/database/schema";
+import type { PublicQuizOverview } from "@/server/database/schema";
 import { formatSecondsToMinutes } from "@/lib/format-time";
 import { toast } from "sonner";
 import { tryCatch } from "@/lib/try-catch";
-import { toggleQuizBookmark } from "@/server/user/quiz-bookmarks";
+import { toggleQuizBookmark } from "@/server/actions/quiz/bookmark";
 
 type QuizCardProps = {
   quiz: PublicQuizOverview;

@@ -19,7 +19,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Session } from "@/lib/auth";
 import {
   CategoryPerformance,
-  RecentQuiz,
+  UserRecentAttempt,
   UserStats,
   WeeklyProgress,
 } from "@/lib/types";
@@ -47,7 +47,7 @@ import { formatSecondsToMinutes } from "@/lib/format-time";
 type Props = {
   session: Session;
   stats: UserStats;
-  recentQuizzes: RecentQuiz[];
+  recentQuizzes: UserRecentAttempt[];
   categoryPerformance: CategoryPerformance[];
   weeklyProgress: WeeklyProgress[];
 };

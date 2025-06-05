@@ -36,7 +36,7 @@ import {
 import { quizFormSchema, QuizFormValues } from "@/lib/quiz-form-schema";
 import { useTransition } from "react";
 import { toast } from "sonner";
-import { updateQuiz } from "@/server/quiz/update";
+import { updateQuiz } from "@/server/actions/quiz/update";
 import { useRouter } from "next/navigation";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
 import {
@@ -47,7 +47,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Session } from "@/lib/auth";
-import { OwnerQuizDetail } from "@/database/schema";
+import { OwnerQuizDetail } from "@/server/database/schema";
 import {
   Command,
   CommandEmpty,
@@ -405,7 +405,6 @@ export default function EditQuizForm({ quizId, quiz, session }: Props) {
                           onClick={() => remove(qIndex)}
                           className="text-destructive hover:text-destructive/90 hover:bg-red-50 text-sm">
                           <Trash2 className="w-4 h-4 mr-1" />
-                          Remove Question
                         </Button>
                       </div>
                     </AccordionTrigger>

@@ -2,10 +2,9 @@
 
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
-import db from "@/database/db";
-import { eq, desc } from "drizzle-orm";
-import { quizAttempts, QuizLeaderboard } from "@/database/schema";
-import { QuizActionError } from "@/lib/error";
+import { QuizLeaderboard } from "@/server/database/schema";
+import { QuizActionError } from "@/server/utils/error";
+import { selectQuizLeaderboard } from "@/server/database/queries/quiz/select";
 
 export const getQuizLeaderboard = async (
   quizId: number
@@ -31,24 +30,7 @@ export const getQuizLeaderboard = async (
       );
     }
 
-    const leaderboardData = await db.query.quizAttempts.findMany({
-      where: eq(quizAttempts.quizId, quizId),
-      orderBy: desc(quizAttempts.score),
-      limit: 5,
-      with: {
-        user: {
-          columns: {
-            name: true,
-            image: true,
-          },
-        },
-      },
-    });
-
-    const leaderboard = leaderboardData.map((entry, index) => ({
-      ...entry,
-      rank: index + 1,
-    }));
+    const leaderboard = await selectQuizLeaderboard(quizId);
 
     return leaderboard;
   } catch (error) {

@@ -42,7 +42,11 @@ import {
 } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
-import { PublicQuiz, QuizAttempt, QuizDifficulty } from "@/database/schema";
+import {
+  PublicQuiz,
+  QuizAttempt,
+  QuizDifficulty,
+} from "@/server/database/schema";
 import { Session } from "@/lib/auth";
 import { formatSecondsToMinutes } from "@/lib/format-time";
 

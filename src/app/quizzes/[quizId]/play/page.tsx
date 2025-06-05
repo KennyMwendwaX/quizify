@@ -1,7 +1,7 @@
 import { tryCatch } from "@/lib/try-catch";
 import QuizQuestion from "./components/quiz-question";
 import { auth } from "@/lib/auth";
-import { getPublicQuiz } from "@/server/quiz/get";
+import { getPublicQuiz } from "@/server/actions/quiz/read";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 

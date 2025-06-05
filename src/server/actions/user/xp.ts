@@ -1,21 +1,15 @@
 "use server";
 
-import db from "@/database/db";
-import { users } from "@/database/schema";
-import { eq } from "drizzle-orm";
-import { UserActionError } from "@/lib/error";
+import { UserActionError } from "@/server/utils/error";
+import { selectUserById } from "@/server/database/queries/user/select";
+import { updateUserTotalXP } from "@/server/database/queries/user/update";
 
 export async function updateUserXP(
   userId: number,
   xpEarned: number
 ): Promise<number> {
   try {
-    const user = await db.query.users.findFirst({
-      where: eq(users.id, userId),
-      columns: {
-        totalXp: true,
-      },
-    });
+    const user = await selectUserById(userId);
 
     if (!user) {
       throw new UserActionError("NOT_FOUND", "User not found", "updateUserXP");
@@ -23,12 +17,7 @@ export async function updateUserXP(
 
     const newTotalXp = user.totalXp + xpEarned;
 
-    await db
-      .update(users)
-      .set({
-        totalXp: newTotalXp,
-      })
-      .where(eq(users.id, userId));
+    await updateUserTotalXP(userId, newTotalXp);
 
     return newTotalXp;
   } catch (error) {

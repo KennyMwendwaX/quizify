@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import type { PublicQuiz, QuizDifficulty } from "@/database/schema";
+import type { PublicQuiz, QuizDifficulty } from "@/server/database/schema";
 import { motion } from "motion/react";
 import QuizCard from "./quiz-card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";

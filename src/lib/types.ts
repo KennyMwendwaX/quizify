@@ -1,17 +1,6 @@
-import { QuizDifficulty } from "@/database/schema";
+import { QuizDifficulty } from "@/server/database/schema";
 
-export type UserStats = {
-  totalQuizzesTaken: number;
-  averageScore: number;
-  topCategory: string;
-  completionRate: number;
-  bestStreak: number;
-  currentStreak: number;
-  averageTimePerQuiz: number;
-  totalXP: number;
-};
-
-export type RecentQuiz = {
+export type UserRecentAttempt = {
   id: number;
   title: string;
   category: string;
@@ -40,6 +29,17 @@ export type QuizBookmark = {
       image: string | null;
     };
   };
+};
+
+export type UserStats = {
+  totalQuizzesTaken: number;
+  averageScore: number;
+  topCategory: string;
+  completionRate: number;
+  bestStreak: number;
+  averageTimePerQuiz: number;
+  totalXP: number;
+  currentStreak: number;
 };
 
 export type CategoryPerformance = {

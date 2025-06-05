@@ -1,12 +1,11 @@
 "use server";
 
-import db from "@/database/db";
-import { quizRatings, quizzes, users } from "@/database/schema";
-import { eq, and } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
-import { QuizActionError } from "@/lib/error";
-import { revalidatePath } from "next/cache";
+import { QuizActionError } from "@/server/utils/error";
+import { checkUserExists } from "@/server/database/queries/user/select";
+import { checkQuizExists } from "@/server/database/queries/quiz/select";
+import { upsertQuizRating } from "@/server/database/queries/ratings/update";
 
 export const submitQuizRating = async (
   quizId: number,
@@ -43,12 +42,7 @@ export const submitQuizRating = async (
       );
     }
 
-    const user = await db.query.users.findFirst({
-      where: eq(users.id, parseInt(userId)),
-      columns: {
-        id: true,
-      },
-    });
+    const user = await checkUserExists(parseInt(userId));
 
     if (!user) {
       throw new QuizActionError(
@@ -58,12 +52,7 @@ export const submitQuizRating = async (
       );
     }
 
-    const quiz = await db.query.quizzes.findFirst({
-      where: eq(quizzes.id, quizId),
-      columns: {
-        id: true,
-      },
-    });
+    const quiz = await checkQuizExists(quizId);
 
     if (!quiz) {
       throw new QuizActionError(
@@ -73,43 +62,8 @@ export const submitQuizRating = async (
       );
     }
 
-    // Check if user has already rated this quiz
-    const existingRating = await db.query.quizRatings.findFirst({
-      where: and(
-        eq(quizRatings.userId, parseInt(userId)),
-        eq(quizRatings.quizId, quizId)
-      ),
-    });
-
-    if (existingRating) {
-      // Update existing rating
-      await db
-        .update(quizRatings)
-        .set({
-          rating: rating,
-          updatedAt: new Date(),
-        })
-        .where(
-          and(
-            eq(quizRatings.userId, parseInt(userId)),
-            eq(quizRatings.quizId, quizId)
-          )
-        );
-    } else {
-      // Create new rating
-      await db.insert(quizRatings).values({
-        userId: parseInt(userId),
-        quizId: quizId,
-        rating: rating,
-      });
-    }
-
-    revalidatePath(`/quizzes/${quizId}`);
-    revalidatePath("/explore");
-
-    return {
-      success: true,
-    };
+    await upsertQuizRating(quizId, parseInt(userId), rating);
+    return { success: true };
   } catch (error) {
     console.error("Error in submitQuizRating:", error);
 

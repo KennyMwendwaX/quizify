@@ -2,7 +2,7 @@ import { auth } from "@/lib/auth";
 import QuizzesContent from "./components/quizzes-content";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { getPublicQuizzes } from "@/server/quiz/get";
+import { getPublicQuizzes } from "@/server/actions/quiz/read";
 import { tryCatch } from "@/lib/try-catch";
 
 export default async function QuizzesPage() {

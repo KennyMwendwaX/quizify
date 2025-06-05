@@ -6,7 +6,7 @@ import React, {
   useReducer,
   useTransition,
 } from "react";
-import { PublicQuizDetail } from "@/database/schema";
+import { PublicQuizDetail } from "@/server/database/schema";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
@@ -19,7 +19,7 @@ import {
 import { Progress } from "@/components/ui/progress";
 import { Clock, ChevronLeft, ChevronRight, Flag } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { submitQuizAttempt } from "@/server/quiz/submit";
+import { submitQuizAttempt } from "@/server/actions/quiz/attempt";
 import { toast } from "sonner";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
 import { Session } from "@/lib/auth";

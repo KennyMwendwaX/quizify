@@ -2,11 +2,13 @@ import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import DashboardContent from "./components/dashboard-content";
-import { getUserStats } from "@/server/user/stats";
-import { getRecentQuizzes } from "@/server/user/recent-quizzes";
-import { getCategoryPerformance } from "@/server/user/category-performance";
-import { getWeeklyProgress } from "@/server/user/weekly-progress";
+import { getUserStats } from "@/server/actions/user/stats";
+import {
+  getCategoryPerformance,
+  getWeeklyProgress,
+} from "@/server/actions/user/analytics";
 import { tryCatch } from "@/lib/try-catch";
+import { getRecentQuizAttempts } from "@/server/actions/quiz/attempt";
 
 export default async function DashboardPage() {
   const session = await auth.api.getSession({
@@ -25,7 +27,7 @@ export default async function DashboardPage() {
   }
 
   const { data: recentQuizzes, error: recentQuizzesError } = await tryCatch(
-    getRecentQuizzes(session.user.id)
+    getRecentQuizAttempts(session.user.id, 3)
   );
   if (recentQuizzesError) {
     throw new Error(recentQuizzesError.message);

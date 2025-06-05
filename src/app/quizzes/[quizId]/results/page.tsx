@@ -3,7 +3,7 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import QuizResultsCard from "./components/quiz-results-card";
 import { getUserQuizAttempt } from "@/server/user/quiz-attempts";
-import { getOwnerQuiz } from "@/server/quiz/get";
+import { getOwnerQuiz } from "@/server/actions/quiz/read";
 import { tryCatch } from "@/lib/try-catch";
 
 type Props = {

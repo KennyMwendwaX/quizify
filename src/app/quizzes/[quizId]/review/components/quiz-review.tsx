@@ -30,7 +30,7 @@ import type {
   OwnerQuizDetail,
   QuizAttempt,
   QuizDifficulty,
-} from "@/database/schema";
+} from "@/server/database/schema";
 
 interface QuizReviewProps {
   quiz: OwnerQuizDetail;

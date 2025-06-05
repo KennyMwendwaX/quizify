@@ -3,9 +3,9 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import QuizDetails from "./components/quiz-details";
-import { getPublicQuiz } from "@/server/quiz/get";
+import { getPublicQuiz } from "@/server/actions/quiz/read";
 import { getUserQuizAttempts } from "@/server/user/quiz-attempts";
-import { getQuizLeaderboard } from "@/server/quiz/leaderboard";
+import { getQuizLeaderboard } from "@/server/actions/quiz/leaderboard";
 import { tryCatch } from "@/lib/try-catch";
 
 type Props = {

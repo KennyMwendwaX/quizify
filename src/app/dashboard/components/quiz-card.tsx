@@ -1,9 +1,9 @@
 "use client";
 
 import { formatSecondsToMinutes } from "@/lib/format-time";
-import { RecentQuiz } from "@/lib/types";
+import { UserRecentAttempt } from "@/lib/types";
 
-export default function QuizCard({ quiz }: { quiz: RecentQuiz }) {
+export default function QuizCard({ quiz }: { quiz: UserRecentAttempt }) {
   return (
     <div className="flex items-center justify-between p-3 bg-primary/5 rounded-lg hover:bg-primary/10 transition-colors">
       <div>
