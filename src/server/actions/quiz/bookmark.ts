@@ -4,10 +4,10 @@ import { auth } from "@/lib/auth";
 import { QuizActionError } from "@/server/utils/error";
 import { QuizBookmark } from "@/lib/types";
 import { headers } from "next/headers";
-import { selectQuizBookmarksByUserId } from "@/server/database/queries/bookmarks/select";
+import { selectBookmarkedQuizzes } from "@/server/database/queries/bookmarks/select";
 import { toggleQuizBookmarkQuery } from "@/server/database/queries/bookmarks/update";
 
-export async function getUserQuizBookmarks(
+export async function getUserBookmarkedQuizzes(
   userId?: string
 ): Promise<QuizBookmark[]> {
   try {
@@ -19,7 +19,7 @@ export async function getUserQuizBookmarks(
       throw new QuizActionError(
         "UNAUTHORIZED",
         "No active session found",
-        "getUserQuizBookmarks"
+        "getUserBookmarkedQuizzes"
       );
     }
 
@@ -27,12 +27,12 @@ export async function getUserQuizBookmarks(
       throw new QuizActionError(
         "UNAUTHORIZED",
         "User ID mismatch or missing",
-        "getUserQuizBookmarks"
+        "getUserBookmarkedQuizzes"
       );
     }
 
     // Get bookmarks with quiz and user data
-    const bookmarks = await selectQuizBookmarksByUserId(parseInt(userId));
+    const bookmarks = await selectBookmarkedQuizzes(parseInt(userId));
 
     return bookmarks;
   } catch (error) {
@@ -42,7 +42,7 @@ export async function getUserQuizBookmarks(
     throw new QuizActionError(
       "DATABASE_ERROR",
       "Failed to fetch user quiz bookmarks",
-      "getUserQuizBookmarks"
+      "getUserBookmarkedQuizzes"
     );
   }
 }

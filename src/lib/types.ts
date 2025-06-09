@@ -1,4 +1,4 @@
-import { QuizDifficulty } from "@/server/database/schema";
+import { PublicQuizOverview, QuizDifficulty } from "@/server/database/schema";
 
 export type UserRecentAttempt = {
   id: number;
@@ -12,23 +12,8 @@ export type UserRecentAttempt = {
 
 export type QuizBookmark = {
   id: number;
-  quizId: number;
-  userId: number;
   createdAt: Date;
-  updatedAt: Date;
-  quiz: {
-    id: number;
-    title: string;
-    description: string;
-    category: string;
-    difficulty: "BEGINNER" | "INTERMEDIATE" | "ADVANCED";
-    rating: number;
-    createdAt: Date;
-    user: {
-      name: string;
-      image: string | null;
-    };
-  };
+  quiz: PublicQuizOverview;
 };
 
 export type UserStats = {

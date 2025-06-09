@@ -155,7 +155,7 @@ export default function DashboardContent({
                     <ActionButton
                       href="/quizzes/?tab=bookmarks"
                       icon={Bookmark}>
-                      Bookmarked
+                      Bookmarks
                     </ActionButton>
                   </CardContent>
                 </Card>
