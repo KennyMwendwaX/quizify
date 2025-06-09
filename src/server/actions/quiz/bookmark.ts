@@ -2,14 +2,14 @@
 
 import { auth } from "@/lib/auth";
 import { QuizActionError } from "@/server/utils/error";
-import { QuizBookmark } from "@/lib/types";
 import { headers } from "next/headers";
 import { selectBookmarkedQuizzes } from "@/server/database/queries/bookmarks/select";
 import { toggleQuizBookmarkQuery } from "@/server/database/queries/bookmarks/update";
+import { PublicQuizOverview } from "@/server/database/schema";
 
 export async function getUserBookmarkedQuizzes(
   userId?: string
-): Promise<QuizBookmark[]> {
+): Promise<PublicQuizOverview[]> {
   try {
     const session = await auth.api.getSession({
       headers: await headers(),

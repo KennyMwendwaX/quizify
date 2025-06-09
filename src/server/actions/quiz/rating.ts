@@ -12,7 +12,7 @@ import { selectTopRatedQuizzes } from "@/server/database/queries/ratings/select"
 export const getTopRatedQuizzes = async (
   userId?: string,
   limit: number = 10,
-  minRatings: number = 3 // Minimum number of ratings required to appear in top rated
+  minRatings: number = 1
 ): Promise<PublicQuizOverview[]> => {
   try {
     const session = await auth.api.getSession({
@@ -40,6 +40,7 @@ export const getTopRatedQuizzes = async (
       limit,
       minRatings
     );
+
     return quizzes;
   } catch (error) {
     console.error("Error in getTopRatedQuizzes:", error);

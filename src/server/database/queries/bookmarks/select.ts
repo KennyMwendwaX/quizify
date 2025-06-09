@@ -1,18 +1,18 @@
 "use server";
 
-import { QuizBookmark } from "@/lib/types";
 import db from "@/server/database";
 import {
   quizBookmarks,
   quizRatings,
   quizAttempts,
   questions,
+  PublicQuizOverview,
 } from "@/server/database/schema";
 import { avg, eq, inArray, count } from "drizzle-orm";
 
 export async function selectBookmarkedQuizzes(
   userId: number
-): Promise<QuizBookmark[]> {
+): Promise<PublicQuizOverview[]> {
   // Get bookmarks with quiz and user data
   const bookmarks = await db.query.quizBookmarks.findMany({
     where: eq(quizBookmarks.userId, userId),
@@ -106,15 +106,13 @@ export async function selectBookmarkedQuizzes(
   });
 
   // Data transformation logic
-  const transformedBookmarks: QuizBookmark[] = bookmarks.map((bookmark) => {
-    const ratingData = ratingsMap.get(bookmark.quiz.id);
-    const questionCount = questionCountMap.get(bookmark.quiz.id) || 0;
-    const attemptCount = attemptCountMap.get(bookmark.quiz.id) || 0;
+  const transformedBookmarks: PublicQuizOverview[] = bookmarks.map(
+    (bookmark) => {
+      const ratingData = ratingsMap.get(bookmark.quiz.id);
+      const questionCount = questionCountMap.get(bookmark.quiz.id) || 0;
+      const attemptCount = attemptCountMap.get(bookmark.quiz.id) || 0;
 
-    return {
-      id: bookmark.id,
-      createdAt: bookmark.createdAt,
-      quiz: {
+      return {
         id: bookmark.quiz.id,
         createdAt: bookmark.quiz.createdAt,
         updatedAt: bookmark.quiz.updatedAt,
@@ -134,9 +132,9 @@ export async function selectBookmarkedQuizzes(
           image: bookmark.quiz.user.image,
         },
         isBookmarked: true, // Since these are bookmarked quizzes, this is always true
-      },
-    };
-  });
+      };
+    }
+  );
 
   return transformedBookmarks;
 }

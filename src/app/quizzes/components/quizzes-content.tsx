@@ -17,7 +17,6 @@ import type { PublicQuizOverview } from "@/server/database/schema";
 import { motion } from "motion/react";
 import QuizCard from "./quiz-card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { QuizBookmark } from "@/lib/types";
 import {
   difficultyIcons,
   getDifficultyConfig,
@@ -30,7 +29,7 @@ export default function QuizzesContent({
 }: {
   quizzes: PublicQuizOverview[];
   topRatedQuizzes: PublicQuizOverview[];
-  bookmarkedQuizzes: QuizBookmark[];
+  bookmarkedQuizzes: PublicQuizOverview[];
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -44,14 +43,21 @@ export default function QuizzesContent({
     const search = searchParams.get("search") || "";
     const difficulty = searchParams.get("difficulty") || "all";
     const sort = searchParams.get("sort") || "date_desc";
+    const tab = searchParams.get("tab") || "all";
 
     setSearchTerm(search);
     setDifficultyFilter(difficulty);
     setSortBy(sort);
+    setActiveTab(tab);
   }, [searchParams]);
 
   const updateUrlParams = useCallback(
-    (newSearch: string, newDifficulty: string, newSort: string) => {
+    (
+      newSearch: string,
+      newDifficulty: string,
+      newSort: string,
+      newTab?: string
+    ) => {
       const params = new URLSearchParams(searchParams);
 
       if (newSearch) {
@@ -72,14 +78,22 @@ export default function QuizzesContent({
         params.delete("sort");
       }
 
-      // Create the new URL based on the current pathname (not just ".")
+      // Handle tab parameter
+      const tabToSet = newTab !== undefined ? newTab : activeTab;
+      if (tabToSet && tabToSet !== "all") {
+        params.set("tab", tabToSet);
+      } else {
+        params.delete("tab");
+      }
+
+      // Create the new URL based on the current pathname
       const queryString = params.toString();
       const currentPath = window.location.pathname;
       router.push(queryString ? `${currentPath}?${queryString}` : currentPath, {
         scroll: false,
       });
     },
-    [router, searchParams]
+    [router, searchParams, activeTab]
   );
 
   const handleDifficultyChange = useCallback(
@@ -98,12 +112,28 @@ export default function QuizzesContent({
     [setSortBy, updateUrlParams, searchTerm, difficultyFilter]
   );
 
-  const handleTabChange = useCallback((value: string) => {
-    setActiveTab(value);
-  }, []);
+  const handleTabChange = useCallback(
+    (value: string) => {
+      setActiveTab(value);
+      updateUrlParams(searchTerm, difficultyFilter, sortBy, value);
+    },
+    [searchTerm, difficultyFilter, sortBy, updateUrlParams]
+  );
+
+  // Get the current quiz list based on active tab
+  const getCurrentQuizList = useMemo(() => {
+    switch (activeTab) {
+      case "top-rated":
+        return topRatedQuizzes;
+      case "bookmarks":
+        return bookmarkedQuizzes;
+      default:
+        return quizzes;
+    }
+  }, [activeTab, quizzes, topRatedQuizzes, bookmarkedQuizzes]);
 
   const filteredAndSortedQuizzes = useMemo(() => {
-    return quizzes
+    return getCurrentQuizList
       .filter((quiz) => {
         const matchesSearch = quiz.title
           .toLowerCase()
@@ -130,7 +160,7 @@ export default function QuizzesContent({
             return 0;
         }
       });
-  }, [quizzes, searchTerm, difficultyFilter, sortBy]);
+  }, [getCurrentQuizList, searchTerm, difficultyFilter, sortBy]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-background/90 py-4">
@@ -153,9 +183,13 @@ export default function QuizzesContent({
                 onValueChange={handleTabChange}
                 className="w-full sm:w-auto">
                 <TabsList className="grid grid-cols-3 w-full sm:w-auto">
-                  <TabsTrigger value="all">All</TabsTrigger>
-                  <TabsTrigger value="top-rated">Top Rated</TabsTrigger>
-                  <TabsTrigger value="bookmarked">Bookmarks</TabsTrigger>
+                  <TabsTrigger value="all">All ({quizzes.length})</TabsTrigger>
+                  <TabsTrigger value="top-rated">
+                    Top Rated ({topRatedQuizzes.length})
+                  </TabsTrigger>
+                  <TabsTrigger value="bookmarks">
+                    Bookmarks ({bookmarkedQuizzes.length})
+                  </TabsTrigger>
                 </TabsList>
               </Tabs>
             </div>
@@ -170,7 +204,13 @@ export default function QuizzesContent({
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground h-4 w-4" />
                   <Input
                     type="text"
-                    placeholder="Search your quizzes..."
+                    placeholder={`Search ${
+                      activeTab === "all"
+                        ? "quizzes"
+                        : activeTab === "top-rated"
+                        ? "top rated quizzes"
+                        : "bookmarked quizzes"
+                    }...`}
                     className="pl-9 h-9 text-sm w-full"
                     value={searchTerm}
                     onChange={(e) => {
@@ -251,6 +291,7 @@ export default function QuizzesContent({
           </div>
 
           <motion.div
+            key={activeTab} // Re-animate when tab changes
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5, delay: 0.2 }}
@@ -281,10 +322,19 @@ export default function QuizzesContent({
                   </div>
 
                   <div className="space-y-2">
-                    <h3 className="text-xl font-semibold">No quizzes found</h3>
+                    <h3 className="text-xl font-semibold">
+                      No{" "}
+                      {activeTab === "all"
+                        ? "quizzes"
+                        : activeTab === "top-rated"
+                        ? "top rated quizzes"
+                        : "bookmarked quizzes"}{" "}
+                      found
+                    </h3>
                     <p className="text-muted-foreground max-w-md mx-auto text-sm">
-                      Try adjusting your search terms or filters to find what
-                      you&apos;re looking for.
+                      {activeTab === "bookmarks"
+                        ? "You haven't bookmarked any quizzes yet. Browse and bookmark quizzes to see them here."
+                        : "Try adjusting your search terms or filters to find what you're looking for."}
                     </p>
 
                     <Button
@@ -294,7 +344,7 @@ export default function QuizzesContent({
                       onClick={() => {
                         setSearchTerm("");
                         setDifficultyFilter("all");
-                        updateUrlParams("", "all", "");
+                        updateUrlParams("", "all", sortBy);
                       }}>
                       Clear filters
                     </Button>

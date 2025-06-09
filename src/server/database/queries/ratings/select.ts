@@ -2,6 +2,7 @@
 
 import db from "@/server/database";
 import {
+  users,
   quizzes,
   quizRatings,
   quizAttempts,
@@ -36,18 +37,25 @@ export async function selectTopRatedQuizzes(
 
   const topRatedQuizIds = topRatedQuizzesData.map((q) => q.quizId);
 
-  // Get full quiz details for the top rated quizzes
-  const quizzesWithDetails = await db.query.quizzes.findMany({
-    where: inArray(quizzes.id, topRatedQuizIds),
-    with: {
-      user: {
-        columns: {
-          name: true,
-          image: true,
-        },
-      },
-    },
-  });
+  // Get full quiz details for the top rated quizzes using consistent core API
+  const quizzesWithDetails = await db
+    .select({
+      id: quizzes.id,
+      createdAt: quizzes.createdAt,
+      updatedAt: quizzes.updatedAt,
+      userId: quizzes.userId,
+      title: quizzes.title,
+      description: quizzes.description,
+      category: quizzes.category,
+      difficulty: quizzes.difficulty,
+      isTimeLimited: quizzes.isTimeLimited,
+      timeLimit: quizzes.timeLimit,
+      userName: users.name,
+      userImage: users.image,
+    })
+    .from(quizzes)
+    .innerJoin(users, eq(quizzes.userId, users.id))
+    .where(inArray(quizzes.id, topRatedQuizIds));
 
   // Get question counts for these quizzes
   const questionCounts = await db
@@ -72,25 +80,27 @@ export async function selectTopRatedQuizzes(
   // Get bookmark status for the current user (if userId provided)
   let bookmarkedQuizIds: number[] = [];
   if (userId) {
-    const bookmarks = await db.query.quizBookmarks.findMany({
-      where: and(
-        eq(quizBookmarks.userId, userId),
-        inArray(quizBookmarks.quizId, topRatedQuizIds)
-      ),
-      columns: {
-        quizId: true,
-      },
-    });
+    const bookmarks = await db
+      .select({
+        quizId: quizBookmarks.quizId,
+      })
+      .from(quizBookmarks)
+      .where(
+        and(
+          eq(quizBookmarks.userId, userId),
+          inArray(quizBookmarks.quizId, topRatedQuizIds)
+        )
+      );
     bookmarkedQuizIds = bookmarks.map((b) => b.quizId);
   }
 
-  // Create lookup maps
+  // Create lookup maps with better null handling
   const ratingsMap = new Map<
     number,
     { avgRating: number; ratingsCount: number }
   >();
   topRatedQuizzesData.forEach((rating) => {
-    if (rating.avgRating !== null) {
+    if (rating.avgRating !== null && rating.avgRating !== undefined) {
       ratingsMap.set(rating.quizId, {
         avgRating: Number(rating.avgRating),
         ratingsCount: rating.ratingsCount,
@@ -131,8 +141,8 @@ export async function selectTopRatedQuizzes(
         avgRating: ratingData?.avgRating || null,
         ratings: ratingData?.ratingsCount || null,
         user: {
-          name: quiz.user.name,
-          image: quiz.user.image,
+          name: quiz.userName,
+          image: quiz.userImage,
         },
         isBookmarked: bookmarkedQuizIds.includes(quiz.id),
       };
@@ -143,7 +153,6 @@ export async function selectTopRatedQuizzes(
   return publicQuizOverviews;
 }
 
-// Alternative version that gets top rated quizzes by category
 export async function selectTopRatedQuizzesByCategory(
   category: string,
   userId?: number,
