@@ -13,50 +13,25 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import type { PublicQuiz, QuizDifficulty } from "@/server/database/schema";
+import type { PublicQuizOverview } from "@/server/database/schema";
 import { motion } from "motion/react";
 import QuizCard from "./quiz-card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { QuizBookmark } from "@/lib/types";
+import {
+  difficultyIcons,
+  getDifficultyConfig,
+} from "@/lib/quiz-difficulty-config";
 
-const difficultyIcons = {
-  BEGINNER: "🌱",
-  INTERMEDIATE: "🌟",
-  ADVANCED: "⚡",
-  DEFAULT: "✨",
-};
-
-const getDifficultyConfig = (
-  difficulty: QuizDifficulty
-): { color: string; icon: string; bgColor: string } => {
-  switch (difficulty) {
-    case "BEGINNER":
-      return {
-        color: "text-emerald-700 dark:text-emerald-400",
-        bgColor: "bg-emerald-100 dark:bg-emerald-900/40",
-        icon: difficultyIcons.BEGINNER,
-      };
-    case "INTERMEDIATE":
-      return {
-        color: "text-amber-700 dark:text-amber-400",
-        bgColor: "bg-amber-100 dark:bg-amber-900/40",
-        icon: difficultyIcons.INTERMEDIATE,
-      };
-    case "ADVANCED":
-      return {
-        color: "text-rose-700 dark:text-rose-400",
-        bgColor: "bg-rose-100 dark:bg-rose-900/40",
-        icon: difficultyIcons.ADVANCED,
-      };
-    default:
-      return {
-        color: "text-slate-700 dark:text-slate-400",
-        bgColor: "bg-slate-100 dark:bg-slate-900/40",
-        icon: difficultyIcons.DEFAULT,
-      };
-  }
-};
-
-export default function QuizzesContent({ quizzes }: { quizzes: PublicQuiz[] }) {
+export default function QuizzesContent({
+  quizzes,
+  topRatedQuizzes,
+  bookmarkedQuizzes,
+}: {
+  quizzes: PublicQuizOverview[];
+  topRatedQuizzes: PublicQuizOverview[];
+  bookmarkedQuizzes: QuizBookmark[];
+}) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [searchTerm, setSearchTerm] = useState("");
@@ -180,7 +155,7 @@ export default function QuizzesContent({ quizzes }: { quizzes: PublicQuiz[] }) {
                 <TabsList className="grid grid-cols-3 w-full sm:w-auto">
                   <TabsTrigger value="all">All</TabsTrigger>
                   <TabsTrigger value="top-rated">Top Rated</TabsTrigger>
-                  <TabsTrigger value="bookmarked">Bookmarked</TabsTrigger>
+                  <TabsTrigger value="bookmarked">Bookmarks</TabsTrigger>
                 </TabsList>
               </Tabs>
             </div>
