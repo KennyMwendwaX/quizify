@@ -83,7 +83,7 @@ export const getPublicQuizzes = async (
       );
     }
 
-    const userIdNum = parseInt(userId, 10);
+    const userIdNum = parseInt(userId);
 
     const publicQuizzes = await selectPublicQuizzes(userIdNum);
 
