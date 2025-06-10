@@ -4,6 +4,33 @@ import db from "@/server/database";
 import { eq } from "drizzle-orm";
 import { users } from "@/server/database/schema";
 
+export const updateUserById = async (
+  userId: number,
+  profileData: {
+    name: string;
+    email: string;
+    socialLinks: {
+      platform: string;
+      url: string;
+    }[];
+  }
+): Promise<{ id: number }> => {
+  const { name, email, socialLinks } = profileData;
+  const result = await db
+    .update(users)
+    .set({
+      name: name,
+      email: email,
+      socialLinks: socialLinks,
+    })
+    .where(eq(users.id, userId))
+    .returning({
+      id: users.id,
+    });
+
+  return result[0];
+};
+
 type StreakUpdateData = {
   lastActivityDate?: Date;
   currentStreak?: number;
