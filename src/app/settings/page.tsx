@@ -30,7 +30,7 @@ export default async function SettingsPage() {
         </p>
       </div>
       <div className="grid gap-10 pt-6">
-        <SettingsForm user={user} />
+        <SettingsForm user={user} session={session} />
       </div>
     </>
   );

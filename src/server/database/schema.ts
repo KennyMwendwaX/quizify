@@ -46,7 +46,7 @@ export const sessions = pgTable("session", {
   userAgent: text("user_agent"),
   userId: integer("user_id")
     .notNull()
-    .references(() => users.id),
+    .references(() => users.id, { onDelete: "cascade", onUpdate: "cascade" }),
 });
 
 export const accounts = pgTable("account", {
@@ -55,7 +55,7 @@ export const accounts = pgTable("account", {
   providerId: text("provider_id").notNull(),
   userId: integer("user_id")
     .notNull()
-    .references(() => users.id),
+    .references(() => users.id, { onDelete: "cascade", onUpdate: "cascade" }),
   accessToken: text("access_token"),
   refreshToken: text("refresh_token"),
   idToken: text("id_token"),

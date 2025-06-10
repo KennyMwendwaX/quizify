@@ -3,8 +3,15 @@ import GeneralSettings from "./general-settings";
 import ProfileSettings from "./profile-settings";
 import NotificationSettings from "./notification-settings";
 import { User } from "@/server/database/schema";
+import { Session } from "@/lib/auth";
 
-export default function SettingsForm({ user }: { user: User }) {
+export default function SettingsForm({
+  user,
+  session,
+}: {
+  user: User;
+  session: Session;
+}) {
   return (
     <Tabs defaultValue="general" className="w-full">
       <TabsList className="grid w-full grid-cols-3">
@@ -14,7 +21,7 @@ export default function SettingsForm({ user }: { user: User }) {
       </TabsList>
 
       <TabsContent value="general" className="space-y-4 pt-4">
-        <GeneralSettings />
+        <GeneralSettings session={session} />
       </TabsContent>
       <TabsContent value="profile" className="space-y-4 pt-4">
         <ProfileSettings user={user} />

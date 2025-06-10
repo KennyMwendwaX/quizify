@@ -21,8 +21,9 @@ import {
 } from "@/components/ui/select";
 import { useEffect, useState } from "react";
 import DeleteAccountModal from "./delete-account-modal";
+import { Session } from "@/lib/auth";
 
-export default function GeneralSettings() {
+export default function GeneralSettings({ session }: { session: Session }) {
   const { setTheme, theme, resolvedTheme, systemTheme } = useTheme();
   // Add this to handle hydration mismatch
   const [mounted, setMounted] = useState(false);
@@ -285,7 +286,7 @@ export default function GeneralSettings() {
                   Permanently delete your account and all your data.
                 </p>
               </div>
-              <DeleteAccountModal />
+              <DeleteAccountModal session={session} />
             </div>
           </div>
         </CardContent>

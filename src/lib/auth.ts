@@ -16,6 +16,11 @@ export const auth = betterAuth({
       generateId: false,
     },
   },
+  user: {
+    deleteUser: {
+      enabled: true,
+    },
+  },
   plugins: [nextCookies()],
 });
 
