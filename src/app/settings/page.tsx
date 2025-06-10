@@ -2,6 +2,8 @@ import { auth } from "@/lib/auth";
 import SettingsForm from "./components/settings-form";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { tryCatch } from "@/lib/try-catch";
+import { getUserById } from "@/server/actions/user/read";
 
 export default async function SettingsPage() {
   const session = await auth.api.getSession({
@@ -10,6 +12,13 @@ export default async function SettingsPage() {
 
   if (!session) {
     redirect("/sign-in");
+  }
+
+  const { data: user, error: userError } = await tryCatch(
+    getUserById(session.user.id)
+  );
+  if (userError) {
+    throw new Error(userError.message);
   }
 
   return (
@@ -21,7 +30,7 @@ export default async function SettingsPage() {
         </p>
       </div>
       <div className="grid gap-10 pt-6">
-        <SettingsForm session={session} />
+        <SettingsForm user={user} />
       </div>
     </>
   );

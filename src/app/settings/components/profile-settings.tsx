@@ -42,18 +42,18 @@ import {
   Link as LinkIcon,
   Loader2,
   Camera,
-  User,
+  User as UserIcon,
   Plus,
   Trash2,
 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { RiTwitterXLine } from "react-icons/ri";
-import { Session } from "@/lib/auth";
 import { useRouter } from "next/navigation";
 import { tryCatch } from "@/lib/try-catch";
 import { updateUserProfile } from "@/server/actions/user/update";
 import { toast } from "sonner";
+import { User } from "@/server/database/schema";
 
 const socialPlatforms = [
   {
@@ -134,23 +134,15 @@ const profileFormSchema = z.object({
 type ProfileFormValues = z.infer<typeof profileFormSchema>;
 
 interface ProfileSettingsProps {
-  session: Session;
-  // Add existing social links from database
-  existingSocialLinks?: Array<{
-    platform: string;
-    url: string;
-  }>;
+  user: User;
 }
 
-export default function ProfileSettings({
-  session,
-  existingSocialLinks = [],
-}: ProfileSettingsProps) {
+export default function ProfileSettings({ user }: ProfileSettingsProps) {
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
 
   const [profileImage, setProfileImage] = useState<string>(
-    session.user.image || "/api/placeholder/200/200"
+    user.image || "/api/placeholder/200/200"
   );
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -181,9 +173,9 @@ export default function ProfileSettings({
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
     defaultValues: {
-      email: session.user.email,
-      name: session.user.name,
-      socialLinks: existingSocialLinks, // Initialize with existing social links
+      email: user.email,
+      name: user.name,
+      socialLinks: user.socialLinks || [], // Initialize with existing social links or empty array
     },
     mode: "onChange",
   });
@@ -241,7 +233,7 @@ export default function ProfileSettings({
   function onSubmit(data: ProfileFormValues) {
     startTransition(async () => {
       const { data: updatedUser, error: userError } = await tryCatch(
-        updateUserProfile(session.user.id, data)
+        updateUserProfile(user.id, data)
       );
 
       if (userError) {
@@ -267,7 +259,7 @@ export default function ProfileSettings({
                   <Avatar className="h-24 w-24 border-4 border-background shadow">
                     <AvatarImage src={profileImage} alt="Profile picture" />
                     <AvatarFallback className="bg-primary-foreground">
-                      <User className="h-12 w-12 text-primary" />
+                      <UserIcon className="h-12 w-12 text-primary" />
                     </AvatarFallback>
                   </Avatar>
                   <Button
@@ -288,10 +280,8 @@ export default function ProfileSettings({
                 </div>
 
                 <div className="text-center space-y-1">
-                  <h3 className="font-semibold text-lg">{session.user.name}</h3>
-                  <p className="text-sm text-muted-foreground">
-                    {session.user.email}
-                  </p>
+                  <h3 className="font-semibold text-lg">{user.name}</h3>
+                  <p className="text-sm text-muted-foreground">{user.email}</p>
                 </div>
 
                 <Badge variant="outline" className="px-3 py-1">
@@ -299,7 +289,7 @@ export default function ProfileSettings({
                 </Badge>
 
                 {/* Dynamic Social Links Display - Show existing links + real-time form updates */}
-                {((existingSocialLinks && existingSocialLinks.length > 0) ||
+                {((user.socialLinks && user.socialLinks.length > 0) ||
                   (currentSocialLinks && currentSocialLinks.length > 0)) && (
                   <>
                     <Separator className="w-full" />
@@ -313,7 +303,7 @@ export default function ProfileSettings({
                         {/* Show existing links if form is pristine, otherwise show form values */}
                         {(form.formState.isDirty
                           ? currentSocialLinks
-                          : existingSocialLinks
+                          : user.socialLinks ?? []
                         )
                           .filter((link) => link.platform && link.url)
                           .map((link, index) => {

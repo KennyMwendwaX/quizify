@@ -2,9 +2,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import GeneralSettings from "./general-settings";
 import ProfileSettings from "./profile-settings";
 import NotificationSettings from "./notification-settings";
-import { Session } from "@/lib/auth";
+import { User } from "@/server/database/schema";
 
-export default function SettingsForm({ session }: { session: Session }) {
+export default function SettingsForm({ user }: { user: User }) {
   return (
     <Tabs defaultValue="general" className="w-full">
       <TabsList className="grid w-full grid-cols-3">
@@ -17,7 +17,7 @@ export default function SettingsForm({ session }: { session: Session }) {
         <GeneralSettings />
       </TabsContent>
       <TabsContent value="profile" className="space-y-4 pt-4">
-        <ProfileSettings session={session} />
+        <ProfileSettings user={user} />
       </TabsContent>
       <TabsContent value="notifications" className="space-y-4 pt-4">
         <NotificationSettings />

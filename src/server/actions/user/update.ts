@@ -7,7 +7,7 @@ import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 
 export const updateUserProfile = async (
-  userId: string,
+  userId: number,
   profileData: {
     name: string;
     email: string;
@@ -30,7 +30,7 @@ export const updateUserProfile = async (
       );
     }
 
-    if (!userId || userId !== session.user.id) {
+    if (!userId || userId !== Number(session.user.id)) {
       throw new UserActionError(
         "UNAUTHORIZED",
         "User ID mismatch or missing",
@@ -38,9 +38,7 @@ export const updateUserProfile = async (
       );
     }
 
-    const userIdInt = parseInt(userId);
-
-    const updatedUser = await updateUserById(userIdInt, profileData);
+    const updatedUser = await updateUserById(userId, profileData);
     if (!updatedUser) {
       throw new UserActionError(
         "NOT_FOUND",
