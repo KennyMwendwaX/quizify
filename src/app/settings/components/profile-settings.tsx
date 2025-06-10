@@ -20,22 +20,91 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { useForm } from "react-hook-form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import {
-  User,
-  Camera,
   Instagram,
-  Mail,
+  Linkedin,
+  Github,
+  Youtube,
+  Facebook,
+  Globe,
   UserCircle,
+  Mail,
   Link as LinkIcon,
   Loader2,
+  Camera,
+  User,
+  Plus,
+  Trash2,
 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { RiTwitterXLine } from "react-icons/ri";
 import { Session } from "@/lib/auth";
+
+const socialPlatforms = [
+  {
+    value: "x",
+    label: "X (Twitter)",
+    icon: RiTwitterXLine,
+    placeholder: "https://x.com/username",
+  },
+  {
+    value: "instagram",
+    label: "Instagram",
+    icon: Instagram,
+    placeholder: "https://instagram.com/username",
+  },
+  {
+    value: "linkedin",
+    label: "LinkedIn",
+    icon: Linkedin,
+    placeholder: "https://linkedin.com/in/username",
+  },
+  {
+    value: "github",
+    label: "GitHub",
+    icon: Github,
+    placeholder: "https://github.com/username",
+  },
+  {
+    value: "youtube",
+    label: "YouTube",
+    icon: Youtube,
+    placeholder: "https://youtube.com/@username",
+  },
+  {
+    value: "tiktok",
+    label: "TikTok",
+    icon: () => (
+      <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z" />
+      </svg>
+    ),
+    placeholder: "https://tiktok.com/@username",
+  },
+  {
+    value: "facebook",
+    label: "Facebook",
+    icon: Facebook,
+    placeholder: "https://facebook.com/username",
+  },
+  {
+    value: "website",
+    label: "Website",
+    icon: Globe,
+    placeholder: "https://yourwebsite.com",
+  },
+];
 
 const profileFormSchema = z.object({
   name: z
@@ -50,15 +119,12 @@ const profileFormSchema = z.object({
     .string()
     .min(1, { message: "This field is required" })
     .email("This is not a valid email"),
-  urls: z
-    .object({
-      x: z.string().url({ message: "Please enter a valid URL." }).optional(),
-      instagram: z
-        .string()
-        .url({ message: "Please enter a valid URL." })
-        .optional(),
+  socialLinks: z.array(
+    z.object({
+      platform: z.string().min(1, "Please select a platform"),
+      url: z.string().url("Please enter a valid URL"),
     })
-    .optional(),
+  ),
 });
 
 type ProfileFormValues = z.infer<typeof profileFormSchema>;
@@ -72,14 +138,12 @@ export default function ProfileSettings({ session }: { session: Session }) {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Define the click handler with proper return type
   const handleImageClick = (): void => {
     if (fileInputRef.current) {
       fileInputRef.current.click();
     }
   };
 
-  // Fix the handleImageChange function with proper return type
   const handleImageChange = (event: ChangeEvent<HTMLInputElement>): void => {
     const files = event.target.files;
 
@@ -102,16 +166,64 @@ export default function ProfileSettings({ session }: { session: Session }) {
     defaultValues: {
       email: session.user.email,
       name: session.user.name,
+      socialLinks: [],
     },
     mode: "onChange",
   });
 
+  const { fields, append, remove } = useFieldArray({
+    control: form.control,
+    name: "socialLinks",
+  });
+
+  const addSocialLink = () => {
+    append({ platform: "", url: "" });
+  };
+
+  const removeSocialLink = (index: number) => {
+    remove(index);
+  };
+
+  const getAvailablePlatforms = (currentIndex: number) => {
+    const selectedPlatforms = form
+      .getValues("socialLinks")
+      .map((link, index) => (index !== currentIndex ? link.platform : null))
+      .filter(Boolean);
+
+    return socialPlatforms.filter(
+      (platform) => !selectedPlatforms.includes(platform.value)
+    );
+  };
+
+  const getPlatformIcon = (platformValue: string) => {
+    const platform = socialPlatforms.find((p) => p.value === platformValue);
+    if (!platform) return LinkIcon;
+
+    const IconComponent = platform.icon;
+    return IconComponent;
+  };
+
+  const getPlatformPlaceholder = (platformValue: string) => {
+    const platform = socialPlatforms.find((p) => p.value === platformValue);
+    return platform?.placeholder || "Enter URL";
+  };
+
   function onSubmit(data: ProfileFormValues) {
     setIsLoading(true);
 
+    // Transform the data to match your original schema structure
+    const transformedData = {
+      name: data.name,
+      email: data.email,
+      urls: data.socialLinks.reduce((acc, link) => {
+        acc[link.platform] = link.url;
+        return acc;
+      }, {} as Record<string, string>),
+    };
+
     // Simulate API call
     setTimeout(() => {
-      console.log(data);
+      console.log(transformedData);
       setIsLoading(false);
     }, 1000);
   }
@@ -119,7 +231,6 @@ export default function ProfileSettings({ session }: { session: Session }) {
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       <div className="flex flex-col md:flex-row gap-6">
-        {/* Left sidebar with avatar and stats */}
         <div className="w-full md:w-1/3 space-y-4">
           <Card className="w-full max-w-sm">
             <CardContent className="pt-6">
@@ -159,35 +270,8 @@ export default function ProfileSettings({ session }: { session: Session }) {
               </div>
             </CardContent>
           </Card>
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base">Stats</CardTitle>
-            </CardHeader>
-            <CardContent className="pb-2">
-              <div className="grid grid-cols-2 gap-2">
-                <div className="flex flex-col rounded-lg bg-muted/50 p-3">
-                  <span className="text-xs font-medium text-muted-foreground">
-                    Total XP
-                  </span>
-                  <span className="text-xl font-bold">1,250</span>
-                </div>
-                <div className="flex flex-col rounded-lg bg-muted/50 p-3">
-                  <span className="text-xs font-medium text-muted-foreground">
-                    Streak
-                  </span>
-                  <span className="text-xl font-bold">7d</span>
-                </div>
-              </div>
-            </CardContent>
-            <CardFooter className="pt-0">
-              <Button variant="ghost" size="sm" className="w-full text-primary">
-                View all stats
-              </Button>
-            </CardFooter>
-          </Card>
         </div>
 
-        {/* Right content area with tabs */}
         <div className="w-full md:w-2/3">
           <Card className="flex flex-col h-full">
             <CardHeader className="pb-3">
@@ -247,47 +331,128 @@ export default function ProfileSettings({ session }: { session: Session }) {
                 </div>
 
                 <Separator />
-                <div className="flex items-center space-x-2">
-                  <LinkIcon className="h-5 w-5 text-primary" />
-                  <h3 className="text-sm font-medium">Social Links</h3>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <LinkIcon className="h-5 w-5 text-primary" />
+                    <h3 className="text-sm font-medium">Social Links</h3>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={addSocialLink}
+                    className="flex items-center gap-2">
+                    <Plus className="h-4 w-4" />
+                    Add Link
+                  </Button>
                 </div>
+
                 <div className="space-y-4">
-                  <FormField
-                    control={form.control}
-                    name="urls.x"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="flex items-center gap-2">
-                          <RiTwitterXLine className="h-4 w-4" /> X (Twitter)
-                        </FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="https://x.com/username"
-                            {...field}
+                  {fields.length === 0 ? (
+                    <div className="text-center py-8 text-muted-foreground">
+                      <LinkIcon className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                      <p>No social links added yet.</p>
+                      <p className="text-sm">
+                        Click &quot;Add Link&quot; to get started.
+                      </p>
+                    </div>
+                  ) : (
+                    fields.map((field, index) => (
+                      <div key={field.id} className="flex gap-2 items-end">
+                        <div className="flex-1 grid gap-2 md:grid-cols-2">
+                          <FormField
+                            control={form.control}
+                            name={`socialLinks.${index}.platform`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Platform</FormLabel>
+                                <Select
+                                  onValueChange={field.onChange}
+                                  value={field.value}>
+                                  <FormControl>
+                                    <SelectTrigger>
+                                      <SelectValue placeholder="Select platform" />
+                                    </SelectTrigger>
+                                  </FormControl>
+                                  <SelectContent>
+                                    {getAvailablePlatforms(index).map(
+                                      (platform) => {
+                                        const IconComponent = platform.icon;
+                                        return (
+                                          <SelectItem
+                                            key={platform.value}
+                                            value={platform.value}>
+                                            <div className="flex items-center gap-2">
+                                              <IconComponent className="h-4 w-4" />
+                                              {platform.label}
+                                            </div>
+                                          </SelectItem>
+                                        );
+                                      }
+                                    )}
+                                  </SelectContent>
+                                </Select>
+                                <FormMessage />
+                              </FormItem>
+                            )}
                           />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="urls.instagram"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="flex items-center gap-2">
-                          <Instagram className="h-4 w-4" /> Instagram
-                        </FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="https://instagram.com/username"
-                            {...field}
+                          <FormField
+                            control={form.control}
+                            name={`socialLinks.${index}.url`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>URL</FormLabel>
+                                <FormControl>
+                                  <div className="relative">
+                                    {form.watch(
+                                      `socialLinks.${index}.platform`
+                                    ) && (
+                                      <div className="absolute left-3 top-1/2 -translate-y-1/2">
+                                        {(() => {
+                                          const IconComponent = getPlatformIcon(
+                                            form.watch(
+                                              `socialLinks.${index}.platform`
+                                            )
+                                          );
+                                          return (
+                                            <IconComponent className="h-4 w-4 text-muted-foreground" />
+                                          );
+                                        })()}
+                                      </div>
+                                    )}
+                                    <Input
+                                      placeholder={getPlatformPlaceholder(
+                                        form.watch(
+                                          `socialLinks.${index}.platform`
+                                        )
+                                      )}
+                                      className={
+                                        form.watch(
+                                          `socialLinks.${index}.platform`
+                                        )
+                                          ? "pl-9"
+                                          : ""
+                                      }
+                                      {...field}
+                                    />
+                                  </div>
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
                           />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                        </div>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="icon"
+                          onClick={() => removeSocialLink(index)}
+                          className="text-destructive hover:text-destructive">
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ))
+                  )}
                 </div>
 
                 <CardFooter className="border-t px-0 py-4 flex justify-between">
