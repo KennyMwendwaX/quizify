@@ -57,34 +57,41 @@ export default function Navbar({ session }: Props) {
           ? "bg-background/90 backdrop-blur-sm border-b shadow-sm dark:border-slate-700 dark:shadow-slate-900/10"
           : "bg-transparent"
       )}>
-      <Link className="flex items-center gap-2" href="/">
-        <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-          <ThemeLogo width={20} height={20} alt="Quizify logo" />
-        </div>
-        <div className="flex-1 text-left text-lg leading-tight">
-          <span className="font-bold tracking-tight">Quizify</span>
-        </div>
-      </Link>
-
-      <div className="hidden md:flex items-center space-x-1 mx-auto">
-        {["How It Works", "Features", "Popular Categories", "FAQ"].map(
-          (item) => {
-            const href = `#${item.toLowerCase().replace(/\s+/g, "-")}`;
-            return (
-              <Link key={item} href={href}>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="text-sm font-medium">
-                  {item}
-                </Button>
-              </Link>
-            );
-          }
-        )}
+      {/* Left Section - Logo */}
+      <div className="flex items-center gap-2 flex-shrink-0">
+        <Link className="flex items-center gap-2" href="/">
+          <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
+            <ThemeLogo width={20} height={20} alt="Quizify logo" />
+          </div>
+          <div className="flex-1 text-left text-lg leading-tight">
+            <span className="font-bold tracking-tight">Quizify</span>
+          </div>
+        </Link>
       </div>
 
-      <div className="flex items-center space-x-4 ml-auto">
+      {/* Center Section - Navigation Links */}
+      <div className="hidden md:flex items-center justify-center flex-1">
+        <div className="flex items-center space-x-1">
+          {["How It Works", "Features", "Popular Categories", "FAQ"].map(
+            (item) => {
+              const href = `#${item.toLowerCase().replace(/\s+/g, "-")}`;
+              return (
+                <Link key={item} href={href}>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-sm font-medium">
+                    {item}
+                  </Button>
+                </Link>
+              );
+            }
+          )}
+        </div>
+      </div>
+
+      {/* Right Section - Theme Toggle & User Menu */}
+      <div className="flex items-center space-x-4 flex-shrink-0">
         <ThemeToggle />
 
         {/* Mobile Menu */}
