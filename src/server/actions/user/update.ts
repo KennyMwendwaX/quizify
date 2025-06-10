@@ -16,7 +16,7 @@ export const updateUserProfile = async (
       url: string;
     }[];
   }
-): Promise<void> => {
+): Promise<{ id: number }> => {
   try {
     const session = await auth.api.getSession({
       headers: await headers(),
@@ -50,6 +50,7 @@ export const updateUserProfile = async (
     }
 
     revalidatePath("/settings");
+    return updatedUser;
   } catch (error) {
     console.error("Error in updateUserProfile:", error);
 

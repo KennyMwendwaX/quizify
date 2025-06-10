@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, ChangeEvent } from "react";
+import { useRef, useState, ChangeEvent, useTransition } from "react";
 import {
   Card,
   CardHeader,
@@ -50,6 +50,10 @@ import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { RiTwitterXLine } from "react-icons/ri";
 import { Session } from "@/lib/auth";
+import { useRouter } from "next/navigation";
+import { tryCatch } from "@/lib/try-catch";
+import { updateUserProfile } from "@/server/actions/user/update";
+import { toast } from "sonner";
 
 const socialPlatforms = [
   {
@@ -129,11 +133,24 @@ const profileFormSchema = z.object({
 
 type ProfileFormValues = z.infer<typeof profileFormSchema>;
 
-export default function ProfileSettings({ session }: { session: Session }) {
-  const [isLoading, setIsLoading] = useState(false);
+interface ProfileSettingsProps {
+  session: Session;
+  // Add existing social links from database
+  existingSocialLinks?: Array<{
+    platform: string;
+    url: string;
+  }>;
+}
+
+export default function ProfileSettings({
+  session,
+  existingSocialLinks = [],
+}: ProfileSettingsProps) {
+  const [isPending, startTransition] = useTransition();
+  const router = useRouter();
 
   const [profileImage, setProfileImage] = useState<string>(
-    "/api/placeholder/200/200"
+    session.user.image || "/api/placeholder/200/200"
   );
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -166,7 +183,7 @@ export default function ProfileSettings({ session }: { session: Session }) {
     defaultValues: {
       email: session.user.email,
       name: session.user.name,
-      socialLinks: [],
+      socialLinks: existingSocialLinks, // Initialize with existing social links
     },
     mode: "onChange",
   });
@@ -176,7 +193,7 @@ export default function ProfileSettings({ session }: { session: Session }) {
     name: "socialLinks",
   });
 
-  // Watch for changes in social links
+  // Watch current social links for real-time updates in the profile card
   const currentSocialLinks = form.watch("socialLinks");
 
   const addSocialLink = () => {
@@ -211,10 +228,9 @@ export default function ProfileSettings({ session }: { session: Session }) {
     return platform?.placeholder || "Enter URL";
   };
 
-  // Helper function to get platform icon for profile card
-  const getSocialPlatformIcon = (platform: string) => {
-    const platformData = socialPlatforms.find((p) => p.value === platform);
-    return platformData ? platformData.icon : LinkIcon;
+  // Helper function to get platform data
+  const getSocialPlatformData = (platform: string) => {
+    return socialPlatforms.find((p) => p.value === platform);
   };
 
   // Helper function to open social link
@@ -223,22 +239,23 @@ export default function ProfileSettings({ session }: { session: Session }) {
   };
 
   function onSubmit(data: ProfileFormValues) {
-    setIsLoading(true);
+    startTransition(async () => {
+      const { data: updatedUser, error: userError } = await tryCatch(
+        updateUserProfile(session.user.id, data)
+      );
 
-    // Use the new schema structure directly
-    const transformedData = {
-      name: data.name,
-      email: data.email,
-      socialLinks: data.socialLinks,
-    };
+      if (userError) {
+        toast.error(userError.message);
+        return;
+      }
 
-    // Simulate API call
-    setTimeout(() => {
-      console.log(transformedData);
-      setIsLoading(false);
-    }, 1000);
+      if (updatedUser) {
+        form.reset();
+        toast.success("Profile updated successfully!");
+        router.refresh();
+      }
+    });
   }
-
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       <div className="flex flex-col md:flex-row gap-6">
@@ -281,8 +298,9 @@ export default function ProfileSettings({ session }: { session: Session }) {
                   Premium Member
                 </Badge>
 
-                {/* Dynamic Social Links Display */}
-                {currentSocialLinks && currentSocialLinks.length > 0 && (
+                {/* Dynamic Social Links Display - Show existing links + real-time form updates */}
+                {((existingSocialLinks && existingSocialLinks.length > 0) ||
+                  (currentSocialLinks && currentSocialLinks.length > 0)) && (
                   <>
                     <Separator className="w-full" />
                     <div className="w-full space-y-3">
@@ -292,19 +310,23 @@ export default function ProfileSettings({ session }: { session: Session }) {
                         </p>
                       </div>
                       <div className="flex flex-wrap justify-center gap-2">
-                        {currentSocialLinks
+                        {/* Show existing links if form is pristine, otherwise show form values */}
+                        {(form.formState.isDirty
+                          ? currentSocialLinks
+                          : existingSocialLinks
+                        )
                           .filter((link) => link.platform && link.url)
                           .map((link, index) => {
-                            const IconComponent = getSocialPlatformIcon(
+                            const IconComponent = getPlatformIcon(
                               link.platform
                             );
-                            const platformData = socialPlatforms.find(
-                              (p) => p.value === link.platform
+                            const platformData = getSocialPlatformData(
+                              link.platform
                             );
 
                             return (
                               <Button
-                                key={index}
+                                key={`${link.platform}-${index}`}
                                 variant="outline"
                                 size="sm"
                                 className="h-8 px-3 hover:bg-primary hover:text-primary-foreground transition-colors"
@@ -515,8 +537,8 @@ export default function ProfileSettings({ session }: { session: Session }) {
                   <Button variant="outline" type="button">
                     Cancel
                   </Button>
-                  <Button type="submit" disabled={isLoading}>
-                    {isLoading ? (
+                  <Button type="submit" disabled={isPending}>
+                    {isPending ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                         Saving...

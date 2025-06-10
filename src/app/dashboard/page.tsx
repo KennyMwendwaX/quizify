@@ -49,21 +49,10 @@ export default async function DashboardPage() {
   return (
     <DashboardContent
       session={session}
-      stats={
-        userStats ?? {
-          totalQuizzesTaken: 0,
-          averageScore: 0,
-          topCategory: "",
-          completionRate: 0,
-          bestStreak: 0,
-          currentStreak: 0,
-          averageTimePerQuiz: 0,
-          totalXP: 0,
-        }
-      }
-      recentQuizzes={recentQuizzes ?? []}
-      categoryPerformance={categoryPerformance ?? []}
-      weeklyProgress={weeklyProgress ?? []}
+      stats={userStats}
+      recentQuizzes={recentQuizzes}
+      categoryPerformance={categoryPerformance}
+      weeklyProgress={weeklyProgress}
     />
   );
 }
