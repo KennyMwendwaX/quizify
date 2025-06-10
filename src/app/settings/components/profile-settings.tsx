@@ -176,6 +176,9 @@ export default function ProfileSettings({ session }: { session: Session }) {
     name: "socialLinks",
   });
 
+  // Watch for changes in social links
+  const currentSocialLinks = form.watch("socialLinks");
+
   const addSocialLink = () => {
     append({ platform: "", url: "" });
   };
@@ -208,17 +211,25 @@ export default function ProfileSettings({ session }: { session: Session }) {
     return platform?.placeholder || "Enter URL";
   };
 
+  // Helper function to get platform icon for profile card
+  const getSocialPlatformIcon = (platform: string) => {
+    const platformData = socialPlatforms.find((p) => p.value === platform);
+    return platformData ? platformData.icon : LinkIcon;
+  };
+
+  // Helper function to open social link
+  const openSocialLink = (url: string) => {
+    window.open(url, "_blank", "noopener,noreferrer");
+  };
+
   function onSubmit(data: ProfileFormValues) {
     setIsLoading(true);
 
-    // Transform the data to match your original schema structure
+    // Use the new schema structure directly
     const transformedData = {
       name: data.name,
       email: data.email,
-      urls: data.socialLinks.reduce((acc, link) => {
-        acc[link.platform] = link.url;
-        return acc;
-      }, {} as Record<string, string>),
+      socialLinks: data.socialLinks,
     };
 
     // Simulate API call
@@ -258,15 +269,60 @@ export default function ProfileSettings({ session }: { session: Session }) {
                     aria-label="Upload profile picture"
                   />
                 </div>
+
                 <div className="text-center space-y-1">
                   <h3 className="font-semibold text-lg">{session.user.name}</h3>
                   <p className="text-sm text-muted-foreground">
                     {session.user.email}
                   </p>
                 </div>
+
                 <Badge variant="outline" className="px-3 py-1">
                   Premium Member
                 </Badge>
+
+                {/* Dynamic Social Links Display */}
+                {currentSocialLinks && currentSocialLinks.length > 0 && (
+                  <>
+                    <Separator className="w-full" />
+                    <div className="w-full space-y-3">
+                      <div className="text-center">
+                        <p className="text-sm font-medium text-muted-foreground">
+                          Social Links
+                        </p>
+                      </div>
+                      <div className="flex flex-wrap justify-center gap-2">
+                        {currentSocialLinks
+                          .filter((link) => link.platform && link.url)
+                          .map((link, index) => {
+                            const IconComponent = getSocialPlatformIcon(
+                              link.platform
+                            );
+                            const platformData = socialPlatforms.find(
+                              (p) => p.value === link.platform
+                            );
+
+                            return (
+                              <Button
+                                key={index}
+                                variant="outline"
+                                size="sm"
+                                className="h-8 px-3 hover:bg-primary hover:text-primary-foreground transition-colors"
+                                onClick={() => openSocialLink(link.url)}
+                                title={`Visit ${
+                                  platformData?.label || link.platform
+                                }`}>
+                                <IconComponent className="h-4 w-4 mr-1" />
+                                <span className="text-xs">
+                                  {platformData?.label || link.platform}
+                                </span>
+                              </Button>
+                            );
+                          })}
+                      </div>
+                    </div>
+                  </>
+                )}
               </div>
             </CardContent>
           </Card>

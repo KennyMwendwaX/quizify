@@ -109,6 +109,7 @@ CREATE TABLE "user" (
 	"email" text NOT NULL,
 	"email_verified" boolean NOT NULL,
 	"image" text,
+	"social_links" json DEFAULT '[]'::json,
 	"total_xp" integer DEFAULT 0 NOT NULL,
 	"best_streak" integer DEFAULT 0 NOT NULL,
 	"current_streak" integer DEFAULT 0 NOT NULL,

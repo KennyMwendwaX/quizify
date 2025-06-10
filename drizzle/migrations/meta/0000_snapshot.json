@@ -1,5 +1,5 @@
 {
-  "id": "e24e795f-391f-4956-9292-5d8d18638101",
+  "id": "a42c8c40-319c-4bee-85fa-dfe795f25f4c",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -806,6 +806,13 @@
           "type": "text",
           "primaryKey": false,
           "notNull": false
+        },
+        "social_links": {
+          "name": "social_links",
+          "type": "json",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'[]'::json"
         },
         "total_xp": {
           "name": "total_xp",
