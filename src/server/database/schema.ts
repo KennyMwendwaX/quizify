@@ -2,6 +2,7 @@ import { relations } from "drizzle-orm";
 import {
   boolean,
   integer,
+  json,
   pgTable,
   serial,
   text,
@@ -15,6 +16,14 @@ export const users = pgTable("user", {
   email: text("email").notNull().unique(),
   emailVerified: boolean("email_verified").notNull(),
   image: text("image"),
+  socialLinks: json("social_links")
+    .$type<
+      Array<{
+        platform: string;
+        url: string;
+      }>
+    >()
+    .default([]),
   totalXp: integer("total_xp").notNull().default(0),
   bestStreak: integer("best_streak").notNull().default(0),
   currentStreak: integer("current_streak").notNull().default(0),
