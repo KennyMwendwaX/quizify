@@ -67,8 +67,8 @@ export default function SignUp() {
         },
         onSuccess: async () => {
           setIsLoading(false);
-          toast.success("Account created successfully");
           signUpForm.reset();
+          toast.success("Account created successfully");
           router.push("/dashboard");
         },
       },

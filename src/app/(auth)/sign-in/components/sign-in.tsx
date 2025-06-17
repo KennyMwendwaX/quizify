@@ -56,17 +56,14 @@ export default function SignIn() {
           toast.error(ctx.error.message);
         },
         onSuccess: () => {
-          toast.success("Sign in successful");
-          signInForm.reset();
-        },
-        onComplete: () => {
-          router.push("/dashboard");
           setIsLoading(false);
+          signInForm.reset();
+          toast.success("Sign in successful");
+          router.push("/dashboard");
         },
       }
     );
   }
-
   return (
     <>
       <Form {...signInForm}>
