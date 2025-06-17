@@ -42,7 +42,7 @@ export const updateUserProfile = async (
     if (!updatedUser) {
       throw new UserActionError(
         "NOT_FOUND",
-        "User not found or you do not have permission to update it",
+        "Failed to update user profile",
         "updateUserProfile"
       );
     }
